@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>leejunhui&#39;s blog</title>
+  
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://leejunhui.com/"/>
+  <updated>2019-08-05T09:18:31.971Z</updated>
+  <id>http://leejunhui.com/</id>
+  
+  <author>
+    <name>leejunhui</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>拥抱变化</title>
+    <link href="http://leejunhui.com/2019/08/05/%E6%8B%A5%E6%8A%B1%E5%8F%98%E5%8C%96/"/>
+    <id>http://leejunhui.com/2019/08/05/拥抱变化/</id>
+    <published>2019-08-05T05:30:33.000Z</published>
+    <updated>2019-08-05T09:18:31.971Z</updated>
+    
+    <content type="html"><![CDATA[<p>如果是 2019 年是一个充满变化的年份，那么对于仍处于迷茫期的我来说，只能去拥抱变化，而不是拒绝改变了。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;如果是 2019 年是一个充满变化的年份，那么对于仍处于迷茫期的我来说，只能去拥抱变化，而不是拒绝改变了。&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+      <category term="感悟" scheme="http://leejunhui.com/categories/%E6%84%9F%E6%82%9F/"/>
+    
+    
+      <category term="拥抱变化" scheme="http://leejunhui.com/tags/%E6%8B%A5%E6%8A%B1%E5%8F%98%E5%8C%96/"/>
+    
+  </entry>
+  
+</feed>
