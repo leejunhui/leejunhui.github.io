@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://leejunhui.com/"/>
-  <updated>2019-08-05T09:18:31.971Z</updated>
+  <updated>2019-08-13T14:34:28.367Z</updated>
   <id>http://leejunhui.com/</id>
   
   <author>
@@ -17,19 +17,49 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>拥抱变化</title>
-    <link href="http://leejunhui.com/2019/08/05/%E6%8B%A5%E6%8A%B1%E5%8F%98%E5%8C%96/"/>
-    <id>http://leejunhui.com/2019/08/05/拥抱变化/</id>
-    <published>2019-08-05T05:30:33.000Z</published>
-    <updated>2019-08-05T09:18:31.971Z</updated>
+    <title>iOS 最佳实践[译]</title>
+    <link href="http://leejunhui.com/2019/08/10/iOS-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-%E8%AF%91/"/>
+    <id>http://leejunhui.com/2019/08/10/iOS-最佳实践-译/</id>
+    <published>2019-08-10T03:07:46.000Z</published>
+    <updated>2019-08-13T14:34:28.367Z</updated>
     
-    <content type="html"><![CDATA[<p>如果是 2019 年是一个充满变化的年份，那么对于仍处于迷茫期的我来说，只能去拥抱变化，而不是拒绝改变了。</p>]]></content>
+    <content type="html"><![CDATA[<h1 id="iOS-最佳实践"><a href="#iOS-最佳实践" class="headerlink" title="iOS 最佳实践"></a>iOS 最佳实践</h1><h2 id="为什么整理这篇文档"><a href="#为什么整理这篇文档" class="headerlink" title="为什么整理这篇文档?"></a>为什么整理这篇文档?</h2><p>刚开始从事iOS开发会有一点让人心生畏惧。<code>Swift</code>和<code>Objective-C</code>并不是被广泛使用的语言，这个平台几乎所有内容都有自己特有的名称，将你所编写的代码运行到一台设备上的过程可能是很坎坷的。这份文档就是来帮助你的，不论你是开始迈出你在<code>Cocoa王国</code>中的第一步还是对于<code>以正确的方式</code>编程。下面所有的内容都仅仅是建议，所以如果你有一个很好地理由用不同的方式来实现，那就去做吧!</p><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>如果您正在寻找特定的内容，您可以从这里直接跳到相关部分。</p><ol><li><a href="#1">起步</a></li><li><a href="#2">常用库</a></li><li><a href="#3">架构</a></li><li><a href="#4">存储</a></li><li><a href="#5">资源</a></li><li><a href="#6">编码风格</a></li><li><a href="#7">安全</a></li><li><a href="#8">诊断</a></li><li><a href="#9">分析</a></li><li><a href="#10">编译</a></li><li><a href="#11">分发</a></li><li><a href="#12">内购(IAP)</a></li><li><a href="#13">证书</a></li></ol><h2 id="1">起步</h2><h3>人机交互指南</h3><p>如果你来自其它平台，请花一些时间来熟悉苹果的<a href="https://developer.apple.com/ios/human-interface-guidelines/" target="_blank" rel="noopener">人机交互指南</a>。iOS的世界非常强调要有一个良好的设计，你的app也不应例外。该指南还为设计人员提供了一个关于原生UI元素、以及如3D Touch或Wallet等app以及图标大小的实用概述。</p><h3 id="Xcode"><a href="#Xcode" class="headerlink" title="Xcode"></a>Xcode</h3><p><a href="https://developer.apple.com/xcode/" target="_blank" rel="noopener">Xcode</a>是大多数iOS开发者所选择的IDE，同时也是苹果官方指定的唯一平台。除了<code>Xcode</code>外，还有一些替换方案，其中<a href="https://www.jetbrains.com/objc/" target="_blank" rel="noopener">AppCode</a>可以说是最出名的了，但除非你是经验丰富的iOS开发者，否则还是请使用<code>Xcode</code>吧。虽然它有一些缺点，但它现在确实很实用！</p><p>如需安装<code>Xcode</code>，直接在Mac的<a href="https://itunes.apple.com/us/app/xcode/id497799835" target="_blank" rel="noopener">App Store</a>上下载即可。它提供了最新的SDK和模拟器，您可以在首选项&gt;下载中安装更多的东西。</p><h3 id="项目设置"><a href="#项目设置" class="headerlink" title="项目设置"></a>项目设置</h3><p>当开始开发一个iOS项目的时候，一个常见的问题就是纯代码还是通过<code>Storyboards</code>或<code>XIB</code>文件来使用<code>Interface Builder</code>。众所周知两种方法都能完成工作。然而，这里有几点需要考虑的：</p><h4 id="为什么使用纯代码"><a href="#为什么使用纯代码" class="headerlink" title="为什么使用纯代码?"></a>为什么使用纯代码?</h4><ul><li><code>Storyboards</code>由于其复杂的XML结构，更容易发生版本冲突。这使得比纯代码更难完成合并。</li><li>纯代码更容易构造和重用视图，从而保持代码库的<a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself" target="_blank" rel="noopener">DRY</a>。</li><li>所有的信息都在一个地方。在<code>Interface Builder</code>中，你必须单击所有检查器才能找到您要查找的内容。</li><li><code>Storyboards</code>引入了代码和UI之间的耦合，这可能导致崩溃，例如当<code>outlet</code>或<code>Action</code>没有正确被设置时。编译器不会检测到这些问题。</li></ul><h4 id="为什么使用Storyboards"><a href="#为什么使用Storyboards" class="headerlink" title="为什么使用Storyboards?"></a>为什么使用<code>Storyboards</code>?</h4><ul><li>对于不太倾向于技术的人来说，<code>Storyboards</code>是直接为项目做出贡献的好方法。例如，调整颜色和布局约束。然而，这是需要一个可行的项目设置并且花时间学习基础知识的过程。</li><li>由于可以在不构建项目的情况下预览更改，对于迭代开发来说更有优势。</li><li>自定义字体和UI元素都是以图形化的方式展现在<code>Storyboards</code>中，当在设计时对最终的外观有一个更好的了解。</li><li>对于<a href="http://futurice.com/blog/adaptive-views-in-ios-8" target="_blank" rel="noopener">size classes</a>, Interface Builder 能将你所选择的设备提供实时布局预览，包括iPad分屏多任务处理。</li></ul><h4 id="为什么不两者兼用呢"><a href="#为什么不两者兼用呢" class="headerlink" title="为什么不两者兼用呢?"></a>为什么不两者兼用呢?</h4><p>为了两全其美，你可以采取混用的方案：首先用<code>Storyboards</code>勾勒出最初的设计，对修补和快速更改非常有用。你甚至可以邀请设计师加入到这个流程中。随着UI的成熟和可靠性变得更加重要，你将过渡到更容易维护和协作的基于代码的方式开发。</p><h3 id="忽略文件"><a href="#忽略文件" class="headerlink" title="忽略文件"></a>忽略文件</h3><p>将版本控制引入项目的第一步就是要有一个正确的<code>.gitignore</code>文件。这样，不需要的文件（用户设置文件，临时文件等）将永远不会被纳入版本库。幸运的是，GitHub 已经提供了 <a href="https://github.com/github/gitignore/blob/master/Objective-C.gitignore" target="_blank" rel="noopener">OC</a> 和 <a href="https://github.com/github/gitignore/blob/master/Swift.gitignore" target="_blank" rel="noopener">Swift</a> 的<code>.gitignore</code>文件。</p><h3 id="依赖管理"><a href="#依赖管理" class="headerlink" title="依赖管理"></a>依赖管理</h3><h4 id="CocoaPods"><a href="#CocoaPods" class="headerlink" title="CocoaPods"></a>CocoaPods</h4><p>如果你打算在项目中引入第三方库的话，<a href="https://cocoapods.org/" target="_blank" rel="noopener">CocoaPods</a> 提供了简单快速的集成。安装它很简单，如下：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gem install cocoapods</span><br></pre></td></tr></table></figure><p>初始化时，跳转到项目路径下，执行如下代码：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod init</span><br></pre></td></tr></table></figure><p>这会自动生成一个<code>Podfile</code>文件，这个文件用来管理项目的所有依赖。在<code>Podfile</code>中添加好依赖后，执行如下代码：</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod install</span><br></pre></td></tr></table></figure><p>执行后会安装所依赖的第三方库，并且作为工程的一部分，这个工程当然也包含了你自己的项目。由于<a href="https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control" target="_blank" rel="noopener">这里</a>和<a href="https://www.dzombak.com/blog/2014/03/including-pods-in-source-control.html" target="_blank" rel="noopener">这里</a>的原因，我们推荐将<code>Pods</code>里面的内容也提交到版本库里面，而不是在每次新的代码签出后依赖于开发人员执行<code>pod install</code>。</p><blockquote><p>这里的原因大概可以这么来解释，通过将<code>Pods</code>文件夹加入版本库。当有新的开发人员克隆版本库的时候，只需要编译运行项目，不需要运行<code>pod install</code>这种需要长时间命令</p></blockquote><p>注意从现在开始，你需要打开<code>.xcworkspace</code>文件，而不是<code>.xcproject</code>文件，否则代码将无法编译。</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod update</span><br></pre></td></tr></table></figure><p>上面的命令将会更新所有的pods到<code>Podfile</code>文件上所允许的最新的版本。你可以使用<a href="http://guides.cocoapods.org/syntax/podfile.html#pod" target="_blank" rel="noopener">运算符</a>来指明你想要的版本。</p><h4 id="Carthage"><a href="#Carthage" class="headerlink" title="Carthage"></a>Carthage</h4>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;如果是 2019 年是一个充满变化的年份，那么对于仍处于迷茫期的我来说，只能去拥抱变化，而不是拒绝改变了。&lt;/p&gt;
+        &lt;h1 id=&quot;iOS-最佳实践&quot;&gt;&lt;a href=&quot;#iOS-最佳实践&quot; class=&quot;headerlink&quot; title=&quot;iOS 最佳实践&quot;&gt;&lt;/a&gt;iOS 最佳实践&lt;/h1&gt;&lt;h2 id=&quot;为什么整理这篇文档&quot;&gt;&lt;a href=&quot;#为什么整理这篇文档&quot; class=&quot;he
+      
+    
+    </summary>
+    
+    
+      <category term="iOS 翻译" scheme="http://leejunhui.com/tags/iOS-%E7%BF%BB%E8%AF%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>拥抱变化</title>
+    <link href="http://leejunhui.com/2019/08/05/%E6%8B%A5%E6%8A%B1%E5%8F%98%E5%8C%96/"/>
+    <id>http://leejunhui.com/2019/08/05/拥抱变化/</id>
+    <published>2019-08-05T05:30:33.000Z</published>
+    <updated>2019-08-10T03:51:46.682Z</updated>
+    
+    <content type="html"><![CDATA[<p>今天的厚度决定明天的高度，拥抱当下的变化，做时间的朋友。</p><p>近期书单:</p><ul><li>《态度》</li><li>《见识》</li><li>《浪潮之巅》</li><li>《数学之美》</li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;今天的厚度决定明天的高度，拥抱当下的变化，做时间的朋友。&lt;/p&gt;
+&lt;p&gt;近期书单:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;《态度》&lt;/li&gt;
+&lt;li&gt;《见识》&lt;/li&gt;
+&lt;li&gt;《浪潮之巅》&lt;/li&gt;
+&lt;li&gt;《数学之美》&lt;/li&gt;
+&lt;/ul&gt;
 
       
     
