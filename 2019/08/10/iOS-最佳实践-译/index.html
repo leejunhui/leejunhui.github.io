@@ -89,7 +89,7 @@
 <meta property="og:site_name" content="leejunhui&#39;s blog">
 <meta property="og:description" content="iOS 最佳实践（一）起步为什么整理这篇文档?刚开始从事iOS开发会有一点让人心生畏惧。Swift和Objective-C并不是被广泛使用的语言，这个平台几乎所有内容都有自己特有的名称，将你所编写的代码运行到一台设备上的过程可能是很坎坷的。这份文档就是来帮助你的，不论你是开始迈出你在Cocoa王国中的第一步还是对于以正确的方式编程。下面所有的内容都仅仅是建议，所以如果你有一个很好地理由用不同的方式">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-08-15T02:36:02.461Z">
+<meta property="og:updated_time" content="2019-08-15T02:37:30.905Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 最佳实践[译]（一）起步">
 <meta name="twitter:description" content="iOS 最佳实践（一）起步为什么整理这篇文档?刚开始从事iOS开发会有一点让人心生畏惧。Swift和Objective-C并不是被广泛使用的语言，这个平台几乎所有内容都有自己特有的名称，将你所编写的代码运行到一台设备上的过程可能是很坎坷的。这份文档就是来帮助你的，不论你是开始迈出你在Cocoa王国中的第一步还是对于以正确的方式编程。下面所有的内容都仅仅是建议，所以如果你有一个很好地理由用不同的方式">
@@ -382,6 +382,7 @@
 <li>对于<a href="http://futurice.com/blog/adaptive-views-in-ios-8" target="_blank" rel="noopener">size classes</a>, Interface Builder 能将你所选择的设备提供实时布局预览，包括iPad分屏多任务处理。</li>
 </ul>
 <h4 id="为什么不两者兼用呢"><a href="#为什么不两者兼用呢" class="headerlink" title="为什么不两者兼用呢?"></a>为什么不两者兼用呢?</h4><p>为了两全其美，你可以采取混用的方案：首先用<code>Storyboards</code>勾勒出最初的设计，对修补和快速更改非常有用。你甚至可以邀请设计师加入到这个流程中。随着UI的成熟和可靠性变得更加重要，你将过渡到更容易维护和协作的基于代码的方式开发。</p>
+<a id="more"></a>
 <h3 id="忽略文件"><a href="#忽略文件" class="headerlink" title="忽略文件"></a>忽略文件</h3><p>将版本控制引入项目的第一步就是要有一个正确的<code>.gitignore</code>文件。这样，不需要的文件（用户设置文件，临时文件等）将永远不会被纳入版本库。幸运的是，GitHub 已经提供了 <a href="https://github.com/github/gitignore/blob/master/Objective-C.gitignore" target="_blank" rel="noopener">OC</a> 和 <a href="https://github.com/github/gitignore/blob/master/Swift.gitignore" target="_blank" rel="noopener">Swift</a> 的<code>.gitignore</code>文件。</p>
 <h3 id="依赖管理"><a href="#依赖管理" class="headerlink" title="依赖管理"></a>依赖管理</h3><h4 id="CocoaPods"><a href="#CocoaPods" class="headerlink" title="CocoaPods"></a>CocoaPods</h4><p>如果你打算在项目中引入第三方库的话，<a href="https://cocoapods.org/" target="_blank" rel="noopener">CocoaPods</a> 提供了简单快速的集成。安装它很简单，如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gem install cocoapods</span><br></pre></td></tr></table></figure>
