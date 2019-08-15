@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next pisces use-motion" lang>
+<html class="theme-next pisces use-motion" lang="zh-Hans">
 <head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -85,7 +85,7 @@
 <meta property="og:title" content="leejunhui&#39;s blog">
 <meta property="og:url" content="http://leejunhui.com/index.html">
 <meta property="og:site_name" content="leejunhui&#39;s blog">
-<meta property="og:locale" content="default">
+<meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="leejunhui&#39;s blog">
 
@@ -103,7 +103,7 @@
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     duoshuo: {
       userId: '0',
-      author: 'Author'
+      author: '博主'
     },
     algolia: {
       applicationID: '',
@@ -135,7 +135,7 @@
 
 </head>
 
-<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
   
   
@@ -184,7 +184,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
             
-            Home
+            首页
           </a>
         </li>
       
@@ -194,7 +194,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
             
-            Tags
+            标签
           </a>
         </li>
       
@@ -204,7 +204,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
             
-            Categories
+            分类
           </a>
         </li>
       
@@ -214,7 +214,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
             
-            Archives
+            归档
           </a>
         </li>
       
@@ -251,12 +251,244 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2019/08/10/iOS-最佳实践-译/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="leejunhui">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="leejunhui's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/10/iOS-最佳实践-译/" itemprop="url">iOS 最佳实践[译]（一）起步</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-10T11:07:46+08:00">
+                2019-08-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS最佳实践/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS最佳实践</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="iOS-最佳实践（一）起步"><a href="#iOS-最佳实践（一）起步" class="headerlink" title="iOS 最佳实践（一）起步"></a>iOS 最佳实践（一）起步</h1><h2 id="为什么整理这篇文档"><a href="#为什么整理这篇文档" class="headerlink" title="为什么整理这篇文档?"></a>为什么整理这篇文档?</h2><p>刚开始从事iOS开发会有一点让人心生畏惧。<code>Swift</code>和<code>Objective-C</code>并不是被广泛使用的语言，这个平台几乎所有内容都有自己特有的名称，将你所编写的代码运行到一台设备上的过程可能是很坎坷的。这份文档就是来帮助你的，不论你是开始迈出你在<code>Cocoa王国</code>中的第一步还是对于<code>以正确的方式</code>编程。下面所有的内容都仅仅是建议，所以如果你有一个很好地理由用不同的方式来实现，那就去做吧!</p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>如果您正在寻找特定的内容，您可以从这里直接跳到相关部分。</p>
+<ol>
+<li><a href="#1">起步</a></li>
+<li><a href="#2">常用库</a></li>
+<li><a href="#3">架构</a></li>
+<li><a href="#4">存储</a></li>
+<li><a href="#5">资源</a></li>
+<li><a href="#6">编码风格</a></li>
+<li><a href="#7">安全</a></li>
+<li><a href="#8">诊断</a></li>
+<li><a href="#9">分析</a></li>
+<li><a href="#10">编译</a></li>
+<li><a href="#11">分发</a></li>
+<li><a href="#12">内购(IAP)</a></li>
+<li><a href="#13">证书</a></li>
+</ol>
+<h2 id="1">起步</h2>
+
+<h3>人机交互指南</h3>
+
+<p>如果你来自其它平台，请花一些时间来熟悉苹果的<a href="https://developer.apple.com/ios/human-interface-guidelines/" target="_blank" rel="noopener">人机交互指南</a>。iOS的世界非常强调要有一个良好的设计，你的app也不应例外。该指南还为设计人员提供了一个关于原生UI元素、以及如3D Touch或Wallet等app以及图标大小的实用概述。</p>
+<h3 id="Xcode"><a href="#Xcode" class="headerlink" title="Xcode"></a>Xcode</h3><p><a href="https://developer.apple.com/xcode/" target="_blank" rel="noopener">Xcode</a>是大多数iOS开发者所选择的IDE，同时也是苹果官方指定的唯一平台。除了<code>Xcode</code>外，还有一些替换方案，其中<a href="https://www.jetbrains.com/objc/" target="_blank" rel="noopener">AppCode</a>可以说是最出名的了，但除非你是经验丰富的iOS开发者，否则还是请使用<code>Xcode</code>吧。虽然它有一些缺点，但它现在确实很实用！</p>
+<p>如需安装<code>Xcode</code>，直接在Mac的<a href="https://itunes.apple.com/us/app/xcode/id497799835" target="_blank" rel="noopener">App Store</a>上下载即可。它提供了最新的SDK和模拟器，您可以在首选项&gt;下载中安装更多的东西。</p>
+<h3 id="项目设置"><a href="#项目设置" class="headerlink" title="项目设置"></a>项目设置</h3><p>当开始开发一个iOS项目的时候，一个常见的问题就是纯代码还是通过<code>Storyboards</code>或<code>XIB</code>文件来使用<code>Interface Builder</code>。众所周知两种方法都能完成工作。然而，这里有几点需要考虑的：</p>
+<h4 id="为什么使用纯代码"><a href="#为什么使用纯代码" class="headerlink" title="为什么使用纯代码?"></a>为什么使用纯代码?</h4><ul>
+<li><code>Storyboards</code>由于其复杂的XML结构，更容易发生版本冲突。这使得比纯代码更难完成合并。</li>
+<li>纯代码更容易构造和重用视图，从而保持代码库的<a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself" target="_blank" rel="noopener">DRY</a>。</li>
+<li>所有的信息都在一个地方。在<code>Interface Builder</code>中，你必须单击所有检查器才能找到您要查找的内容。</li>
+<li><code>Storyboards</code>引入了代码和UI之间的耦合，这可能导致崩溃，例如当<code>outlet</code>或<code>Action</code>没有正确被设置时。编译器不会检测到这些问题。</li>
+</ul>
+<h4 id="为什么使用Storyboards"><a href="#为什么使用Storyboards" class="headerlink" title="为什么使用Storyboards?"></a>为什么使用<code>Storyboards</code>?</h4><ul>
+<li>对于不太倾向于技术的人来说，<code>Storyboards</code>是直接为项目做出贡献的好方法。例如，调整颜色和布局约束。然而，这是需要一个可行的项目设置并且花时间学习基础知识的过程。</li>
+<li>由于可以在不构建项目的情况下预览更改，对于迭代开发来说更有优势。</li>
+<li>自定义字体和UI元素都是以图形化的方式展现在<code>Storyboards</code>中，当在设计时对最终的外观有一个更好的了解。</li>
+<li>对于<a href="http://futurice.com/blog/adaptive-views-in-ios-8" target="_blank" rel="noopener">size classes</a>, Interface Builder 能将你所选择的设备提供实时布局预览，包括iPad分屏多任务处理。</li>
+</ul>
+<h4 id="为什么不两者兼用呢"><a href="#为什么不两者兼用呢" class="headerlink" title="为什么不两者兼用呢?"></a>为什么不两者兼用呢?</h4><p>为了两全其美，你可以采取混用的方案：首先用<code>Storyboards</code>勾勒出最初的设计，对修补和快速更改非常有用。你甚至可以邀请设计师加入到这个流程中。随着UI的成熟和可靠性变得更加重要，你将过渡到更容易维护和协作的基于代码的方式开发。</p>
+<h3 id="忽略文件"><a href="#忽略文件" class="headerlink" title="忽略文件"></a>忽略文件</h3><p>将版本控制引入项目的第一步就是要有一个正确的<code>.gitignore</code>文件。这样，不需要的文件（用户设置文件，临时文件等）将永远不会被纳入版本库。幸运的是，GitHub 已经提供了 <a href="https://github.com/github/gitignore/blob/master/Objective-C.gitignore" target="_blank" rel="noopener">OC</a> 和 <a href="https://github.com/github/gitignore/blob/master/Swift.gitignore" target="_blank" rel="noopener">Swift</a> 的<code>.gitignore</code>文件。</p>
+<h3 id="依赖管理"><a href="#依赖管理" class="headerlink" title="依赖管理"></a>依赖管理</h3><h4 id="CocoaPods"><a href="#CocoaPods" class="headerlink" title="CocoaPods"></a>CocoaPods</h4><p>如果你打算在项目中引入第三方库的话，<a href="https://cocoapods.org/" target="_blank" rel="noopener">CocoaPods</a> 提供了简单快速的集成。安装它很简单，如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gem install cocoapods</span><br></pre></td></tr></table></figure>
+
+<p>初始化时，跳转到项目路径下，执行如下代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod init</span><br></pre></td></tr></table></figure>
+
+<p>这会自动生成一个<code>Podfile</code>文件，这个文件用来管理项目的所有依赖。在<code>Podfile</code>中添加好依赖后，执行如下代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod install</span><br></pre></td></tr></table></figure>
+
+<p>执行后会安装所依赖的第三方库，并且作为工程的一部分，这个工程当然也包含了你自己的项目。由于<a href="https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control" target="_blank" rel="noopener">这里</a>和<a href="https://www.dzombak.com/blog/2014/03/including-pods-in-source-control.html" target="_blank" rel="noopener">这里</a>的原因，我们推荐将<code>Pods</code>里面的内容也提交到版本库里面，而不是在每次新的代码签出后依赖于开发人员执行<code>pod install</code>。</p>
+<blockquote>
+<p>这里的原因大概可以这么来解释，通过将<code>Pods</code>文件夹加入版本库。当有新的开发人员克隆版本库的时候，只需要编译运行项目，不需要运行<code>pod install</code>这种需要长时间命令</p>
+</blockquote>
+<p>注意从现在开始，你需要打开<code>.xcworkspace</code>文件，而不是<code>.xcproject</code>文件，否则代码将无法编译。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pod update</span><br></pre></td></tr></table></figure>
+
+<p>上面的命令将会更新所有的pods到<code>Podfile</code>文件上所允许的最新的版本。你可以使用<a href="http://guides.cocoapods.org/syntax/podfile.html#pod" target="_blank" rel="noopener">运算符</a>来指明你想要的版本。</p>
+<h4 id="Carthage"><a href="#Carthage" class="headerlink" title="Carthage"></a>Carthage</h4><p><a href="https://github.com/Carthage/Carthage" target="_blank" rel="noopener">Carthage</a> 采用<a href="http://www.infoq.com/presentations/Simple-Made-Easy" target="_blank" rel="noopener">简约而不简单</a>的方式将你所依赖的代码打包成二进制库文件，而不是以神奇地将它们以各种方式集成到你的项目中。这会大大的减少编译时间，因为你的依赖在项目开始构建的时候就已经被编译好了。<br>由于没有集中式的项目仓库，这意味任何可以编译成框架的代码库都支持开箱即用的<code>Carthage</code>。<br>要开始引入<code>Carthage</code>到你的项目中的话，请遵循<code>Carthage</code>文档中的<a href="https://github.com/Carthage/Carthage#installing-carthage" target="_blank" rel="noopener">说明</a>。</p>
+<h3 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h3><p>为了避免将数以百计的源文件放置在同一个目录下，最好根据项目自身的架构设置一些文件夹结构层级。例如，你可以使用如下的划分方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">├─ Models</span><br><span class="line">├─ Views</span><br><span class="line">├─ Controllers (或者是ViewModels, 如果你的项目是MVVM架构)</span><br><span class="line">├─ Stores</span><br><span class="line">├─ Helpers</span><br></pre></td></tr></table></figure>
+
+<p>首先，在 Xcode 的项目导航器中的项目名称目录下创建组(黄色的小文件夹)，然后，对于每个组，通过点击 Xcode 的文件检查器下的灰色文件夹小图标，来到分组对应的真实物理路径，并创建对应名称的文件夹，并与 Xcode 中的组相关联。</p>
+<h4 id="本地化"><a href="#本地化" class="headerlink" title="本地化"></a>本地化</h4><p>项目伊始将所有的字符串都存储到本地化文件，不仅为翻译提供了便利，同时为快速查找字符串提供了便利。你可以在<code>build scheme</code>中加入启动参数来指定app的语言：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-AppleLanguages (Finnish)</span><br></pre></td></tr></table></figure>
+
+<p>而对于更加复杂的翻译场景，如取决于数量的复数形式(例如: “1 person” vs “3 people”)，你应该使用<a href="https://developer.apple.com/library/prerelease/ios/documentation/MacOSX/Conceptual/BPInternational/StringsdictFileFormat/StringsdictFileFormat.html" target="_blank" rel="noopener">.stringsdict</a>格式文件而不是常规的格式化字符串文件。一旦你将视线转移到这个疯狂的语法上，你就拥有了一个知道如何为 <code>one</code>，<code>some</code>，<code>few</code> 和 <code>many</code> 应用复数化的强大工具，<a href="http://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html" target="_blank" rel="noopener">例如在俄语和阿拉伯语中</a>。</p>
+<h4 id="常量"><a href="#常量" class="headerlink" title="常量"></a>常量</h4><p>保持常量的作用域尽可能的小，例如，当你只需要在一个类中使用常量的时候，那么这个常量作用域应仅限于这个类。需要在全局作用域保存的常量应当统一存放在一个地方。在<code>Swift</code>中，你可以使用枚举来定义常量然后生成<code>Constants.swift</code>文件来组织、存储和获取全局作用域的常量，这是一种非常干净的方式。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Config</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> baseURL = <span class="type">NSURL</span>(string: <span class="string">"http://www.example.org/"</span>)!</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> splineReticulatorName = <span class="string">"foobar"</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Color</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> primaryColor = <span class="type">UIColor</span>(red: <span class="number">0.22</span>, green: <span class="number">0.58</span>, blue: <span class="number">0.29</span>, alpha: <span class="number">1.0</span>)</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> secondaryColor = <span class="type">UIColor</span>.lightGray</span><br><span class="line"></span><br><span class="line">    <span class="comment">// A visual way to define colours within code files is to use #colorLiteral</span></span><br><span class="line">    <span class="comment">// This syntax will present you with colour picker component right on the code line</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">let</span> tertiaryColor = #colorLiteral(red: <span class="number">0.22</span>, green: <span class="number">0.58</span>, blue: <span class="number">0.29</span>, alpha: <span class="number">1.0</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当你使用<code>Objective-C</code>时，将全局作用域常量存储在<code>Constant.h</code>文件中，该文件是被<code>Prefix Header</code>头文件所引用了的。<br>通过静态常量来代替预处理宏定义常量：</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="type">CGFloat</span> const <span class="type">XYZBrandingFontSizeSmall</span> = <span class="number">12</span>.0f;</span><br><span class="line"><span class="keyword">static</span> <span class="type">NSString</span> * const <span class="type">XYZAwesomenessDeliveredNotificationName</span> = @<span class="string">"foo"</span>;</span><br></pre></td></tr></table></figure>
+
+<p>静态常量是类型安全的，有着更加显式的作用域(在未定义之前，它们不能在所有导入/包含的文件中使用)，在后续开发中不能被重定义或者未定义，并且是在调试器中可用的。</p>
+<h3 id="分支模型"><a href="#分支模型" class="headerlink" title="分支模型"></a>分支模型</h3><p>特别是在向公众发布应用程序时（例如通过 App Store），使用适当的标签将发布版本与其他分支隔离是一个好主意。此外，涉及大量提交的新特性开发工作应该在它自己的分支上完成。<a href="https://github.com/nvie/gitflow" target="_blank" rel="noopener"><code>git-flow</code></a>是一个可以帮助你遵循这些约定的工具。它只是<code>Git</code>分支和标签命令的一个便捷的封装，但能帮助团队或个人维护一个适当的分支结构。<br>所有的开发都是基于<code>feature</code>分支(或针对较小的工作基于<code>Dev</code>分支)、基于app版本的标签的发布以及提交都要通过下列代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git flow release finish &lt;version&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="最小的iOS兼容版本"><a href="#最小的iOS兼容版本" class="headerlink" title="最小的iOS兼容版本"></a>最小的iOS兼容版本</h3><p>尽早的决定你的项目所支持的最小iOS版本是十分有用的：明确需要基于哪个系统版本进行开发，测试以及哪些系统API可以使用可以帮助你评估工作量，并让你知道哪些是可用的，哪些是不安全的。</p>
+<p>利用这些资源所收集的资料做出选择：</p>
+<ul>
+<li><p>官方第一手资源</p>
+<ul>
+<li><a href="https://developer.apple.com/support/app-store/" target="_blank" rel="noopener">苹果iOS设备占有率</a><br>版本渗透数据的主要统计渠道，如果可能的话，更倾向于本地化和特定领域的统计信息。</li>
+</ul>
+</li>
+<li><p>第三方资源</p>
+<ul>
+<li><a href="http://iossupportmatrix.com/" target="_blank" rel="noopener">iOS Support Matrix</a> </li>
+<li><a href="https://david-smith.org/iosversionstats/" target="_blank" rel="noopener">DavidSmith: iOS Version Stats</a></li>
+<li><a href="https://mixpanel.com/trends/#report/ios_frag" target="_blank" rel="noopener">Mixpanel Trends: iOS versions</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2019/08/05/拥抱变化/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="leejunhui">
       <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="image" content="/uploads/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
@@ -280,9 +512,9 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">发表于</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-05T13:30:33+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-05T13:30:33+08:00">
                 2019-08-05
               </time>
             
@@ -301,7 +533,7 @@
                 <i class="fa fa-folder-o"></i>
               </span>
               
-                <span class="post-meta-item-text">In</span>
+                <span class="post-meta-item-text">分类于</span>
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
@@ -422,6 +654,8 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
+              <img class="site-author-image" itemprop="image" src="/uploads/avatar.png" alt="leejunhui">
+            
               <p class="site-author-name" itemprop="name">leejunhui</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
@@ -433,8 +667,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">1</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">日志</span>
                 </a>
               </div>
             
@@ -443,10 +677,10 @@
               
               
               <div class="site-state-item site-state-categories">
-                
-                  <span class="site-state-item-count">1</span>
-                  <span class="site-state-item-name">categories</span>
-                
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
               </div>
             
 
@@ -454,10 +688,10 @@
               
               
               <div class="site-state-item site-state-tags">
-                
-                  <span class="site-state-item-count">1</span>
-                  <span class="site-state-item-name">tags</span>
-                
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
               </div>
             
 
@@ -509,7 +743,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
 
 
 
@@ -517,7 +751,7 @@
 
 
 
-  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
 
 
 
@@ -564,6 +798,8 @@
   
 
 
+  
+
 
 
 
@@ -602,6 +838,11 @@
   
   
     <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
   
 
 
