@@ -37,9 +37,9 @@
     
       <category term="iOS" scheme="http://leejunhui.com/tags/iOS/"/>
     
-      <category term="WWDC" scheme="http://leejunhui.com/tags/WWDC/"/>
-    
       <category term="翻译" scheme="http://leejunhui.com/tags/%E7%BF%BB%E8%AF%91/"/>
+    
+      <category term="WWDC" scheme="http://leejunhui.com/tags/WWDC/"/>
     
       <category term="[object Object]" scheme="http://leejunhui.com/tags/object-Object/"/>
     
@@ -104,9 +104,9 @@
     
       <category term="iOS" scheme="http://leejunhui.com/tags/iOS/"/>
     
-      <category term="翻译" scheme="http://leejunhui.com/tags/%E7%BF%BB%E8%AF%91/"/>
-    
       <category term="最佳实践" scheme="http://leejunhui.com/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/"/>
+    
+      <category term="翻译" scheme="http://leejunhui.com/tags/%E7%BF%BB%E8%AF%91/"/>
     
   </entry>
   
