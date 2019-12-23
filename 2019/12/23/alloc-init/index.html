@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="iOS,OC,alloc,">
 
 
 
@@ -81,13 +81,32 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="leejunhui&#39;s blog">
-<meta property="og:url" content="http://leejunhui.com/index.html">
+<meta name="description" content="OC 底层原理分析对象篇之 alloc&amp;amp;init alloc &amp;amp; init 探索作为 iOS 开发者，我们每天打交道最多的应该就是对象了，从面向对象设计的角度来说，对象的创建以及初始化是最基础的内容。那么，今天我们就一起来探索一下 iOS 中最常用的 alloc 和 init  的底层是怎么实现的吧。  一、 如何进行底层探索对于第三方开源框架来说，我们去剖析内部原理和细节是有一定">
+<meta name="keywords" content="iOS,OC,alloc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="alloc&amp;init">
+<meta property="og:url" content="http://leejunhui.com/2019/12/23/alloc-init/index.html">
 <meta property="og:site_name" content="leejunhui&#39;s blog">
+<meta property="og:description" content="OC 底层原理分析对象篇之 alloc&amp;amp;init alloc &amp;amp; init 探索作为 iOS 开发者，我们每天打交道最多的应该就是对象了，从面向对象设计的角度来说，对象的创建以及初始化是最基础的内容。那么，今天我们就一起来探索一下 iOS 中最常用的 alloc 和 init  的底层是怎么实现的吧。  一、 如何进行底层探索对于第三方开源框架来说，我们去剖析内部原理和细节是有一定">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f309764e942815?w=964&h=738&f=png&s=733652">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f309764ea68f14?w=902&h=74&f=png&s=31589">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f309764eb9c302">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f309764fee5427?w=783&h=314&f=png&s=7869">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f3097652ddbabe?w=372&h=66&f=png&s=4558">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f3097654fd6365?w=1884&h=400&f=png&s=191365">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f309767976e057?w=1022&h=224&f=png&s=253989">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f309767e89d29f?w=1940&h=384&f=png&s=188650">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f3097683a7e518?w=424&h=268&f=png&s=109931">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f309768d2e6bc1?w=952&h=382&f=png&s=565114">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f30976adf97036?w=1942&h=378&f=png&s=188236">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f309768dc0fe81?w=1312&h=48&f=png&s=6144">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f30976af136d0d?w=1769&h=1430&f=png&s=162905">
+<meta property="og:updated_time" content="2019-12-23T03:11:14.005Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="leejunhui&#39;s blog">
+<meta name="twitter:title" content="alloc&amp;init">
+<meta name="twitter:description" content="OC 底层原理分析对象篇之 alloc&amp;amp;init alloc &amp;amp; init 探索作为 iOS 开发者，我们每天打交道最多的应该就是对象了，从面向对象设计的角度来说，对象的创建以及初始化是最基础的内容。那么，今天我们就一起来探索一下 iOS 中最常用的 alloc 和 init  的底层是怎么实现的吧。  一、 如何进行底层探索对于第三方开源框架来说，我们去剖析内部原理和细节是有一定">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2019/12/23/16f309764e942815?w=964&h=738&f=png&s=733652">
 
 
 
@@ -117,13 +136,13 @@
 
 
 
-  <link rel="canonical" href="http://leejunhui.com/">
+  <link rel="canonical" href="http://leejunhui.com/2019/12/23/alloc-init/">
 
 
 
 
 
-  <title>leejunhui's blog</title>
+  <title>alloc&init | leejunhui's blog</title>
   
 
 
@@ -142,8 +161,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -236,9 +254,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -268,9 +286,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/23/alloc-init/" itemprop="url">alloc&init</a></h1>
+          <h1 class="post-title" itemprop="name headline">alloc&init</h1>
         
 
         <div class="post-meta">
@@ -361,9 +377,7 @@
       
 
       
-        
-          
-            <h1 id="OC-底层原理分析对象篇之-alloc-amp-init"><a href="#OC-底层原理分析对象篇之-alloc-amp-init" class="headerlink" title="OC 底层原理分析对象篇之 alloc&amp;init"></a>OC 底层原理分析对象篇之 alloc&amp;init</h1><p><a name="BrezX"></a></p>
+        <h1 id="OC-底层原理分析对象篇之-alloc-amp-init"><a href="#OC-底层原理分析对象篇之-alloc-amp-init" class="headerlink" title="OC 底层原理分析对象篇之 alloc&amp;init"></a>OC 底层原理分析对象篇之 alloc&amp;init</h1><p><a name="BrezX"></a></p>
 <h1 id="alloc-amp-init-探索"><a href="#alloc-amp-init-探索" class="headerlink" title="alloc &amp; init 探索"></a>alloc &amp; init 探索</h1><p>作为 <code>iOS</code> 开发者，我们每天打交道最多的应该就是对象了，从面向对象设计的角度来说，对象的创建以及初始化是最基础的内容。那么，今天我们就一起来探索一下 <code>iOS</code> 中最常用的 <code>alloc</code> 和 <code>init</code>  的底层是怎么实现的吧。</p>
 <p><a name="LrrLo"></a></p>
 <h2 id="一、-如何进行底层探索"><a href="#一、-如何进行底层探索" class="headerlink" title="一、 如何进行底层探索"></a>一、 如何进行底层探索</h2><p>对于第三方开源框架来说，我们去剖析内部原理和细节是有一定的方法和套路可以掌握的。而对于 <code>iOS</code>  底层，特别是 <code>OC</code> 底层，我们可能就需要用到一些开发中不是很常用的方法。</p>
@@ -465,8 +479,6 @@
 <li>isa 是如何初始化的?</li>
 </ul>
 
-          
-        
       
     </div>
     
@@ -478,582 +490,61 @@
     
 
     
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    leejunhui
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://leejunhui.com/2019/12/23/alloc-init/" title="alloc&init">http://leejunhui.com/2019/12/23/alloc-init/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2019/12/10/WWDC2012-iOS-App-Performance-Responsiveness/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/10/WWDC2012-iOS-App-Performance-Responsiveness/" itemprop="url">WWDC2012 iOS App Performance:Responsiveness 笔记</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-10T11:55:32+08:00">
-                2019-12-10
-              </time>
-            
-
-            
-
-            
-          </span>
+        <div class="post-tags">
           
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2019-12-10T12:42:32+08:00" content="2019-12-10">
-              2019-12-10
-            </time>
-          </span>
+            <a href="/tags/iOS/" rel="tag"># iOS</a>
           
-
+            <a href="/tags/OC/" rel="tag"># OC</a>
           
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/WWDC-笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">WWDC 笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
+            <a href="/tags/alloc/" rel="tag"># alloc</a>
           
-
-          
-            
-          
-
-          
-          
-             <span id="/2019/12/10/WWDC2012-iOS-App-Performance-Responsiveness/" class="leancloud_visitors" data-flag-title="WWDC2012 iOS App Performance:Responsiveness 笔记">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
+      
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      
       
       
 
       
-        
-          <p>如果观看过 <a href="https://developer.apple.com/videos/play/wwdc2012/235/" target="_blank" rel="noopener">WWDC 2012 Session 305 - iOS App Performance: Responsiveness</a> 可以略过本文。</p>
-<p>首先，该篇 WWDC Session 有两个主题</p>
-<ul>
-<li>响应式：app 如何更快的响应用户操作</li>
-<li>性能优化：让 app 高效的运行</li>
-</ul>
-<h2 id="一、应用启动"><a href="#一、应用启动" class="headerlink" title="一、应用启动"></a>一、应用启动</h2><ul>
-<li>app 启动时间是第一指标</li>
-<li>app 启动时会有一段过渡动画<ul>
-<li>iPhone 上有 400 毫秒</li>
-<li>iPad 上有 500 毫秒</li>
-</ul>
-</li>
-<li>力争更快的启动 app</li>
-</ul>
-<p>iOS 系统会有一个 watchdog 来监测 app 的启动时间是否过长，根据 app 的生命周期，对应的时间阈值如下表所示：</p>
-<table>
-<thead>
-<tr>
-<th>场景</th>
-<th>Watchdog 时间阈值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>启动 Launch</td>
-<td>20 秒</td>
-</tr>
-<tr>
-<td>重载 Resume</td>
-<td>10 秒</td>
-</tr>
-<tr>
-<td>挂起 Suspend</td>
-<td>10 秒</td>
-</tr>
-<tr>
-<td>退出 Quit</td>
-<td>6 秒</td>
-</tr>
-<tr>
-<td>后台任务 Background Task</td>
-<td>10 分钟</td>
-</tr>
-</tbody></table>
-<p>值得注意的是，如果是在 Xcode 中以 Debug 模式运行你的 app，这个 watchdog 机制是默认禁用的。也就是说在 Release 模式下才会激活这个机制。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/12/10/WWDC2012-iOS-App-Performance-Responsiveness/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/10/WWDC2012-iOS-App-Performance-Responsiveness/" rel="next" title="WWDC2012 iOS App Performance:Responsiveness 笔记">
+                <i class="fa fa-chevron-left"></i> WWDC2012 iOS App Performance:Responsiveness 笔记
+              </a>
+            
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
 
-    
+          <span class="post-nav-divider"></span>
 
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2019/08/10/iOS-最佳实践-译/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/08/10/iOS-最佳实践-译/" itemprop="url">iOS 最佳实践[译]（一）起步</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+          <div class="post-nav-prev post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-10T11:07:46+08:00">
-                2019-08-10
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2019-12-10T12:36:23+08:00" content="2019-12-10">
-              2019-12-10
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS最佳实践/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS最佳实践</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2019/08/10/iOS-最佳实践-译/" class="leancloud_visitors" data-flag-title="iOS 最佳实践[译]（一）起步">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="iOS-最佳实践（一）起步"><a href="#iOS-最佳实践（一）起步" class="headerlink" title="iOS 最佳实践（一）起步"></a>iOS 最佳实践（一）起步</h1><h2 id="为什么整理这篇文档"><a href="#为什么整理这篇文档" class="headerlink" title="为什么整理这篇文档?"></a>为什么整理这篇文档?</h2><p>刚开始从事 iOS 开发会有一点让人心生畏惧。<code>Swift</code>和<code>Objective-C</code>并不是被广泛使用的语言，这个平台几乎所有内容都有自己特有的名称，将你所编写的代码运行到一台设备上的过程可能是很坎坷的。这份文档就是来帮助你的，不论你是开始迈出你在<code>Cocoa王国</code>中的第一步还是对于<code>以正确的方式</code>编程。下面所有的内容都仅仅是建议，所以如果你有一个很好地理由用不同的方式来实现，那就去做吧!</p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>如果您正在寻找特定的内容，您可以从这里直接跳到相关部分。</p>
-<ol>
-<li><a href="#1">起步</a></li>
-<li><a href>常用库</a></li>
-<li><a href>架构</a></li>
-<li><a href>存储</a></li>
-<li><a href>资源</a></li>
-<li><a href>编码风格</a></li>
-<li><a href>安全</a></li>
-<li><a href>诊断</a></li>
-<li><a href>分析</a></li>
-<li><a href>编译</a></li>
-<li><a href>分发</a></li>
-<li><a href>内购(IAP)</a></li>
-<li><a href>证书</a></li>
-</ol>
-<h2 id="1">起步</h2>
-
-<h3>人机交互指南</h3>
-
-<p>如果你来自其它平台，请花一些时间来熟悉苹果的<a href="https://developer.apple.com/ios/human-interface-guidelines/" target="_blank" rel="noopener">人机交互指南</a>。iOS 的世界非常强调要有一个良好的设计，你的app也不应例外。该指南还为设计人员提供了一个关于原生UI元素、以及如 3D Touch 或 Wallet 等 app 以及图标大小的实用概述。</p>
-<h3 id="Xcode"><a href="#Xcode" class="headerlink" title="Xcode"></a>Xcode</h3><p><a href="https://developer.apple.com/xcode/" target="_blank" rel="noopener">Xcode</a>是大多数iOS开发者所选择的IDE，同时也是苹果官方指定的唯一平台。除了<code>Xcode</code>外，还有一些替换方案，其中<a href="https://www.jetbrains.com/objc/" target="_blank" rel="noopener">AppCode</a>可以说是最出名的了，但除非你是经验丰富的iOS开发者，否则还是请使用<code>Xcode</code>吧。虽然它有一些缺点，但它现在确实很实用！</p>
-<p>如需安装<code>Xcode</code>，直接在Mac的<a href="https://itunes.apple.com/us/app/xcode/id497799835" target="_blank" rel="noopener">App Store</a>上下载即可。它提供了最新的SDK和模拟器，您可以在首选项&gt;下载中安装更多的东西。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/08/10/iOS-最佳实践-译/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2019/08/05/拥抱变化/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/08/05/拥抱变化/" itemprop="url">拥抱变化</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-05T13:30:33+08:00">
-                2019-08-05
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2019-08-14T21:08:11+08:00" content="2019-08-14">
-              2019-08-14
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/感悟/" itemprop="url" rel="index">
-                    <span itemprop="name">感悟</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2019/08/05/拥抱变化/" class="leancloud_visitors" data-flag-title="拥抱变化">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          
-            <p>今天的厚度决定明天的高度，拥抱当下的变化，做时间的朋友。</p>
-<p>近期书单:</p>
-<ul>
-<li>《态度》</li>
-<li>《见识》</li>
-<li>《浪潮之巅》</li>
-<li>《数学之美》</li>
-</ul>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -1063,10 +554,11 @@
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -1074,6 +566,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -1094,8 +590,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -1162,6 +667,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#OC-底层原理分析对象篇之-alloc-amp-init"><span class="nav-number">1.</span> <span class="nav-text">OC 底层原理分析对象篇之 alloc&amp;init</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#alloc-amp-init-探索"><span class="nav-number">2.</span> <span class="nav-text">alloc &amp; init 探索</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、-如何进行底层探索"><span class="nav-number">2.1.</span> <span class="nav-text">一、 如何进行底层探索</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-直接下代码断点"><span class="nav-number">2.1.1.</span> <span class="nav-text">1.1 直接下代码断点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-打开反汇编显示"><span class="nav-number">2.1.2.</span> <span class="nav-text">1.2 打开反汇编显示</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-下符号断点"><span class="nav-number">2.1.3.</span> <span class="nav-text">1.3 下符号断点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、-探索-libObjc-源码"><span class="nav-number">2.2.</span> <span class="nav-text">二、 探索 libObjc 源码</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-objc-alloc"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.1 objc_alloc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-第一次-callAlloc"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2 第一次 callAlloc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-objc-rootAlloc"><span class="nav-number">2.2.3.</span> <span class="nav-text">2.3 _objc_rootAlloc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-第二次-callAlloc"><span class="nav-number">2.2.4.</span> <span class="nav-text">2.4 第二次 callAlloc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-init-简略分析"><span class="nav-number">2.2.5.</span> <span class="nav-text">2.5 init 简略分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、总结"><span class="nav-number">2.3.</span> <span class="nav-text">三、总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -1309,6 +830,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
