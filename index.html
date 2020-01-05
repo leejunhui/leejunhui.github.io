@@ -251,6 +251,171 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/05/iOS-底层探索-calloc-isa/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="leejunhui">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="leejunhui's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/01/05/iOS-底层探索-calloc-isa/" itemprop="url">iOS 底层探索- calloc&isa</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-05T11:37:49+08:00">
+                2020-01-05
+              </time>
+            
+
+            
+
+            
+          </span>
+          
+          <span class="post-updated">
+            &nbsp; | &nbsp; 更新于
+            <time itemprop="dateUpdated" datetime="2020-01-05T11:40:24+08:00" content="2020-01-05">
+              2020-01-05
+            </time>
+          </span>
+          
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS 底层原理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2020/01/05/iOS-底层探索-calloc-isa/" class="leancloud_visitors" data-flag-title="iOS 底层探索- calloc&isa">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>上一篇文章主要我们探索了 <code>iOS</code>  对象的 <code>alloc</code> 和 <code>init</code> 以及对象是怎么开辟内存以及初始化的，如果在对象身上增加一些属性，是否会影响内存开辟呢？还有一个遗留问题就是通过 <code>calloc</code> ，我们的对象有了内存地址，但是对象结构里面的 <code>isa</code> 是怎么关联到我们的对象的内存地址的呢。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/01/05/iOS-底层探索-calloc-isa/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/05/iOS-底层探索-alloc-init/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -294,7 +459,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-05T11:31:01+08:00" content="2020-01-05">
+            <time itemprop="dateUpdated" datetime="2020-01-05T11:40:43+08:00" content="2020-01-05">
               2020-01-05
             </time>
           </span>
@@ -364,8 +529,6 @@
         
           <p><a name="BrezX"></a></p>
 <p>作为 <code>iOS</code> 开发者，我们每天打交道最多的应该就是对象了，从面向对象设计的角度来说，对象的创建以及初始化是最基础的内容。那么，今天我们就一起来探索一下 <code>iOS</code> 中最常用的 <code>alloc</code> 和 <code>init</code>  的底层是怎么实现的吧。</p>
-<p><a name="LrrLo"></a></p>
-<h1 id="如何进行底层探索"><a href="#如何进行底层探索" class="headerlink" title="如何进行底层探索"></a>如何进行底层探索</h1><p>对于第三方开源框架来说，我们去剖析内部原理和细节是有一定的方法和套路可以掌握的。而对于 <code>iOS</code>  底层，特别是 <code>OC</code> 底层，我们可能就需要用到一些开发中不是很常用的方法。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2020/01/05/iOS-底层探索-alloc-init/#more" rel="contents">
@@ -462,8 +625,8 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2019-12-10T12:42:32+08:00" content="2019-12-10">
-              2019-12-10
+            <time itemprop="dateUpdated" datetime="2020-01-05T11:41:03+08:00" content="2020-01-05">
+              2020-01-05
             </time>
           </span>
           
@@ -534,47 +697,7 @@
 <p>首先，该篇 WWDC Session 有两个主题</p>
 <ul>
 <li>响应式：app 如何更快的响应用户操作</li>
-<li>性能优化：让 app 高效的运行</li>
-</ul>
-<h2 id="一、应用启动"><a href="#一、应用启动" class="headerlink" title="一、应用启动"></a>一、应用启动</h2><ul>
-<li>app 启动时间是第一指标</li>
-<li>app 启动时会有一段过渡动画<ul>
-<li>iPhone 上有 400 毫秒</li>
-<li>iPad 上有 500 毫秒</li>
-</ul>
-</li>
-<li>力争更快的启动 app</li>
-</ul>
-<p>iOS 系统会有一个 watchdog 来监测 app 的启动时间是否过长，根据 app 的生命周期，对应的时间阈值如下表所示：</p>
-<table>
-<thead>
-<tr>
-<th>场景</th>
-<th>Watchdog 时间阈值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>启动 Launch</td>
-<td>20 秒</td>
-</tr>
-<tr>
-<td>重载 Resume</td>
-<td>10 秒</td>
-</tr>
-<tr>
-<td>挂起 Suspend</td>
-<td>10 秒</td>
-</tr>
-<tr>
-<td>退出 Quit</td>
-<td>6 秒</td>
-</tr>
-<tr>
-<td>后台任务 Background Task</td>
-<td>10 分钟</td>
-</tr>
-</tbody></table>
-<p>值得注意的是，如果是在 Xcode 中以 Debug 模式运行你的 app，这个 watchdog 机制是默认禁用的。也就是说在 Release 模式下才会激活这个机制。</p>
+<li>性能优化：让 app 高效的运行
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/12/10/WWDC2012-iOS-App-Performance-Responsiveness/#more" rel="contents">
@@ -584,7 +707,7 @@
           <!--/noindex-->
         
       
-    </div>
+    </li></ul></div>
     
     
     
@@ -671,8 +794,8 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2019-12-10T12:36:23+08:00" content="2019-12-10">
-              2019-12-10
+            <time itemprop="dateUpdated" datetime="2020-01-05T11:41:19+08:00" content="2020-01-05">
+              2020-01-05
             </time>
           </span>
           
@@ -740,29 +863,6 @@
       
         
           <h1 id="iOS-最佳实践（一）起步"><a href="#iOS-最佳实践（一）起步" class="headerlink" title="iOS 最佳实践（一）起步"></a>iOS 最佳实践（一）起步</h1><h2 id="为什么整理这篇文档"><a href="#为什么整理这篇文档" class="headerlink" title="为什么整理这篇文档?"></a>为什么整理这篇文档?</h2><p>刚开始从事 iOS 开发会有一点让人心生畏惧。<code>Swift</code>和<code>Objective-C</code>并不是被广泛使用的语言，这个平台几乎所有内容都有自己特有的名称，将你所编写的代码运行到一台设备上的过程可能是很坎坷的。这份文档就是来帮助你的，不论你是开始迈出你在<code>Cocoa王国</code>中的第一步还是对于<code>以正确的方式</code>编程。下面所有的内容都仅仅是建议，所以如果你有一个很好地理由用不同的方式来实现，那就去做吧!</p>
-<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><p>如果您正在寻找特定的内容，您可以从这里直接跳到相关部分。</p>
-<ol>
-<li><a href="#1">起步</a></li>
-<li><a href>常用库</a></li>
-<li><a href>架构</a></li>
-<li><a href>存储</a></li>
-<li><a href>资源</a></li>
-<li><a href>编码风格</a></li>
-<li><a href>安全</a></li>
-<li><a href>诊断</a></li>
-<li><a href>分析</a></li>
-<li><a href>编译</a></li>
-<li><a href>分发</a></li>
-<li><a href>内购(IAP)</a></li>
-<li><a href>证书</a></li>
-</ol>
-<h2 id="1">起步</h2>
-
-<h3>人机交互指南</h3>
-
-<p>如果你来自其它平台，请花一些时间来熟悉苹果的<a href="https://developer.apple.com/ios/human-interface-guidelines/" target="_blank" rel="noopener">人机交互指南</a>。iOS 的世界非常强调要有一个良好的设计，你的app也不应例外。该指南还为设计人员提供了一个关于原生UI元素、以及如 3D Touch 或 Wallet 等 app 以及图标大小的实用概述。</p>
-<h3 id="Xcode"><a href="#Xcode" class="headerlink" title="Xcode"></a>Xcode</h3><p><a href="https://developer.apple.com/xcode/" target="_blank" rel="noopener">Xcode</a>是大多数iOS开发者所选择的IDE，同时也是苹果官方指定的唯一平台。除了<code>Xcode</code>外，还有一些替换方案，其中<a href="https://www.jetbrains.com/objc/" target="_blank" rel="noopener">AppCode</a>可以说是最出名的了，但除非你是经验丰富的iOS开发者，否则还是请使用<code>Xcode</code>吧。虽然它有一些缺点，但它现在确实很实用！</p>
-<p>如需安装<code>Xcode</code>，直接在Mac的<a href="https://itunes.apple.com/us/app/xcode/id497799835" target="_blank" rel="noopener">App Store</a>上下载即可。它提供了最新的SDK和模拟器，您可以在首选项&gt;下载中安装更多的东西。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/08/10/iOS-最佳实践-译/#more" rel="contents">
@@ -1017,7 +1117,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

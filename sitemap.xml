@@ -2,23 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://leejunhui.com/2020/01/05/iOS-%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2-alloc-init/</loc>
+    <loc>http://leejunhui.com/2019/08/10/iOS-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-%E8%AF%91/</loc>
     
-    <lastmod>2020-01-05T03:31:01.354Z</lastmod>
+    <lastmod>2020-01-05T03:41:19.176Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://leejunhui.com/2019/12/10/WWDC2012-iOS-App-Performance-Responsiveness/</loc>
     
-    <lastmod>2019-12-10T04:42:32.708Z</lastmod>
+    <lastmod>2020-01-05T03:41:03.412Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://leejunhui.com/2019/08/10/iOS-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5-%E8%AF%91/</loc>
+    <loc>http://leejunhui.com/2020/01/05/iOS-%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2-alloc-init/</loc>
     
-    <lastmod>2019-12-10T04:36:23.923Z</lastmod>
+    <lastmod>2020-01-05T03:40:43.539Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://leejunhui.com/2020/01/05/iOS-%E5%BA%95%E5%B1%82%E6%8E%A2%E7%B4%A2-calloc-isa/</loc>
+    
+    <lastmod>2020-01-05T03:40:24.014Z</lastmod>
     
   </url>
   

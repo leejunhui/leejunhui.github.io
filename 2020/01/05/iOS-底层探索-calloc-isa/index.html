@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS,Objective-C,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="leejunhui's blog" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="上一篇文章主要我们探索了 iOS  对象的 alloc 和 init 以及对象是怎么开辟内存以及初始化的，如果在对象身上增加一些属性，是否会影响内存开辟呢？还有一个遗留问题就是通过 calloc ，我们的对象有了内存地址，但是对象结构里面的 isa 是怎么关联到我们的对象的内存地址的呢。">
+<meta name="keywords" content="iOS,Objective-C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 底层探索- calloc&amp;isa">
+<meta property="og:url" content="http://leejunhui.com/2020/01/05/iOS-底层探索-calloc-isa/index.html">
+<meta property="og:site_name" content="leejunhui&#39;s blog">
+<meta property="og:description" content="上一篇文章主要我们探索了 iOS  对象的 alloc 和 init 以及对象是怎么开辟内存以及初始化的，如果在对象身上增加一些属性，是否会影响内存开辟呢？还有一个遗留问题就是通过 calloc ，我们的对象有了内存地址，但是对象结构里面的 isa 是怎么关联到我们的对象的内存地址的呢。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265ae536110?w=680&h=536&f=jpeg&s=80287">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265aea6aeb3?w=680&h=292&f=jpeg&s=34893">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265b04a3886?w=680&h=204&f=jpeg&s=46381">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265b4c07f50?w=680&h=274&f=jpeg&s=60910">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265b5c3cf95?w=680&h=707&f=png&s=189346">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265b865e5f1?w=1212&h=1052&f=png&s=765507">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265eb174e37?w=1692&h=630&f=jpeg&s=266761">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265eb419418?w=470&h=131&f=png&s=4319">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265ee276b43?w=662&h=508&f=jpeg&s=123612">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265f729a19f?w=1144&h=1180&f=png&s=248458">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265f7c6bd44?w=1370&h=1621&f=png&s=177793">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f352661273fee4?w=958&h=528&f=png&s=82472">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f3526624819958?w=612&h=94&f=png&s=9884">
+<meta property="og:updated_time" content="2020-01-05T03:40:24.014Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS 底层探索- calloc&amp;isa">
+<meta name="twitter:description" content="上一篇文章主要我们探索了 iOS  对象的 alloc 和 init 以及对象是怎么开辟内存以及初始化的，如果在对象身上增加一些属性，是否会影响内存开辟呢？还有一个遗留问题就是通过 calloc ，我们的对象有了内存地址，但是对象结构里面的 isa 是怎么关联到我们的对象的内存地址的呢。">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2019/12/24/16f35265ae536110?w=680&h=536&f=jpeg&s=80287">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://leejunhui.com/2020/01/05/iOS-底层探索-calloc-isa/">
+
+
+
+
+
+  <title>iOS 底层探索- calloc&isa | leejunhui's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">leejunhui's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/05/iOS-底层探索-calloc-isa/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="leejunhui">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="leejunhui's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS 底层探索- calloc&isa</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-05T11:37:49+08:00">
+                2020-01-05
+              </time>
+            
+
+            
+
+            
+          </span>
+          
+          <span class="post-updated">
+            &nbsp; | &nbsp; 更新于
+            <time itemprop="dateUpdated" datetime="2020-01-05T11:40:24+08:00" content="2020-01-05">
+              2020-01-05
+            </time>
+          </span>
+          
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS 底层原理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2020/01/05/iOS-底层探索-calloc-isa/" class="leancloud_visitors" data-flag-title="iOS 底层探索- calloc&isa">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上一篇文章主要我们探索了 <code>iOS</code>  对象的 <code>alloc</code> 和 <code>init</code> 以及对象是怎么开辟内存以及初始化的，如果在对象身上增加一些属性，是否会影响内存开辟呢？还有一个遗留问题就是通过 <code>calloc</code> ，我们的对象有了内存地址，但是对象结构里面的 <code>isa</code> 是怎么关联到我们的对象的内存地址的呢。</p>
+<a id="more"></a>
+<p><a name="qYVo0"></a></p>
+<h1 id="calloc-底层探索"><a href="#calloc-底层探索" class="headerlink" title="calloc 底层探索"></a><code>calloc</code> 底层探索</h1><p>在探索 <code>calloc</code> 底层前，我们先补充一下内存对齐相关的知识点。</p>
+<p><a name="ee5b93f3"></a></p>
+<h2 id="内存对齐三原则"><a href="#内存对齐三原则" class="headerlink" title="内存对齐三原则"></a>内存对齐三原则</h2><p>在 <code>iOS</code> 中，对象的属性需要进行内存对齐，而对象本身也需要进行内存对齐。<br>内存对齐有三原则</p>
+<ul>
+<li>数据成员对齐原则: 结构( <code>struct</code> )(或联合( <code>union</code> ))的数据成员，第<br><br>一个数据成员放在 offset 为 0 的地方，以后每个数据成员存储的起始位置要<br><br>从该成员大小或者成员的子成员大小</li>
+<li>结构体作为成员: 如果一个结构里有某些结构体成员,则结构体成员要从<br><br>其内部最大元素大小的整数倍地址开始存储</li>
+<li>收尾工作: 结构体的总大小,也就是 <code>sizeof</code> 的结果,.必须是其内部最大<br><br>成员的整数倍.不足的要补⻬。<br><br>翻译一下就是：</li>
+<li><strong>前面的地址必须是后面的地址正数倍,不是就补齐</strong></li>
+<li>结构体里面的嵌套结构体大小要以该<strong>嵌套结构体最大元素大小的整数倍</strong></li>
+<li><strong>整个 **`</strong>Struct<strong>` **的地址必须是最大字节的整数倍</strong></li>
+</ul>
+<p><a name="b11a31a7"></a></p>
+<h2 id="对象申请内存和系统开辟内存"><a href="#对象申请内存和系统开辟内存" class="headerlink" title="对象申请内存和系统开辟内存"></a>对象申请内存和系统开辟内存</h2><p>我们通过打印下面的代码：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSLog</span>(<span class="string">@"%lu - %lu"</span>,class_getInstanceSize([p <span class="keyword">class</span>]),malloc_size((__bridge <span class="keyword">const</span> <span class="keyword">void</span> *)(p)));</span><br></pre></td></tr></table></figure>
+
+<p>可以发现对象自己申请的内存大小与系统实际给我们开辟的大小时不一样的，这里对象申请的内存大小是 <strong>40</strong> 个字节，而系统开辟的是 <strong>48</strong> 个字节。</p>
+<p>40 个字节不难理解，是因为当前对象有 4 个属性，有三个属性为 8 个字节，有一个属性为 4个字节，再加上 isa 的 8 个字节，就是 32 + 4 = 36 个字节，然后根据内存对齐原则，36 不能被 8 整除，36 往后移动刚好到了 40 就是 8 的倍数，所以内存大小为 40。</p>
+<p>48 个字节的话需要我们探索 <code>calloc</code> 的底层原理。</p>
+<p>这里还有一个注意点，就是 <code>class_getInstanceSize</code> 和 <code>malloc_size</code> 对同一个对象返回的结果不一样的，原因是 <code>malloc_size</code> 是直接返回的 <code>calloc</code> 之后的指针的大小，回忆上一节课，这里有一步在调用 <code>calloc</code> 之前的操作如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">size_t instanceSize(size_t extraBytes) &#123;</span><br><span class="line">    size_t size = alignedInstanceSize() + extraBytes;</span><br><span class="line">    // CF requires all objects be at least 16 bytes.</span><br><span class="line">    if (size &lt; 16) size = 16;</span><br><span class="line">    return size;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而 <code>class_getInstanceSize</code> 内部实现是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">size_t class_getInstanceSize(Class cls)</span><br><span class="line">&#123;</span><br><span class="line">    if (!cls) return 0;</span><br><span class="line">    return cls-&gt;alignedInstanceSize();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说 <code>class_getInstanceSize</code> 会输出 8 个字节，<code>malloc_size</code> 会输出 16 个字节，当然前提是该对象没有任何属性。</p>
+<p><a name="ff23f086"></a></p>
+<h2 id="探索-calloc-底层"><a href="#探索-calloc-底层" class="headerlink" title="探索 calloc 底层"></a>探索 calloc 底层</h2><p>我们从 <code>calloc</code> 函数出发，但是我们直接在 <code>libObjc</code> 的源码中是找不到其对应实现的，通过观察 Xcode 我们知道其实应该找 <code>libMalloc</code> 源码才对:</p>
+<p><a href="https://imgchr.com/i/QTO39A" target="_blank" rel="noopener"><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265ae536110?w=680&h=536&f=jpeg&s=80287" alt></a></p>
+<p>这里有个小技巧，其实我们研究的是 <code>calloc</code> 的底层原理，而 <code>libObjc</code> 和 <code>libMalloc</code> 是相互独立的，所以在 <code>libMalloc</code> 源码里面，我们没必要去走 <code>calloc</code> 前面的流程了。我们通过断点调试 <code>libObjc</code> 源码可以知道第二个参数是 40: (这是因为当前发送 <code>alloc</code> 消息的对象有 4 个属性，每个属性 8 个字节，再加上 isa 的 8 个字节，所以就是 40 个字节)</p>
+<p><a href="https://imgchr.com/i/QTjuJH" target="_blank" rel="noopener"><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265aea6aeb3?w=680&h=292&f=jpeg&s=34893" alt></a></p>
+<p>接下来我们打开 <code>libMalloc</code> 的源码，在新建的 target 中直接手动声明如下的代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">void *p = calloc(1, 40);</span><br><span class="line">NSLog(@&quot;%lu&quot;,malloc_size(p));</span><br></pre></td></tr></table></figure>
+
+<p>但 <code>Command + Run</code> 之后我们会看到报错信息:</p>
+<p><a href="https://imgchr.com/i/QTvVcn" target="_blank" rel="noopener"><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265b04a3886?w=680&h=204&f=jpeg&s=46381" alt></a></p>
+<p>这个时候我们会使用搜索大法，直接 <code>Command + Shift + F</code> 进行全局搜索对应的符号，但是会发现找不到，我们再仔细观察，这些符号都是位于 <code>.o</code> 文件里面的，所以我们可以去掉符号前面的下划线再进行搜索，这个时候就可以把对应的代码注释然后重新运行了。</p>
+<p>运行之后我们一直沿着源码断点下去，会来到这么一段代码</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ptr = zone-&gt;calloc(zone, num_items, size);</span><br></pre></td></tr></table></figure>
+
+<p>我们如果直接去找 <code>calloc</code>，就会递归了，所以我们需要点进去，然后我们会发现一个很复杂的东西出现了:</p>
+<p><a href="https://imgchr.com/i/Q7kfL4" target="_blank" rel="noopener"><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265b4c07f50?w=680&h=274&f=jpeg&s=60910" alt></a></p>
+<p>这里我们可以直接在断点处使用 <code>LLDB</code> 命令打印这行代码来看具体实现是位于哪个文件中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p zone-&gt;calloc</span><br><span class="line">输出: (void *(*)(_malloc_zone_t *, size_t, size_t)) $1 = 0x00000001003839c7 (.dylib`default_zone_calloc at malloc.c:249)</span><br></pre></td></tr></table></figure>
+
+<p>也就是说 <code>zone-&gt;alloc</code> 的真正实现是在 <code>malloc.c</code> 源文件的249行处。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> *</span><br><span class="line">default_zone_calloc(<span class="keyword">malloc_zone_t</span> *zone, <span class="keyword">size_t</span> num_items, <span class="keyword">size_t</span> size)</span><br><span class="line">&#123;</span><br><span class="line">	zone = runtime_default_zone();</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> zone-&gt;<span class="built_in">calloc</span>(zone, num_items, size);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是我们发现这里又是一次 <code>zone-&gt;calloc</code>，我们接着再次使用 <code>LLDB</code> 打印内存地址:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p zone-&gt;calloc</span><br><span class="line">输出: (void *(*)(_malloc_zone_t *, size_t, size_t)) $0 = 0x0000000100384faa (.dylib`nano_calloc at nano_malloc.c:884)</span><br></pre></td></tr></table></figure>
+
+<p>我们再次来到 <code>nano_calloc</code> 方法</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> *</span><br><span class="line">nano_calloc(nanozone_t *nanozone, size_t num_items, size_t size)</span><br><span class="line">&#123;</span><br><span class="line">	size_t total_bytes;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (calloc_get_size(num_items, size, <span class="number">0</span>, &amp;total_bytes)) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (total_bytes &lt;= NANO_MAX_SIZE) &#123;</span><br><span class="line">		<span class="keyword">void</span> *p = _nano_malloc_check_clear(nanozone, total_bytes, <span class="number">1</span>);</span><br><span class="line">		<span class="keyword">if</span> (p) &#123;</span><br><span class="line">			<span class="keyword">return</span> p;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="comment">/* FALLTHROUGH to helper zone */</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	malloc_zone_t *zone = (malloc_zone_t *)(nanozone-&gt;helper_zone);</span><br><span class="line">	<span class="keyword">return</span> zone-&gt;calloc(zone, <span class="number">1</span>, total_bytes);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们简单分析一下，应该往 <code>_nano_malloc_check_clear</code> 里面继续走，然后我们发现 <code>_nano_malloc_check_clear</code> 里面内容非常多，这个时候我们要明确一点，我们的目的是找出 48 是怎么算出来的，经过分析之后，我们来到 <code>segregated_size_to_fit</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> MALLOC_INLINE <span class="keyword">size_t</span></span><br><span class="line">segregated_size_to_fit(<span class="keyword">nanozone_t</span> *nanozone, <span class="keyword">size_t</span> size, <span class="keyword">size_t</span> *pKey)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">// size = 40</span></span><br><span class="line">	<span class="keyword">size_t</span> k, slot_bytes;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (<span class="number">0</span> == size) &#123;</span><br><span class="line">		size = NANO_REGIME_QUANTA_SIZE; <span class="comment">// Historical behavior</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 40 + 16-1 &gt;&gt; 4 &lt;&lt; 4</span></span><br><span class="line">	<span class="comment">// 40 - 16*3 = 48</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//</span></span><br><span class="line">	<span class="comment">// 16</span></span><br><span class="line">	k = (size + NANO_REGIME_QUANTA_SIZE - <span class="number">1</span>) &gt;&gt; SHIFT_NANO_QUANTUM; <span class="comment">// round up and shift for number of quanta</span></span><br><span class="line">	slot_bytes = k &lt;&lt; SHIFT_NANO_QUANTUM;							<span class="comment">// multiply by power of two quanta size</span></span><br><span class="line">	*pKey = k - <span class="number">1</span>;													<span class="comment">// Zero-based!</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> slot_bytes;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里可以看出进行的是 16 字节对齐，那么也就是说我们传入的 <code>size</code> 是 40，在经过 (40 + 16 - 1) &gt;&gt; 4 &lt;&lt; 4 操作后，结果为48，也就是16的整数倍。</p>
+<p>总结:</p>
+<ul>
+<li>对象的属性是进行的 8 字节对齐</li>
+<li>对象自己进行的是 16 字节对齐<ul>
+<li>因为内存是连续的，通过 16 字节对齐规避风险和容错，防止访问溢出</li>
+<li>同时，也提高了寻址访问效率，也就是<strong>空间换时间</strong></li>
+</ul>
+</li>
+</ul>
+<p><a href="https://imgchr.com/i/Q7eJv6" target="_blank" rel="noopener"><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265b5c3cf95?w=680&h=707&f=png&s=189346" alt></a></p>
+<p><a name="GhMIX"></a></p>
+<h1 id="isa-底层探索"><a href="#isa-底层探索" class="headerlink" title="isa 底层探索"></a><code>isa</code> 底层探索</h1><p><a name="c69c2adf"></a></p>
+<h2 id="联合体位域"><a href="#联合体位域" class="headerlink" title="联合体位域"></a>联合体位域</h2><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">union</span> isa_t &#123;</span><br><span class="line">    isa_t() &#123; &#125;</span><br><span class="line">    isa_t(uintptr_t value) : bits(value) &#123; &#125;</span><br><span class="line"></span><br><span class="line">    Class cls;</span><br><span class="line">    uintptr_t bits;</span><br><span class="line"><span class="meta">#if defined(ISA_BITFIELD)</span></span><br><span class="line">    <span class="keyword">struct</span> &#123;</span><br><span class="line">        ISA_BITFIELD;  <span class="comment">// defined in isa.h</span></span><br><span class="line">    &#125;;</span><br><span class="line"><span class="meta">#endif</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>我们探索 <code>isa</code> 的时候，会发现 <code>isa</code> 其实是一个联合体，而这其实是从内存管理层面来设计的，因为联合体是所有成员共享一个内存，联合体内存的大小取决于内部成员内存大小最大的那个元素，对于 <code>isa</code> 指针来说，就不用额外声明很多的属性，直接在内部的 <code>ISA_BITFIELD</code> 保存信息。同时由于联合体属性间是互斥的，所以 <code>cls</code> 和 <code>bits</code> 在 <code>isa</code> 初始化流程时是在两个分支中被赋值的。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265b865e5f1?w=1212&h=1052&f=png&s=765507" alt="image.png"></p>
+<p><a name="b98d0c8d"></a></p>
+<h2 id="isa-结构"><a href="#isa-结构" class="headerlink" title="isa 结构"></a>isa 结构</h2><p><code>isa</code> 作为一个联合体，有一个结构体属性为 <code>ISA_BITFIELD</code>，其大小为 8 个字节，也就是 64 位。<br>下面的代码是基于 <code>arm64</code> 架构的:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#   <span class="meta-keyword">define</span> ISA_BITFIELD                                                      \</span></span><br><span class="line">      <span class="keyword">uintptr_t</span> nonpointer        : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> has_assoc         : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> has_cxx_dtor      : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> shiftcls          : <span class="number">33</span>; <span class="comment">/*MACH_VM_MAX_ADDRESS 0x1000000000*/</span> \</span><br><span class="line">      <span class="keyword">uintptr_t</span> magic             : <span class="number">6</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> weakly_referenced : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> deallocating      : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> has_sidetable_rc  : <span class="number">1</span>;                                       \</span><br><span class="line">      <span class="keyword">uintptr_t</span> extra_rc          : <span class="number">19</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>nonpointer</code>: 表示是否对 <code>isa</code> 指针开启指针优化<ul>
+<li>0: 纯 <code>isa</code> 指针</li>
+<li>1: 不止是类对象地址, <code>isa</code> 中包含了类信息、对象的引用计数等</li>
+</ul>
+</li>
+<li>has_assoc: 关联对象标志位，0 没有，1 存在</li>
+<li>has_cxx_dtor: 该对象是否有 C++ 或者 Objc 的析构器,如果有析构函数,则需要做析构逻辑, 如果没有,则可以更快的释放对象</li>
+<li>shiftcls: 存储类指针的值。开启指针优化的情况下，在 arm64 架构中有 33 位用来存储类指针。</li>
+<li>magic: 用于调试器判断当前对象是真的对象还是没有初始化的空间</li>
+<li>weakly_referenced: 标志对象是否被指向或者曾经指向一个 ARC 的弱变量，<br><br>没有弱引用的对象可以更快释放。</li>
+<li>deallocating: 标志对象是否正在释放内存</li>
+<li>has_sidetable_rc: 当对象引用技术大于 10 时，则需要借用该变量存储进位</li>
+<li>extra_rc: 当表示该对象的引用计数值，实际上是引用计数值减 1， 例如，如果对象的引用计数为 10，那么 extra_rc 为 9。如果引用计数大于 10， 则需要使用到下面的 has_sidetable_rc。</li>
+</ul>
+<p><a name="H7vwo"></a></p>
+<h2 id="isa-关联对象和类"><a href="#isa-关联对象和类" class="headerlink" title="isa 关联对象和类"></a>isa 关联对象和类</h2><p><code>isa</code> 是对象中的第一个属性，因为这一步是在继承的时候发生的，要早于对象的成员变量，属性列表，方法列表以及所遵循的协议列表。</p>
+<p>我们在探索 <code>alloc</code> 底层原理的时候，有一个方法叫做 <code>initIsa</code>。</p>
+<p>这个方法的作用就是初始化 <code>isa</code> 联合体位域。其中有这么一行代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">newisa.shiftcls = (<span class="keyword">uintptr_t</span>)cls &gt;&gt; <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<p>通过这行代码，我们知道 <code>shiftcls</code> 这个位域其实存储的是类的信息。这个类就是实例化对象所指向的那个类。</p>
+<p>通过 <code>LLDB</code> 进行调试打印，我们可以知道一个对象的 <code>isa</code> 会关联到这个对象所属的类。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265eb174e37?w=1692&h=630&f=jpeg&s=266761" alt></p>
+<p>这里的左移右移操作其实很好理解，首先我们先观察 <code>isa</code> 的 <code>ISA_BITFIELD</code> 位域的结构:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注：这里是x64架构</span></span><br><span class="line"><span class="meta"># <span class="meta-keyword">elif</span> __x86_64__</span></span><br><span class="line"><span class="meta">#   <span class="meta-keyword">define</span> ISA_MASK        0x00007ffffffffff8ULL</span></span><br><span class="line"><span class="meta">#   <span class="meta-keyword">define</span> ISA_MAGIC_MASK  0x001f800000000001ULL</span></span><br><span class="line"><span class="meta">#   <span class="meta-keyword">define</span> ISA_MAGIC_VALUE 0x001d800000000001ULL</span></span><br><span class="line"><span class="meta">#   <span class="meta-keyword">define</span> ISA_BITFIELD                                                        \</span></span><br><span class="line">      <span class="keyword">uintptr_t</span> nonpointer        : <span class="number">1</span>;                                         \</span><br><span class="line">      <span class="keyword">uintptr_t</span> has_assoc         : <span class="number">1</span>;                                         \</span><br><span class="line">      <span class="keyword">uintptr_t</span> has_cxx_dtor      : <span class="number">1</span>;                                         \</span><br><span class="line">      <span class="keyword">uintptr_t</span> shiftcls          : <span class="number">44</span>; <span class="comment">/*MACH_VM_MAX_ADDRESS 0x7fffffe00000*/</span> \</span><br><span class="line">      <span class="keyword">uintptr_t</span> magic             : <span class="number">6</span>;                                         \</span><br><span class="line">      <span class="keyword">uintptr_t</span> weakly_referenced : <span class="number">1</span>;                                         \</span><br><span class="line">      <span class="keyword">uintptr_t</span> deallocating      : <span class="number">1</span>;                                         \</span><br><span class="line">      <span class="keyword">uintptr_t</span> has_sidetable_rc  : <span class="number">1</span>;                                         \</span><br><span class="line">      <span class="keyword">uintptr_t</span> extra_rc          : <span class="number">8</span></span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到，<code>ISA_BITFIELD</code> 的前 3 位是 <code>nonpointer</code>，<code>has_assoc</code>，<code>has_cxx_dtor</code>，中间 44 位是 <code>shiftcls</code> ，后面 17 位是剩余的内容，同时因为 iOS 是小端模式，那么我们就需要去掉右边的 3 位和左边的 17位，所以就会采用 &gt;&gt;3&lt;&lt;3 然后 &lt;&lt;17&gt;&gt;17 的操作了。</p>
+<p>通过这个测试，我们就知道了 <code>isa</code> 实现了对象与类之间的关联。</p>
+<p>我们还可以探索 <code>object_getClass</code> 底层，可以发现有这样一行代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">return (Class)(isa.bits &amp; ISA_MASK);</span><br></pre></td></tr></table></figure>
+
+<p>这行代码就是将 <code>isa</code> 中的联合体位域与上一个蒙版，这个蒙版定义是怎么样的呢?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#   <span class="meta-keyword">define</span> ISA_MASK        0x00007ffffffffff8ULL</span></span><br></pre></td></tr></table></figure>
+
+<p><code>0x00007ffffffffff8ULL</code> 这个值我们转成二进制表示:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0000</span> <span class="number">0000</span> <span class="number">0000</span> <span class="number">0000</span> <span class="number">0111</span> <span class="number">1111</span> <span class="number">1111</span> <span class="number">1111</span> </span><br><span class="line"><span class="number">1111</span> <span class="number">1111</span> <span class="number">1111</span> <span class="number">1111</span> <span class="number">1111</span> <span class="number">1111</span> <span class="number">1111</span> <span class="number">1000</span></span><br></pre></td></tr></table></figure>
+
+<p>结果一目了然，这个蒙版就是帮我们去过滤掉除 <code>shiftcls</code> 之外的内容。</p>
+<p>我们直接将对象的 <code>isa</code> 地址与上这个mask之后，就会得到 <code>object.class</code> 一样的内存地址。</p>
+<p><a name="12e70060"></a></p>
+<h2 id="isa-走位分析"><a href="#isa-走位分析" class="headerlink" title="isa 走位分析"></a>isa 走位分析</h2><p><a name="869985ca"></a></p>
+<h3 id="类与元类"><a href="#类与元类" class="headerlink" title="类与元类"></a>类与元类</h3><p>我们都知道对象可以创建多个，但是类是否可以创建多个呢?<br>答案很简单，一个。那么如果来验证呢?</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">//MARK: - 分析类对象内存存在个数</span><br><span class="line">void lgTestClassNum()&#123;</span><br><span class="line">    Class class1 = [LGPerson class];</span><br><span class="line">    Class class2 = [LGPerson alloc].class;</span><br><span class="line">    Class class3 = object_getClass([LGPerson alloc]);</span><br><span class="line">    Class class4 = [LGPerson alloc].class;</span><br><span class="line">    NSLog(@&quot;\n%p-\n%p-\n%p-\n%p&quot;,class1,class2,class3,class4);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 打印输出如下:</span><br><span class="line"></span><br><span class="line">0x100002108-</span><br><span class="line">0x100002108-</span><br><span class="line">0x100002108-</span><br><span class="line">0x100002108</span><br></pre></td></tr></table></figure>
+
+<p>所以我们就知道了类在内存中只会存在一份。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(lldb) x/4gx LGTeacher.class</span><br><span class="line">0x100001420: 0x001d8001000013f9 0x0000000100b38140</span><br><span class="line">0x100001430: 0x00000001003db270 0x0000000000000000</span><br><span class="line">(lldb) po 0x001d8001000013f9</span><br><span class="line">17082823967917874</span><br><span class="line"></span><br><span class="line">(lldb) p 0x001d8001000013f9</span><br><span class="line">(long) $2 = 8303516107936761</span><br><span class="line">(lldb) po 0x100001420</span><br><span class="line">LGTeacher</span><br></pre></td></tr></table></figure>
+
+<p>我们通过上面的打印，就发现 类的内存结构里面的第一个结构打印出来还是 <code>LGTeacher</code>，那么是不是就意味着 对象-&gt;类-&gt;类 这样的死循环呢？这里的第二个类其实是 <code>元类</code>。是由系统帮我们创建的。这个元类也无法被我们实例化。</p>
+<p>也就是下面的这种关系:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265eb419418?w=470&h=131&f=png&s=4319" alt></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">(lldb) p/x 0x001d8001000013f9 &amp; 0x00007ffffffffff8</span><br><span class="line">(long) $4 = 0x00000001000013f8</span><br><span class="line">(lldb) po 0x00000001000013f8</span><br><span class="line">LGTeacher</span><br><span class="line"></span><br><span class="line">(lldb) x/4gx 0x00000001000013f8</span><br><span class="line">0x1000013f8: 0x001d800100b380f1 0x0000000100b380f0</span><br><span class="line">0x100001408: 0x0000000101c30230 0x0000000100000007</span><br><span class="line">(lldb) p/x 0x001d800100b380f1 &amp; 0x00007ffffffffff8</span><br><span class="line">(long) $6 = 0x0000000100b380f0</span><br><span class="line">(lldb) po 0x0000000100b380f0</span><br><span class="line">NSObject</span><br></pre></td></tr></table></figure>
+
+<p><a name="75d38a5f"></a></p>
+<h3 id="isa-走位"><a href="#isa-走位" class="headerlink" title="isa 走位"></a>isa 走位</h3><p>我们在 Xcode 中测试有以下结果：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265ee276b43?w=662&h=508&f=jpeg&s=123612" alt></p>
+<p>由此可以给出官方的经典 <code>isa</code> 走位图</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265f729a19f?w=1144&h=1180&f=png&s=248458" alt></p>
+<p><a name="6e99482c"></a></p>
+<h2 id="isa-初始化流程图"><a href="#isa-初始化流程图" class="headerlink" title="isa 初始化流程图"></a>isa 初始化流程图</h2><p><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f35265f7c6bd44?w=1370&h=1621&f=png&s=177793" alt="image.png"><br><a name="wuBQx"></a></p>
+<h1 id="对象的本质"><a href="#对象的本质" class="headerlink" title="对象的本质"></a>对象的本质</h1><p>在我们认知里面，<code>OC</code> 对象的本质就是一个结构体，这个结论在 <code>libObjc</code> 源码的 <code>objc-private.h</code> 源文件中可以得到证实。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">objc_object</span> &#123;</span></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="keyword">isa_t</span> isa;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ISA() assumes this is NOT a tagged pointer object</span></span><br><span class="line">    <span class="function">Class <span class="title">ISA</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// getIsa() allows this to be a tagged pointer object</span></span><br><span class="line">    <span class="function">Class <span class="title">getIsa</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    ...省略其他的内容...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而对于对象所属的类来说，我们也可以在 <code>objc-runtime-new.h</code> 源文件中找到</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">objc_class</span> :</span> objc_object &#123;</span><br><span class="line">    <span class="comment">// Class ISA;</span></span><br><span class="line">    Class superclass;</span><br><span class="line">    <span class="keyword">cache_t</span> cache;             <span class="comment">// formerly cache pointer and vtable</span></span><br><span class="line">    <span class="keyword">class_data_bits_t</span> bits;    <span class="comment">// class_rw_t * plus custom rr/alloc flags</span></span><br><span class="line">    </span><br><span class="line">    ...省略其他的内容...</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>也就是说 <code>objc_class</code> 内存中第一个位置是 <code>isa</code>，第二个位置是 <code>superclass</code>。</p>
+<p>不过我们本着求真的态度可以用 <code>clang</code> 来重写我们的 <code>OC</code> 源文件来查看是不是这么回事。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -rewrite-objc main.m -o main.cpp</span><br></pre></td></tr></table></figure>
+
+<p>这行命令会把我们的 <code>main.m</code> 文件编译成 <code>C++</code> 格式，输出为 <code>main.cpp</code>。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f352661273fee4?w=958&h=528&f=png&s=82472" alt="image.png"></p>
+<p>我们可以看到 <code>LGPerson</code> 对象在底层其实是一个结构体 <code>objc_object</code> 。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2019/12/24/16f3526624819958?w=612&h=94&f=png&s=9884" alt="image.png"></p>
+<p>而我们的 <code>Class</code> 在底层也是一个结构体 <code>objc_class</code> 。</p>
+<p><a name="G7JLN"></a></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>至此， <code>iOS</code> 底层探索之对象篇更新完毕，现在来回顾一下我们所探索的内容。</p>
+<ul>
+<li>alloc &amp; init 流程剖析</li>
+<li>内存开辟</li>
+<li>字节对齐算法</li>
+<li>isa 初始化和走位</li>
+<li>对象的本质</li>
+</ul>
+<p>下一篇章我们要探索篇章的是类，敬请期待~</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    leejunhui
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://leejunhui.com/2020/01/05/iOS-底层探索-calloc-isa/" title="iOS 底层探索- calloc&isa">http://leejunhui.com/2020/01/05/iOS-底层探索-calloc-isa/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS/" rel="tag"># iOS</a>
+          
+            <a href="/tags/Objective-C/" rel="tag"># Objective-C</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/05/iOS-底层探索-alloc-init/" rel="next" title="iOS 底层探索 - alloc&init">
+                <i class="fa fa-chevron-left"></i> iOS 底层探索 - alloc&init
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">leejunhui</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#calloc-底层探索"><span class="nav-number">1.</span> <span class="nav-text">calloc 底层探索</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存对齐三原则"><span class="nav-number">1.1.</span> <span class="nav-text">内存对齐三原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对象申请内存和系统开辟内存"><span class="nav-number">1.2.</span> <span class="nav-text">对象申请内存和系统开辟内存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#探索-calloc-底层"><span class="nav-number">1.3.</span> <span class="nav-text">探索 calloc 底层</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#isa-底层探索"><span class="nav-number">2.</span> <span class="nav-text">isa 底层探索</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#联合体位域"><span class="nav-number">2.1.</span> <span class="nav-text">联合体位域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#isa-结构"><span class="nav-number">2.2.</span> <span class="nav-text">isa 结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#isa-关联对象和类"><span class="nav-number">2.3.</span> <span class="nav-text">isa 关联对象和类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#isa-走位分析"><span class="nav-number">2.4.</span> <span class="nav-text">isa 走位分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#类与元类"><span class="nav-number">2.4.1.</span> <span class="nav-text">类与元类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#isa-走位"><span class="nav-number">2.4.2.</span> <span class="nav-text">isa 走位</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#isa-初始化流程图"><span class="nav-number">2.5.</span> <span class="nav-text">isa 初始化流程图</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#对象的本质"><span class="nav-number">3.</span> <span class="nav-text">对象的本质</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2019 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">leejunhui</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("UhX6524i2gyc2qu9aQpXbGYq-gzGzoHsz", "0pdkctYWlGFr7bGNsJnPMfS8");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
