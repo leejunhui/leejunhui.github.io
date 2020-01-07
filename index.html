@@ -251,6 +251,316 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/07/iOS-底层探索-消息查找/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="leejunhui">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="leejunhui's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/01/07/iOS-底层探索-消息查找/" itemprop="url">iOS 底层探索 - 消息查找</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-07T11:06:03+08:00">
+                2020-01-07
+              </time>
+            
+
+            
+
+            
+          </span>
+          
+          <span class="post-updated">
+            &nbsp; | &nbsp; 更新于
+            <time itemprop="dateUpdated" datetime="2020-01-07T11:06:51+08:00" content="2020-01-07">
+              2020-01-07
+            </time>
+          </span>
+          
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS 底层原理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="一、objc-msgSend-汇编补充"><a href="#一、objc-msgSend-汇编补充" class="headerlink" title="一、objc_msgSend 汇编补充"></a>一、<code>objc_msgSend</code> 汇编补充</h1><p>我们知道，之所以使用汇编来实现 <code>objc_msgSend</code> 有两个原因:</p>
+<ul>
+<li>因为 C 无法通过写一个函数来保留未知的参数并且跳转到一个任意的函数指针。</li>
+<li><code>objc_msgSend</code> 必须足够快。</li>
+</ul>
+<p><a name="baea769d"></a></p>
+<h2 id="1-1-objc-msgSend-流程"><a href="#1-1-objc-msgSend-流程" class="headerlink" title="1.1 objc_msgSend 流程"></a>1.1 <code>objc_msgSend</code> 流程</h2><ul>
+<li>ENTRY _objc_msgSend</li>
+<li>对消息接收者进行判断、处理 (id self, sel _cmd)</li>
+<li>taggedPointer 判断处理</li>
+<li><code>GetClassFromIsa_p16</code> isa 指针处理拿到 class</li>
+<li>CacheLookup 查找缓存</li>
+<li><code>cache_t</code> 处理 <code>bucket</code> 以及内存哈希处理<ul>
+<li>找不到递归下一个 <code>bucket</code></li>
+<li>找到了就返回 <code>{imp, sel} = *bucket-&gt;imp</code>\</li>
+<li>遇到意外就重试</li>
+<li>找不到就跳到 <code>junpMiss</code></li>
+</ul>
+</li>
+<li><code>__objc_msgSend_uncached</code> 找不到缓存 <code>imp</code></li>
+<li><code>STATIC ENTRY __objc_msgSend_uncached</code></li>
+<li><code>MethodTableLookup</code> 方法表查找<ul>
+<li><code>save parameters registers</code></li>
+<li><code>self</code> 以及 <code>_cmd</code> 准备</li>
+<li><code>_class_lookupMethodAndLoadCache3</code> 调用</li>
+</ul>
+</li>
+</ul>
+<p><a name="e904a2a8"></a></p>
+<h1 id="二、通过汇编找到下一流程"><a href="#二、通过汇编找到下一流程" class="headerlink" title="二、通过汇编找到下一流程"></a>二、通过汇编找到下一流程</h1><p>我们在探索 <code>objc_msgSend</code> 的时候，当找不到缓存的时候，会来到一个地方叫做 <code>objc_msgSend_uncached</code>，然后会来到 <code>MethodTableLookup</code>，然后会有一个核心的查找方法 <code>__class_lookupMethodAndLoadCache3</code>。但是我们知道其实已经要进入 C/C++ 的流程了，所以我们还可以汇编来定位。<br>我们打开 <code>Always Show Disassembly</code>选项</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a5316492635?w=1896&h=276&f=png&s=396502" alt="image.png"></p>
+<p>然后我们进入 <code>objc_msgSend</code> 内部</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a531737e74b?w=1942&h=342&f=png&s=386373" alt="image.png"></p>
+<p>然后我们进入 <code>_objc_msgSend_uncached</code> 的内部</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a5317c96d72?w=2552&h=240&f=png&s=337640" alt="image.png"></p>
+<p>我们会来到 <code>_class_lookupMethodAndLoadCache3</code>，这就是真正的方法查找实现。</p>
+<p><a name="39ae3fe5"></a></p>
+<h1 id="三、代码分析方法查找流程"><a href="#三、代码分析方法查找流程" class="headerlink" title="三、代码分析方法查找流程"></a>三、代码分析方法查找流程</h1><p><a name="f035ba2c"></a></p>
+<h2 id="3-1-对象方法测试"><a href="#3-1-对象方法测试" class="headerlink" title="3.1 对象方法测试"></a>3.1 对象方法测试</h2><ul>
+<li>对象的实例方法 - 自己有</li>
+<li>对象的实例方法 - 自己没有 - 找父类的</li>
+<li>对象的实例方法 - 自己没有 - 父类也没有 - 找父类的父类 - NSObject</li>
+<li>对象的实例方法 - 自己没有 - 父类也没有 - 找父类的父类 - NSObject也没有 - 崩溃</li>
+</ul>
+<p><a name="894b94de"></a></p>
+<h2 id="3-2-类方法测试"><a href="#3-2-类方法测试" class="headerlink" title="3.2 类方法测试"></a>3.2 类方法测试</h2><ul>
+<li>类方法 - 自己有</li>
+<li>类方法 - 自己没有 - 找父类的</li>
+<li>类方法 - 自己没有 - 父类也没有 - 找父类的父类 - NSObject</li>
+<li>类方法 - 自己没有 - 父类也没有 - 找父类的父类 - NSObject也没有 - 崩溃</li>
+<li>类方法 - 自己没有 - 父类也没有 - 找父类的父类 - NSObject也没有 - 但是有对象方法</li>
+</ul>
+<p><a name="070f05ac"></a></p>
+<h1 id="四、源码分析方法查找流程"><a href="#四、源码分析方法查找流程" class="headerlink" title="四、源码分析方法查找流程"></a>四、源码分析方法查找流程</h1><p>我们直接定位到 <code>_class_lookupMethodAndLoadCache3</code> 源码处:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">IMP _class_lookupMethodAndLoadCache3(id obj, SEL sel, Class cls)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> lookUpImpOrForward(cls, sel, obj, </span><br><span class="line">                              YES<span class="comment">/*initialize*/</span>, NO<span class="comment">/*cache*/</span>, YES<span class="comment">/*resolver*/</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着我们进入 <code>lookUpImpOrForward</code>，这里注意一下， <code>cache</code> 是传的 <code>NO</code>，因为来到这里已经说明缓存不存在，所以需要进行方法查找。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a531bccbc53?w=1514&h=248&f=png&s=282937" alt="image.png"></p>
+<p><a name="3800a5e0"></a></p>
+<h2 id="4-1-lookUpImpOrForward"><a href="#4-1-lookUpImpOrForward" class="headerlink" title="4.1 lookUpImpOrForward"></a>4.1 lookUpImpOrForward</h2><p>我们接着定位到 <code>lookUpImpOrForward</code> 的源码处：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">IMP <span class="title">lookUpImpOrForward</span><span class="params">(Class cls, SEL sel, id inst, </span></span></span><br><span class="line"><span class="function"><span class="params">                       <span class="keyword">bool</span> initialize, <span class="keyword">bool</span> cache, <span class="keyword">bool</span> resolver)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>由该方法的参数我们可以知道，<code>lookUpImpOrForward</code> 应该是个公共方法，<code>initialize</code> 和 <code>cache</code> 分别代表是否避免 <code>+initialize</code> 和是否从缓存中查找。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Optimistic cache lookup</span></span><br><span class="line">    <span class="keyword">if</span> (cache) &#123;</span><br><span class="line">        imp = cache_getImp(cls, sel);</span><br><span class="line">        <span class="keyword">if</span> (imp) <span class="keyword">return</span> imp;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果 <code>cache</code> 为 <code>YES</code>，那么就直接调用 <code>cache_getImp</code> 来从 <code>cls</code> 的缓存中获取 <code>sel</code> 对应的 <code>IMP</code>，如果找到了就返回。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!cls-&gt;isRealized()) &#123;</span><br><span class="line">        realizeClass(cls);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>判断当前要查找的 <code>cls</code> 是否已经完成了准备工作，如果没有，则需要进行一下类的 <code>realize</code>。</li>
+</ul>
+<p><a name="cfa0a85c"></a></p>
+<h2 id="4-2-从当前类上查找"><a href="#4-2-从当前类上查找" class="headerlink" title="4.2 从当前类上查找"></a>4.2 从当前类上查找</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Try this class's method lists.</span></span><br><span class="line">    &#123;</span><br><span class="line">        Method meth = getMethodNoSuper_nolock(cls, sel);</span><br><span class="line">        <span class="keyword">if</span> (meth) &#123;</span><br><span class="line">            log_and_fill_cache(cls, meth-&gt;imp, sel, inst, cls);</span><br><span class="line">            imp = meth-&gt;imp;</span><br><span class="line">            <span class="keyword">goto</span> done;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>上面的方法很显然，是从类的方法列表中查找 <code>IMP</code>。这里加两个大括号的目的是形成<strong>局部作用域</strong>，让命名不会不想冲突。通过 <code>getMethodNoSuper_nolock</code> 查找 <code>Method</code>，找到了之后就调用 <code>log_and_fill_cache</code> 进行缓存的填充，然后返回 <code>imp</code>。</li>
+</ul>
+<p><a name="fd3c1098"></a></p>
+<h2 id="4-2-1-getMethodNoSuper-nolock"><a href="#4-2-1-getMethodNoSuper-nolock" class="headerlink" title="4.2.1 getMethodNoSuper_nolock"></a>4.2.1 getMethodNoSuper_nolock</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">method_t</span> *</span><br><span class="line">getMethodNoSuper_nolock(Class cls, SEL sel)</span><br><span class="line">&#123;</span><br><span class="line">    runtimeLock.assertLocked();</span><br><span class="line"></span><br><span class="line">    assert(cls-&gt;isRealized());</span><br><span class="line">    <span class="comment">// fixme nil cls? </span></span><br><span class="line">    <span class="comment">// fixme nil sel?</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> mlists = cls-&gt;data()-&gt;methods.beginLists(), </span><br><span class="line">              end = cls-&gt;data()-&gt;methods.endLists(); </span><br><span class="line">         mlists != end;</span><br><span class="line">         ++mlists)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">method_t</span> *m = search_method_list(*mlists, sel);</span><br><span class="line">        <span class="keyword">if</span> (m) <span class="keyword">return</span> m;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> nil;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> method_t *<span class="title">search_method_list</span><span class="params">(<span class="keyword">const</span> <span class="keyword">method_list_t</span> *mlist, SEL sel)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> methodListIsFixedUp = mlist-&gt;isFixedUp();</span><br><span class="line">    <span class="keyword">int</span> methodListHasExpectedSize = mlist-&gt;entsize() == <span class="keyword">sizeof</span>(<span class="keyword">method_t</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (__builtin_expect(methodListIsFixedUp &amp;&amp; methodListHasExpectedSize, <span class="number">1</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> findMethodInSortedMethodList(sel, mlist);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Linear search of unsorted method list</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; meth : *mlist) &#123;</span><br><span class="line">            <span class="keyword">if</span> (meth.name == sel) <span class="keyword">return</span> &amp;meth;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> DEBUG</span></span><br><span class="line">    <span class="comment">// sanity-check negative results</span></span><br><span class="line">    <span class="keyword">if</span> (mlist-&gt;isFixedUp()) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span>&amp; meth : *mlist) &#123;</span><br><span class="line">            <span class="keyword">if</span> (meth.name == sel) &#123;</span><br><span class="line">                _objc_fatal(<span class="string">"linear search worked when binary search did not"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> nil;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>getMethodNoSuper_nolock</code> 实现很简单，就是从 <code>cls</code> 的 <code>data()</code> 中进行遍历，然后对遍历到的 <code>method_list_t</code> 结构体指针再次调用 <code>search_method_list</code> 与 <code>sel</code> 进行匹配。这里的 <code>findMethodInSortedMethodList</code> 我们再接着往下探索。</p>
+<p><a name="93e192f2"></a></p>
+<h2 id="4-2-2-findMethodInSortedMethodList"><a href="#4-2-2-findMethodInSortedMethodList" class="headerlink" title="4.2.2 findMethodInSortedMethodList"></a>4.2.2 findMethodInSortedMethodList</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> method_t *<span class="title">findMethodInSortedMethodList</span><span class="params">(SEL key, <span class="keyword">const</span> <span class="keyword">method_list_t</span> *<span class="built_in">list</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    assert(<span class="built_in">list</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">method_t</span> * <span class="keyword">const</span> first = &amp;<span class="built_in">list</span>-&gt;first;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">method_t</span> *base = first;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">method_t</span> *probe;</span><br><span class="line">    <span class="keyword">uintptr_t</span> keyValue = (<span class="keyword">uintptr_t</span>)key;</span><br><span class="line">    <span class="keyword">uint32_t</span> count;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (count = <span class="built_in">list</span>-&gt;count; count != <span class="number">0</span>; count &gt;&gt;= <span class="number">1</span>) &#123;</span><br><span class="line">        probe = base + (count &gt;&gt; <span class="number">1</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">uintptr_t</span> probeValue = (<span class="keyword">uintptr_t</span>)probe-&gt;name;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (keyValue == probeValue) &#123;</span><br><span class="line">            <span class="comment">// `probe` is a match.</span></span><br><span class="line">            <span class="comment">// Rewind looking for the *first* occurrence of this value.</span></span><br><span class="line">            <span class="comment">// This is required for correct category overrides.</span></span><br><span class="line">            <span class="keyword">while</span> (probe &gt; first &amp;&amp; keyValue == (<span class="keyword">uintptr_t</span>)probe[<span class="number">-1</span>].name) &#123;</span><br><span class="line">                probe--;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> (<span class="keyword">method_t</span> *)probe;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (keyValue &gt; probeValue) &#123;</span><br><span class="line">            base = probe + <span class="number">1</span>;</span><br><span class="line">            count--;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> nil;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>findMethodInSortedMethodList</code> 的核心逻辑是<strong>二分查找</strong>，这种算法的前提是<strong>有序</strong>的集合。</p>
+<p><a name="03b1d17d"></a></p>
+<h2 id="4-3-从父类中查找"><a href="#4-3-从父类中查找" class="headerlink" title="4.3 从父类中查找"></a>4.3 从父类中查找</h2><p>源码如下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Try superclass caches and method lists.</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">unsigned</span> attempts = unreasonableClassCount();</span><br><span class="line">        <span class="keyword">for</span> (Class curClass = cls-&gt;superclass;</span><br><span class="line">             curClass != nil;</span><br><span class="line">             curClass = curClass-&gt;superclass)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// Halt if there is a cycle in the superclass chain.</span></span><br><span class="line">            <span class="keyword">if</span> (--attempts == <span class="number">0</span>) &#123;</span><br><span class="line">                _objc_fatal(<span class="string">"Memory corruption in class list."</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// Superclass cache.</span></span><br><span class="line">            imp = cache_getImp(curClass, sel);</span><br><span class="line">            <span class="keyword">if</span> (imp) &#123;</span><br><span class="line">                <span class="keyword">if</span> (imp != (IMP)_objc_msgForward_impcache) &#123;</span><br><span class="line">                    <span class="comment">// Found the method in a superclass. Cache it in this class.</span></span><br><span class="line">                    log_and_fill_cache(cls, imp, sel, inst, curClass);</span><br><span class="line">                    <span class="keyword">goto</span> done;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// Found a forward:: entry in a superclass.</span></span><br><span class="line">                    <span class="comment">// Stop searching, but don't cache yet; call method </span></span><br><span class="line">                    <span class="comment">// resolver for this class first.</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// Superclass method list.</span></span><br><span class="line">            Method meth = getMethodNoSuper_nolock(curClass, sel);</span><br><span class="line">            <span class="keyword">if</span> (meth) &#123;</span><br><span class="line">                log_and_fill_cache(cls, meth-&gt;imp, sel, inst, curClass);</span><br><span class="line">                imp = meth-&gt;imp;</span><br><span class="line">                <span class="keyword">goto</span> done;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Superclass cache.</span></span><br><span class="line">            imp = cache_getImp(curClass, sel);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在父类中查找的时候，和在当前类查找有一点不同的是需要检查缓存。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (imp != (IMP)_objc_msgForward_impcache) &#123;</span><br><span class="line">                    <span class="comment">// Found the method in a superclass. Cache it in this class.</span></span><br><span class="line">                    log_and_fill_cache(cls, imp, sel, inst, curClass);</span><br><span class="line">                    <span class="keyword">goto</span> done;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// Found a forward:: entry in a superclass.</span></span><br><span class="line">                    <span class="comment">// Stop searching, but don't cache yet; call method </span></span><br><span class="line">                    <span class="comment">// resolver for this class first.</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果在父类中找到了 <code>IMP</code>，同时判断是否是消息转发的入口，如果不是消息转发，那么就把找到的 <code>IMP</code> 通过 <code>log_and_fill_cache</code> 缓存到当前类的缓存中；如果是消息转发，就退出循环。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Superclass method list.</span></span><br><span class="line">            Method meth = getMethodNoSuper_nolock(curClass, sel);</span><br><span class="line">            <span class="keyword">if</span> (meth) &#123;</span><br><span class="line">                log_and_fill_cache(cls, meth-&gt;imp, sel, inst, curClass);</span><br><span class="line">                imp = meth-&gt;imp;</span><br><span class="line">                <span class="keyword">goto</span> done;</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果父类缓存中没有找到，那么就查找父类的方法列表，这里和上面在当前类中的方法列表中查找是异曲同工之妙，就不再赘述了。</li>
+</ul>
+<p><a name="b77328c0"></a></p>
+<h2 id="4-4-方法解析"><a href="#4-4-方法解析" class="headerlink" title="4.4 方法解析"></a>4.4 方法解析</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// No implementation found. Try method resolver once.</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (resolver  &amp;&amp;  !triedResolver) &#123;</span><br><span class="line">        runtimeLock.unlock();</span><br><span class="line">        _class_resolveMethod(cls, sel, inst);</span><br><span class="line">        runtimeLock.lock();</span><br><span class="line">        <span class="comment">// Don't cache the result; we don't hold the lock so it may have </span></span><br><span class="line">        <span class="comment">// changed already. Re-do the search from scratch instead.</span></span><br><span class="line">        triedResolver = YES;</span><br><span class="line">        <span class="keyword">goto</span> retry;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果在类和父类中都没有找到，<code>Runtime</code> 给了我们一个机会来进行<strong>动态方法解析</strong>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***********************************************************************</span></span><br><span class="line"><span class="comment">* _class_resolveMethod</span></span><br><span class="line"><span class="comment">* Call +resolveClassMethod or +resolveInstanceMethod.</span></span><br><span class="line"><span class="comment">* Returns nothing; any result would be potentially out-of-date already.</span></span><br><span class="line"><span class="comment">* Does not check if the method already exists.</span></span><br><span class="line"><span class="comment">**********************************************************************/</span></span><br><span class="line"><span class="keyword">void</span> _class_resolveMethod(Class cls, SEL sel, id inst)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (! cls-&gt;isMetaClass()) &#123;</span><br><span class="line">        <span class="comment">// try [cls resolveInstanceMethod:sel]</span></span><br><span class="line"></span><br><span class="line">        _class_resolveInstanceMethod(cls, sel, inst);</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// try [nonMetaClass resolveClassMethod:sel]</span></span><br><span class="line">        <span class="comment">// and [cls resolveInstanceMethod:sel]</span></span><br><span class="line">        _class_resolveClassMethod(cls, sel, inst);</span><br><span class="line">        <span class="keyword">if</span> (!lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                            NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>)) </span><br><span class="line">        &#123;</span><br><span class="line">            _class_resolveInstanceMethod(cls, sel, inst);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们来分析一下 <code>_class_resolveMethod</code>:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (! cls-&gt;isMetaClass()) &#123;</span><br><span class="line">        <span class="comment">// try [cls resolveInstanceMethod:sel]</span></span><br><span class="line"></span><br><span class="line">        _class_resolveInstanceMethod(cls, sel, inst);</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// try [nonMetaClass resolveClassMethod:sel]</span></span><br><span class="line">        <span class="comment">// and [cls resolveInstanceMethod:sel]</span></span><br><span class="line">        _class_resolveClassMethod(cls, sel, inst);</span><br><span class="line">        <span class="keyword">if</span> (!lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                            NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>)) </span><br><span class="line">        &#123;</span><br><span class="line">            _class_resolveInstanceMethod(cls, sel, inst);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>判断当前类是否是元类，如果不是的话，调用 <code>_class_resolveInstanceMethod</code>。</li>
+<li>如果是元类的话，说明要查找的是类方法，调用 <code>_class_resolveClassMethod</code>。</li>
+</ul>
+<p><a name="b645649c"></a></p>
+<h3 id="4-4-1-class-resolveInstanceMethod"><a href="#4-4-1-class-resolveInstanceMethod" class="headerlink" title="4.4.1 _class_resolveInstanceMethod"></a>4.4.1 _class_resolveInstanceMethod</h3><p>首先我们分析动态解析对象方法:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _class_resolveInstanceMethod(Class cls, SEL sel, id inst)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (! lookUpImpOrNil(cls-&gt;ISA(), SEL_resolveInstanceMethod, cls, </span><br><span class="line">                         NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>)) </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// Resolver not implemented.</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    BOOL (*msg)(Class, SEL, SEL) = (typeof(msg))objc_msgSend;</span><br><span class="line">    <span class="keyword">bool</span> resolved = msg(cls, SEL_resolveInstanceMethod, sel);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Cache the result (good or bad) so the resolver doesn't fire next time.</span></span><br><span class="line">    <span class="comment">// +resolveInstanceMethod adds to self a.k.a. cls</span></span><br><span class="line">    IMP imp = lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                             NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (resolved  &amp;&amp;  PrintResolving) &#123;</span><br><span class="line">        <span class="keyword">if</span> (imp) &#123;</span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: method %c[%s %s] "</span></span><br><span class="line">                         <span class="string">"dynamically resolved to %p"</span>, </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), imp);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// Method resolver didn't add anything?</span></span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: +[%s resolveInstanceMethod:%s] returned YES"</span></span><br><span class="line">                         <span class="string">", but no new implementation of %c[%s %s] was found"</span>,</span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">IMP <span class="title">lookUpImpOrNil</span><span class="params">(Class cls, SEL sel, id inst, </span></span></span><br><span class="line"><span class="function"><span class="params">                   <span class="keyword">bool</span> initialize, <span class="keyword">bool</span> cache, <span class="keyword">bool</span> resolver)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    IMP imp = lookUpImpOrForward(cls, sel, inst, initialize, cache, resolver);</span><br><span class="line">    <span class="keyword">if</span> (imp == _objc_msgForward_impcache) <span class="keyword">return</span> nil;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> imp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里还有一个注意点：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> resolved = msg(cls, SEL_resolveInstanceMethod, sel);</span><br></pre></td></tr></table></figure>
+
+<p>对当前 <code>cls</code> 发送 <code>SEL_resolveInstanceMethod</code> 消息，如果返回的是 <code>YES</code>，那说明当前类是实现了动态方法解析。</p>
+<p>由上面的代码可知动态方法解析到最后会回到 <code>lookUpImpOrForward</code>。注意这里的传参:<br><code>cache</code> 是 <code>YES</code>，<code>resolver</code> 是 <code>NO</code>，什么意思呢?</p>
+<blockquote>
+<p>Cache the result (good or bad) so the resolver doesn’t fire next time.<br>缓存查找的结果，所以解析器下一次就不会被触发，其实本质上就是<strong>打破递归</strong>。</p>
+</blockquote>
+<p><a name="6508d0e7"></a></p>
+<h3 id="4-4-2-class-resolveClassMethod"><a href="#4-4-2-class-resolveClassMethod" class="headerlink" title="4.4.2 _class_resolveClassMethod"></a>4.4.2 _class_resolveClassMethod</h3><p>我们接着分析动态解析类方法:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _class_resolveClassMethod(Class cls, SEL sel, id inst)</span><br><span class="line">&#123;</span><br><span class="line">    assert(cls-&gt;isMetaClass());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (! lookUpImpOrNil(cls, SEL_resolveClassMethod, inst, </span><br><span class="line">                         NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>)) </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// Resolver not implemented.</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    BOOL (*msg)(Class, SEL, SEL) = (typeof(msg))objc_msgSend;</span><br><span class="line">    <span class="keyword">bool</span> resolved = msg(_class_getNonMetaClass(cls, inst), </span><br><span class="line">                        SEL_resolveClassMethod, sel);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Cache the result (good or bad) so the resolver doesn't fire next time.</span></span><br><span class="line">    <span class="comment">// +resolveClassMethod adds to self-&gt;ISA() a.k.a. cls</span></span><br><span class="line">    IMP imp = lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                             NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (resolved  &amp;&amp;  PrintResolving) &#123;</span><br><span class="line">        <span class="keyword">if</span> (imp) &#123;</span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: method %c[%s %s] "</span></span><br><span class="line">                         <span class="string">"dynamically resolved to %p"</span>, </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), imp);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// Method resolver didn't add anything?</span></span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: +[%s resolveClassMethod:%s] returned YES"</span></span><br><span class="line">                         <span class="string">", but no new implementation of %c[%s %s] was found"</span>,</span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里有一个注意点：传进来的 <code>cls</code> 必须是<strong>元类</strong>，因为类方法存在元类的缓存或方法列表中。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 对象方法动态解析</span></span><br><span class="line"><span class="keyword">bool</span> resolved = msg(cls, SEL_resolveInstanceMethod, sel);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 类方法动态解析</span></span><br><span class="line"><span class="keyword">bool</span> resolved = msg(_class_getNonMetaClass(cls, inst), </span><br><span class="line">                        SEL_resolveClassMethod, sel);</span><br></pre></td></tr></table></figure>
+
+<p>这里 <code>msg</code> 方法的第一个参数就明显不同，解析对象方法的时候传的是当前类，而解析类方法的时候传的是 <code>_class_getNonMetaClass(cls, inst)</code> 的结果。我们进入 <code>_class_getNonMetaClass</code> 内部:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Class _class_getNonMetaClass(Class cls, id obj)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">mutex_locker_t</span> lock(runtimeLock);</span><br><span class="line">    cls = getNonMetaClass(cls, obj);</span><br><span class="line">    assert(cls-&gt;isRealized());</span><br><span class="line">    <span class="keyword">return</span> cls;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着进入 <code>getNonMetaClass</code>，这个方法的目的就是<strong>通过元类获取类</strong>，我们去除一些干扰信息:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> Class <span class="title">getNonMetaClass</span><span class="params">(Class metacls, id inst)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> total, named, secondary, sharedcache;</span><br><span class="line">    realizeClass(metacls);</span><br><span class="line"></span><br><span class="line">    total++;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果已经不是元类的，那就直接返回</span></span><br><span class="line">    <span class="keyword">if</span> (!metacls-&gt;isMetaClass()) <span class="keyword">return</span> metacls;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// metacls really is a metaclass</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 根元类的特殊情况，这里回忆一下，根元类的isa指向的是自己</span></span><br><span class="line">    <span class="comment">// where inst == inst-&gt;ISA() == metacls is possible</span></span><br><span class="line">    <span class="keyword">if</span> (metacls-&gt;ISA() == metacls) &#123;</span><br><span class="line">        Class cls = metacls-&gt;superclass;</span><br><span class="line">        assert(cls-&gt;isRealized());</span><br><span class="line">        assert(!cls-&gt;isMetaClass());</span><br><span class="line">        assert(cls-&gt;ISA() == metacls);</span><br><span class="line">        <span class="keyword">if</span> (cls-&gt;ISA() == metacls) <span class="keyword">return</span> cls;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果实例不为空</span></span><br><span class="line">    <span class="keyword">if</span> (inst) &#123;</span><br><span class="line">        Class cls = (Class)inst;</span><br><span class="line">        realizeClass(cls);</span><br><span class="line">        <span class="comment">// cls 可能是一个子类，这里通过实例获取到类对象，</span></span><br><span class="line">        <span class="comment">// 然后通过一个 while 循环来遍历判断类对象的 isa 是否是元类</span></span><br><span class="line">        <span class="comment">// 如果是元类的话，就跳出循环；如果不是接着获取类对象的父类</span></span><br><span class="line">        <span class="comment">// cls may be a subclass - find the real class for metacls</span></span><br><span class="line">        <span class="keyword">while</span> (cls  &amp;&amp;  cls-&gt;ISA() != metacls) &#123;</span><br><span class="line">            cls = cls-&gt;superclass;</span><br><span class="line">            realizeClass(cls);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 说明已经找到了当前元类所匹配的类</span></span><br><span class="line">        <span class="keyword">if</span> (cls) &#123;</span><br><span class="line">            assert(!cls-&gt;isMetaClass());</span><br><span class="line">            assert(cls-&gt;ISA() == metacls);</span><br><span class="line">            <span class="keyword">return</span> cls;</span><br><span class="line">        &#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> DEBUG</span></span><br><span class="line">        _objc_fatal(<span class="string">"cls is not an instance of metacls"</span>);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">        <span class="comment">// release build: be forgiving and fall through to slow lookups</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 尝试命名查询</span></span><br><span class="line">    &#123;</span><br><span class="line">        Class cls = getClass(metacls-&gt;mangledName());</span><br><span class="line">        <span class="keyword">if</span> (cls-&gt;ISA() == metacls) &#123;</span><br><span class="line">            named++;</span><br><span class="line">            <span class="keyword">if</span> (PrintInitializing) &#123;</span><br><span class="line">                _objc_inform(<span class="string">"INITIALIZE: %d/%d (%g%%) "</span></span><br><span class="line">                             <span class="string">"successful by-name metaclass lookups"</span>,</span><br><span class="line">                             named, total, named*<span class="number">100.0</span>/total);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            realizeClass(cls);</span><br><span class="line">            <span class="keyword">return</span> cls;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 尝试 NXMapGet</span></span><br><span class="line">    &#123;</span><br><span class="line">        Class cls = (Class)NXMapGet(nonMetaClasses(), metacls);</span><br><span class="line">        <span class="keyword">if</span> (cls) &#123;</span><br><span class="line">            secondary++;</span><br><span class="line">            <span class="keyword">if</span> (PrintInitializing) &#123;</span><br><span class="line">                _objc_inform(<span class="string">"INITIALIZE: %d/%d (%g%%) "</span></span><br><span class="line">                             <span class="string">"successful secondary metaclass lookups"</span>,</span><br><span class="line">                             secondary, total, secondary*<span class="number">100.0</span>/total);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            assert(cls-&gt;ISA() == metacls);            </span><br><span class="line">            realizeClass(cls);</span><br><span class="line">            <span class="keyword">return</span> cls;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// try any duplicates in the dyld shared cache</span></span><br><span class="line">    <span class="comment">// 尝试从 dyld 动态共享缓存库中查询</span></span><br><span class="line">    &#123;</span><br><span class="line">        Class cls = nil;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> count;</span><br><span class="line">        Class *classes = copyPreoptimizedClasses(metacls-&gt;mangledName(),&amp;count);</span><br><span class="line">        <span class="keyword">if</span> (classes) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (classes[i]-&gt;ISA() == metacls) &#123;</span><br><span class="line">                    cls = classes[i];</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">free</span>(classes);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (cls) &#123;</span><br><span class="line">            sharedcache++;</span><br><span class="line">            <span class="keyword">if</span> (PrintInitializing) &#123;</span><br><span class="line">                _objc_inform(<span class="string">"INITIALIZE: %d/%d (%g%%) "</span></span><br><span class="line">                             <span class="string">"successful shared cache metaclass lookups"</span>,</span><br><span class="line">                             sharedcache, total, sharedcache*<span class="number">100.0</span>/total);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            realizeClass(cls);</span><br><span class="line">            <span class="keyword">return</span> cls;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _objc_fatal(<span class="string">"no class for metaclass %p"</span>, (<span class="keyword">void</span>*)metacls);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><a name="44df4fd7"></a></p>
+<h2 id="4-5-消息转发"><a href="#4-5-消息转发" class="headerlink" title="4.5 消息转发"></a>4.5 消息转发</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// No implementation found, and method resolver didn't help. </span></span><br><span class="line">    <span class="comment">// Use forwarding.</span></span><br><span class="line"></span><br><span class="line">    imp = (IMP)_objc_msgForward_impcache;</span><br><span class="line">    cache_fill(cls, sel, imp, inst);</span><br></pre></td></tr></table></figure>
+
+<p>如果<strong>动态消息解析</strong>仍然失败，那么就会来到消息查找的最后一步了，<strong>消息转发</strong>。</p>
+<p>此时会返回一个类型为 <code>_objc_msgForward_impcache</code> 的 <code>IMP</code>，然后填充到 <code>cls</code> 中的 <code>cache_t</code> 里面。至此，我们的消息查找流程就此结束了。</p>
+<p><a name="f5e882ad"></a></p>
+<h1 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h1><ul>
+<li>方法查找或者说消息查找，起始于 <code>_class_lookupMethodAndLoadCache3</code>。</li>
+<li><code>_class_lookupMethodAndLoadCache3</code> 的核心实现是 <code>lookUpImpOrForward</code>。</li>
+<li>从 <code>_class_lookupMethodAndLoadCache3</code> 进入的话，是忽略缓存直接从方法列表中查找。</li>
+<li>查找之前会确保类已经完成诸如 属性、方法、协议等内容的 <code>attach</code>。</li>
+<li>先从当前类的方法列表中查找，找到了返回，找不到交给父类。</li>
+<li>先从父类的缓存中查找，如果找到返回，如果没有查找方法列表，找到了返回，找不到进行<strong>动态方法解析</strong>。</li>
+<li>根据当前是类还是元类来进行<strong>对象方法动态解析</strong>和<strong>类方法动态解析</strong>。</li>
+<li>如果解析成功，则返回，如果失败，进入消息转发流程。</li>
+</ul>
+<p>我们今天一起探索了消息查找的底层，下一章我们将会沿着今天的方向再往下探索方法转发的流程。敬请期待~</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/07/iOS-底层探索-方法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -294,7 +604,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-07T10:49:12+08:00" content="2020-01-07">
+            <time itemprop="dateUpdated" datetime="2020-01-07T10:51:23+08:00" content="2020-01-07">
               2020-01-07
             </time>
           </span>
@@ -1528,7 +1838,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
