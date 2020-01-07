@@ -81,22 +81,22 @@
 
 
 
-<meta name="description" content="一、objc_msgSend 汇编补充我们知道，之所以使用汇编来实现 objc_msgSend 有两个原因:  因为 C 无法通过写一个函数来保留未知的参数并且跳转到一个任意的函数指针。 objc_msgSend 必须足够快。   1.1 objc_msgSend 流程 ENTRY _objc_msgSend 对消息接收者进行判断、处理 (id self, sel _cmd) taggedPoin">
+<meta name="description" content="一、objc_msgSend 汇编补充我们知道，之所以使用汇编来实现 objc_msgSend 有两个原因:  因为 C 无法通过写一个函数来保留未知的参数并且跳转到一个任意的函数指针。 objc_msgSend 必须足够快。">
 <meta name="keywords" content="iOS,Objective-C">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS 底层探索 - 消息查找">
 <meta property="og:url" content="http://leejunhui.com/2020/01/07/iOS-底层探索-消息查找/index.html">
 <meta property="og:site_name" content="leejunhui&#39;s blog">
-<meta property="og:description" content="一、objc_msgSend 汇编补充我们知道，之所以使用汇编来实现 objc_msgSend 有两个原因:  因为 C 无法通过写一个函数来保留未知的参数并且跳转到一个任意的函数指针。 objc_msgSend 必须足够快。   1.1 objc_msgSend 流程 ENTRY _objc_msgSend 对消息接收者进行判断、处理 (id self, sel _cmd) taggedPoin">
+<meta property="og:description" content="一、objc_msgSend 汇编补充我们知道，之所以使用汇编来实现 objc_msgSend 有两个原因:  因为 C 无法通过写一个函数来保留未知的参数并且跳转到一个任意的函数指针。 objc_msgSend 必须足够快。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a5316492635?w=1896&h=276&f=png&s=396502">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a531737e74b?w=1942&h=342&f=png&s=386373">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a5317c96d72?w=2552&h=240&f=png&s=337640">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a531bccbc53?w=1514&h=248&f=png&s=282937">
-<meta property="og:updated_time" content="2020-01-07T03:06:51.040Z">
+<meta property="og:updated_time" content="2020-01-07T03:07:50.167Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 底层探索 - 消息查找">
-<meta name="twitter:description" content="一、objc_msgSend 汇编补充我们知道，之所以使用汇编来实现 objc_msgSend 有两个原因:  因为 C 无法通过写一个函数来保留未知的参数并且跳转到一个任意的函数指针。 objc_msgSend 必须足够快。   1.1 objc_msgSend 流程 ENTRY _objc_msgSend 对消息接收者进行判断、处理 (id self, sel _cmd) taggedPoin">
+<meta name="twitter:description" content="一、objc_msgSend 汇编补充我们知道，之所以使用汇编来实现 objc_msgSend 有两个原因:  因为 C 无法通过写一个函数来保留未知的参数并且跳转到一个任意的函数指针。 objc_msgSend 必须足够快。">
 <meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a5316492635?w=1896&h=276&f=png&s=396502">
 
 
@@ -301,7 +301,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-07T11:06:51+08:00" content="2020-01-07">
+            <time itemprop="dateUpdated" datetime="2020-01-07T11:07:50+08:00" content="2020-01-07">
               2020-01-07
             </time>
           </span>
@@ -362,6 +362,7 @@
 <li>因为 C 无法通过写一个函数来保留未知的参数并且跳转到一个任意的函数指针。</li>
 <li><code>objc_msgSend</code> 必须足够快。</li>
 </ul>
+<a id="more"></a>
 <p><a name="baea769d"></a></p>
 <h2 id="1-1-objc-msgSend-流程"><a href="#1-1-objc-msgSend-流程" class="headerlink" title="1.1 objc_msgSend 流程"></a>1.1 <code>objc_msgSend</code> 流程</h2><ul>
 <li>ENTRY _objc_msgSend</li>
