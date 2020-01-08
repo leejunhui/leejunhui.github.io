@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS,Objective-C,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="leejunhui's blog" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="一、动态方法解析流程分析我们在上一章《消息查找》分析到了动态方法解析，为了更好的掌握具体的流程，我们接下来直接进行源码追踪。">
+<meta name="keywords" content="iOS,Objective-C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 底层探索 - 消息转发">
+<meta property="og:url" content="http://leejunhui.com/2020/01/08/iOS-底层探索-消息转发/index.html">
+<meta property="og:site_name" content="leejunhui&#39;s blog">
+<meta property="og:description" content="一、动态方法解析流程分析我们在上一章《消息查找》分析到了动态方法解析，为了更好的掌握具体的流程，我们接下来直接进行源码追踪。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b2fb98925?w=2484&h=560&f=png&s=977495">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b306bc779?w=2652&h=450&f=png&s=881987">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b3b7f3e09?w=2608&h=1346&f=png&s=2272922">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b3920dfcf?w=1144&h=1180&f=png&s=243258">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b36c94460?w=3054&h=818&f=png&s=1617787">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b3b892a37?w=657&h=26&f=png&s=28059">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b69dae31b?w=619&h=138&f=png&s=65066">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b702eec4f?w=586&h=346&f=png&s=124676">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b6d9d2d29?w=404&h=62&f=png&s=23934">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b6b06bffd?w=444&h=267&f=png&s=96694">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b7ef60b3b?w=742&h=349&f=png&s=122964">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b95742e2f?w=565&h=532&f=png&s=153578">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b9baa4045?w=816&h=220&f=png&s=131549">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b9f67d9fb?w=624&h=103&f=png&s=31577">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4ba912aec1?w=812&h=56&f=png&s=39009">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4bb37b830c?w=716&h=144&f=png&s=38557">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4bb6b5e364?w=737&h=138&f=png&s=37188">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4bc7344775?w=537&h=109&f=png&s=25377">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4bca9e252f?w=829&h=73&f=png&s=59803">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4bcc761fb7?w=3064&h=1789&f=png&s=1101322">
+<meta property="og:updated_time" content="2020-01-08T07:33:34.232Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS 底层探索 - 消息转发">
+<meta name="twitter:description" content="一、动态方法解析流程分析我们在上一章《消息查找》分析到了动态方法解析，为了更好的掌握具体的流程，我们接下来直接进行源码追踪。">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b2fb98925?w=2484&h=560&f=png&s=977495">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://leejunhui.com/2020/01/08/iOS-底层探索-消息转发/">
+
+
+
+
+
+  <title>iOS 底层探索 - 消息转发 | leejunhui's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">leejunhui's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/08/iOS-底层探索-消息转发/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="leejunhui">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="leejunhui's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS 底层探索 - 消息转发</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-08T15:33:00+08:00">
+                2020-01-08
+              </time>
+            
+
+            
+
+            
+          </span>
+          
+          <span class="post-updated">
+            &nbsp; | &nbsp; 更新于
+            <time itemprop="dateUpdated" datetime="2020-01-08T15:33:34+08:00" content="2020-01-08">
+              2020-01-08
+            </time>
+          </span>
+          
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS 底层原理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a name="bd936ced"></a></p>
+<h1 id="一、动态方法解析流程分析"><a href="#一、动态方法解析流程分析" class="headerlink" title="一、动态方法解析流程分析"></a>一、动态方法解析流程分析</h1><p>我们在上一章《消息查找》分析到了<strong>动态方法解析</strong>，为了更好的掌握具体的流程，我们接下来直接进行源码追踪。</p>
+<a id="more"></a>
+<p>我们先来到 <code>_class_resolveMethod</code> 方法，该方法源码如下:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> _class_resolveMethod(Class cls, SEL sel, id inst)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (! cls-&gt;isMetaClass()) &#123;</span><br><span class="line">        <span class="comment">// try [cls resolveInstanceMethod:sel]</span></span><br><span class="line"></span><br><span class="line">        _class_resolveInstanceMethod(cls, sel, inst);</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// try [nonMetaClass resolveClassMethod:sel]</span></span><br><span class="line">        <span class="comment">// and [cls resolveInstanceMethod:sel]</span></span><br><span class="line">        _class_resolveClassMethod(cls, sel, inst);</span><br><span class="line">        <span class="keyword">if</span> (!lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                            NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>)) </span><br><span class="line">        &#123;</span><br><span class="line">            _class_resolveInstanceMethod(cls, sel, inst);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大概的流程如下：</p>
+<ul>
+<li>判断进行解析的是否是元类</li>
+<li>如果不是元类，则调用 <code>_class_resolveInstanceMethod</code> 进行对象方法动态解析</li>
+<li>如果是元类，则调用 <code>_class_resolveClassMethod</code> 进行类方法动态解析</li>
+<li>完成类方法动态解析后，再次查询 <code>cls</code> 中的 <code>imp</code>，如果没有找到，则进行一次对象方法动态解析</li>
+</ul>
+<p><a name="c57eb70d"></a></p>
+<h2 id="1-1-对象方法动态解析"><a href="#1-1-对象方法动态解析" class="headerlink" title="1.1 对象方法动态解析"></a>1.1 对象方法动态解析</h2><p>我们先分析对象方法的动态解析，我们直接来到 <code>_class_resolveInstanceMethod</code> 方法处:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _class_resolveInstanceMethod(Class cls, SEL sel, id inst)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (! lookUpImpOrNil(cls-&gt;ISA(), SEL_resolveInstanceMethod, cls, </span><br><span class="line">                         NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>)) </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// Resolver not implemented.</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    BOOL (*msg)(Class, SEL, SEL) = (typeof(msg))objc_msgSend;</span><br><span class="line">    <span class="keyword">bool</span> resolved = msg(cls, SEL_resolveInstanceMethod, sel);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Cache the result (good or bad) so the resolver doesn't fire next time.</span></span><br><span class="line">    <span class="comment">// +resolveInstanceMethod adds to self a.k.a. cls</span></span><br><span class="line">    IMP imp = lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                             NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (resolved  &amp;&amp;  PrintResolving) &#123;</span><br><span class="line">        <span class="keyword">if</span> (imp) &#123;</span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: method %c[%s %s] "</span></span><br><span class="line">                         <span class="string">"dynamically resolved to %p"</span>, </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), imp);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// Method resolver didn't add anything?</span></span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: +[%s resolveInstanceMethod:%s] returned YES"</span></span><br><span class="line">                         <span class="string">", but no new implementation of %c[%s %s] was found"</span>,</span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大致的流程如下:</p>
+<ul>
+<li>检查是否实现了 <code>+(BOOL)resolveInstanceMethod:(SEL)sel</code> 类方法，如果没有实现则直接返回(通过 <code>cls-&gt;ISA()</code> 是拿到元类，因为类方法是存储在元类上的对象方法)</li>
+<li>如果当前实现了 <code>+(BOOL)resolveInstanceMethod:(SEL)sel</code> 类方法，则通过 <code>objc_msgSend</code> 手动调用该类方法</li>
+<li>完成调用后，再次查询 <code>cls</code> 中的 <code>imp</code></li>
+<li>如果 <code>imp</code> 找到了，则输出动态解析对象方法成功的日志</li>
+<li>如果 <code>imp</code> 没有找到，则输出虽然实现了 <code>+(BOOL)resolveInstanceMethod:(SEL)sel</code>，并且返回了 <code>YES</code>，但并没有查找到 <code>imp</code> 的日志</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b2fb98925?w=2484&h=560&f=png&s=977495" alt="image.png"></p>
+<p><a name="34b4dc0d"></a></p>
+<h2 id="1-2-类方法动态解析"><a href="#1-2-类方法动态解析" class="headerlink" title="1.2 类方法动态解析"></a>1.2 类方法动态解析</h2><p>接着我们分析类方法动态解析，我们直接来到 <code>_class_resolveClassMethod</code> 方法处:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> _class_resolveClassMethod(Class cls, SEL sel, id inst)</span><br><span class="line">&#123;</span><br><span class="line">    assert(cls-&gt;isMetaClass());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (! lookUpImpOrNil(cls, SEL_resolveClassMethod, inst, </span><br><span class="line">                         NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>)) </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// Resolver not implemented.</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    BOOL (*msg)(Class, SEL, SEL) = (typeof(msg))objc_msgSend;</span><br><span class="line">    <span class="keyword">bool</span> resolved = msg(_class_getNonMetaClass(cls, inst), </span><br><span class="line">                        SEL_resolveClassMethod, sel);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Cache the result (good or bad) so the resolver doesn't fire next time.</span></span><br><span class="line">    <span class="comment">// +resolveClassMethod adds to self-&gt;ISA() a.k.a. cls</span></span><br><span class="line">    IMP imp = lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                             NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (resolved  &amp;&amp;  PrintResolving) &#123;</span><br><span class="line">        <span class="keyword">if</span> (imp) &#123;</span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: method %c[%s %s] "</span></span><br><span class="line">                         <span class="string">"dynamically resolved to %p"</span>, </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), imp);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// Method resolver didn't add anything?</span></span><br><span class="line">            _objc_inform(<span class="string">"RESOLVE: +[%s resolveClassMethod:%s] returned YES"</span></span><br><span class="line">                         <span class="string">", but no new implementation of %c[%s %s] was found"</span>,</span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel), </span><br><span class="line">                         cls-&gt;isMetaClass() ? <span class="string">'+'</span> : <span class="string">'-'</span>, </span><br><span class="line">                         cls-&gt;nameForLogging(), sel_getName(sel));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大致的流程如下:</p>
+<ul>
+<li>断言是否是元类，如果不是，直接退出</li>
+<li>检查是否实现了 <code>+(BOOL)resolveClassMethod:(SEL)sel</code> 类方法，如果没有实现则直接返回(通过 <code>cls-</code> 是因为当前 <code>cls</code> 就是元类，因为类方法是存储在元类上的对象方法)</li>
+<li>如果当前实现了 <code>+(BOOL)resolveClassMethod:(SEL)sel</code> 类方法，则通过 <code>objc_msgSend</code> 手动调用该类方法，注意这里和动态解析对象方法不同，这里需要<strong>通过元类和对象来找到类</strong>，也就是 <code>_class_getNonMetaClass</code></li>
+<li>完成调用后，再次查询 <code>cls</code> 中的 <code>imp</code></li>
+<li>如果 <code>imp</code> 找到了，则输出动态解析对象方法成功的日志</li>
+<li>如果 <code>imp</code> 没有找到，则输出虽然实现了 <code>+(BOOL)resolveClassMethod:(SEL)sel</code>，并且返回了 <code>YES</code>，但并没有查找到 <code>imp</code> 的日志</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b306bc779?w=2652&h=450&f=png&s=881987" alt="image.png"></p>
+<blockquote>
+<p>这里有一个注意点，如果我们把上面例子中的 <code>objc_getMetaClass(&quot;LGPerson&quot;)</code> 换成 <code>self</code> 试试，会导致 <code>+(BOOL)resolveInstanceMethod:(SEL)sel</code> 方法被调用，其实问题是发生在 <code>class_getMethodImplementation</code> 方法处，其内部会调用到 <code>_class_resolveMethod</code> 方法，而我们的 <code>cls</code> 传的是 <code>self</code>，所以又会走一次 <code>+(BOOL)resolveInstanceMethod:(SEL)sel</code><br><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b3b7f3e09?w=2608&h=1346&f=png&s=2272922" alt="image.png"></p>
+</blockquote>
+<p><a name="2a20542f"></a></p>
+<h2 id="1-3-特殊的-NSObject-对象方法动态解析"><a href="#1-3-特殊的-NSObject-对象方法动态解析" class="headerlink" title="1.3 特殊的 NSObject 对象方法动态解析"></a>1.3 特殊的 <code>NSObject</code> 对象方法动态解析</h2><p>我们再聚焦到 <code>_class_resolveMethod</code> 方法上，如果 <code>cls</code> 是元类，也就是说进行的是类方法动态解析的话，有以下源码:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">_class_resolveClassMethod(cls, sel, inst); <span class="comment">// 已经处理</span></span><br><span class="line">        <span class="keyword">if</span> (!lookUpImpOrNil(cls, sel, inst, </span><br><span class="line">                            NO<span class="comment">/*initialize*/</span>, YES<span class="comment">/*cache*/</span>, NO<span class="comment">/*resolver*/</span>)) </span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 对象方法 决议</span></span><br><span class="line">            _class_resolveInstanceMethod(cls, sel, inst);</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于 <code>_class_resolveClassMethod</code> 的执行，肯定是没有问题的，只是为什么在判断如果动态解析失败之后，还要再进行一次对象方法解析呢，这个时候就需要上一张经典的 <code>isa</code> 走位图了:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b3920dfcf?w=1144&h=1180&f=png&s=243258" alt="image.png"></p>
+<p>由这个流程图我们可以知道，元类最终继承于<strong>根元类</strong>，而<strong>根元类</strong>又继承于 <code>NSObject</code>，那么也就是说在<strong>根元类</strong>中存储的类方法等价于在 <code>NSObject</code> 中存储的对象方法。而系统在执行 <code>lookUpImpOrNil</code> 时，会递归查找元类的父类的方法列表。但是由于元类和根元类都是系统自动生成的，我们是无法直接编写它们，而对于 <code>NSObject</code>，我们可以借助分类(<code>Category</code>)来实现<strong>统一的类方法动态解析</strong>，不过前提是类本身是没有实现 <code>resolveClassMethod</code> 方法：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b36c94460?w=3054&h=818&f=png&s=1617787" alt="image.png"></p>
+<p>这也就解释了为什么 <code>_class_resolveClassMethod</code> 为什么会多一步对象方法解析的流程了。</p>
+<p><a name="59fe9ffe"></a></p>
+<h1 id="二、消息转发快速流程"><a href="#二、消息转发快速流程" class="headerlink" title="二、消息转发快速流程"></a>二、消息转发快速流程</h1><p>如果我们没有进行动态方法解析，消息查找流程接下来会来到的是什么呢?</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// No implementation found, and method resolver didn't help. </span></span><br><span class="line">    <span class="comment">// Use forwarding.</span></span><br><span class="line"></span><br><span class="line">    imp = (IMP)_objc_msgForward_impcache;</span><br><span class="line">    cache_fill(cls, sel, imp, inst);</span><br></pre></td></tr></table></figure>
+
+<p>根据 <code>lookUpImpOrForward</code> 源码我们可以看到当动态解析没有成功后，会直接返回一个 <code>_objc_msgForward_impcache</code>。我们尝试搜索一下它，定位到 <code>objc-msg-arm64.s</code> 汇编源码处：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">STATIC_ENTRY __objc_msgForward_impcache</span><br><span class="line"></span><br><span class="line">	<span class="comment">// No stret specialization.</span></span><br><span class="line">	b	__objc_msgForward</span><br><span class="line"></span><br><span class="line">	END_ENTRY __objc_msgForward_impcache</span><br><span class="line"></span><br><span class="line">	</span><br><span class="line">	ENTRY __objc_msgForward</span><br><span class="line"></span><br><span class="line">	adrp	x17, __objc_forward_handler@PAGE</span><br><span class="line">	ldr	p17, [x17, __objc_forward_handler@PAGEOFF]</span><br><span class="line">	TailCallFunctionPointer x17</span><br><span class="line">	</span><br><span class="line">	END_ENTRY __objc_msgForward</span><br></pre></td></tr></table></figure>
+
+<p>可以看到在 <code>__objc_msgForward_impcache</code> 内部会跳转到 <code>__objc_msgForward</code>，而 <code>__objc_msgForward</code> 内部我们并拿不到有用的信息。这个时候是不是线索就断了呢？我们会议一下前面的流程，如果找到了 <code>imp</code>，会进行缓存的填充以及日志的打印，我们不妨找到打印的日志文件看看里面会不会有我们需要的内容。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">log_and_fill_cache(Class cls, IMP imp, SEL sel, id receiver, Class implementer)</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> SUPPORT_MESSAGE_LOGGING</span></span><br><span class="line">    <span class="keyword">if</span> (objcMsgLogEnabled) &#123;</span><br><span class="line">        <span class="keyword">bool</span> cacheIt = logMessageSend(implementer-&gt;isMetaClass(), </span><br><span class="line">                                      cls-&gt;nameForLogging(),</span><br><span class="line">                                      implementer-&gt;nameForLogging(), </span><br><span class="line">                                      sel);</span><br><span class="line">        <span class="keyword">if</span> (!cacheIt) <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    cache_fill (cls, sel, imp, receiver);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">logMessageSend</span><span class="params">(<span class="keyword">bool</span> isClassMethod,</span></span></span><br><span class="line"><span class="function"><span class="params">                    <span class="keyword">const</span> <span class="keyword">char</span> *objectsClass,</span></span></span><br><span class="line"><span class="function"><span class="params">                    <span class="keyword">const</span> <span class="keyword">char</span> *implementingClass,</span></span></span><br><span class="line"><span class="function"><span class="params">                    SEL selector)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">char</span>	buf[ <span class="number">1024</span> ];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Create/open the log file</span></span><br><span class="line">    <span class="keyword">if</span> (objcMsgLogFD == (<span class="number">-1</span>))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">snprintf</span> (buf, <span class="keyword">sizeof</span>(buf), <span class="string">"/tmp/msgSends-%d"</span>, (<span class="keyword">int</span>) getpid ());</span><br><span class="line">        objcMsgLogFD = secure_open (buf, O_WRONLY | O_CREAT, geteuid());</span><br><span class="line">        <span class="keyword">if</span> (objcMsgLogFD &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="comment">// no log file - disable logging</span></span><br><span class="line">            objcMsgLogEnabled = <span class="literal">false</span>;</span><br><span class="line">            objcMsgLogFD = <span class="number">-1</span>;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Make the log entry</span></span><br><span class="line">    <span class="built_in">snprintf</span>(buf, <span class="keyword">sizeof</span>(buf), <span class="string">"%c %s %s %s\n"</span>,</span><br><span class="line">            isClassMethod ? <span class="string">'+'</span> : <span class="string">'-'</span>,</span><br><span class="line">            objectsClass,</span><br><span class="line">            implementingClass,</span><br><span class="line">            sel_getName(selector));</span><br><span class="line"></span><br><span class="line">    objcMsgLogLock.lock();</span><br><span class="line">    write (objcMsgLogFD, buf, <span class="built_in">strlen</span>(buf));</span><br><span class="line">    objcMsgLogLock.unlock();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Tell caller to not cache the method</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们很清楚的能看到日志文件的存储位置已经命名方式:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b3b892a37?w=657&h=26&f=png&s=28059" alt="image.png"></p>
+<p>这里还有一个注意点:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b69dae31b?w=619&h=138&f=png&s=65066" alt="image.png"></p>
+<p>只有当 <code>objcMsgLogEnabled</code> 这个值为 <code>true</code> 的时候才会进行日志的输出，我们直接搜索这个值出现过的地方:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b702eec4f?w=586&h=346&f=png&s=124676" alt="image.png"></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b6d9d2d29?w=404&h=62&f=png&s=23934" alt="image.png"></p>
+<p>很明显，通过调用 <code>instrumentObjcMessageSends</code> 可以来实现打印的开与关。我们可以简单测试一下:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b6b06bffd?w=444&h=267&f=png&s=96694" alt="image.png"></p>
+<p>我们运行一下，然后来到 <code>/private/tmp</code> 目录下:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b7ef60b3b?w=742&h=349&f=png&s=122964" alt="image.png"></p>
+<p>我们打开这个文件:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b95742e2f?w=565&h=532&f=png&s=153578" alt="image.png"></p>
+<p>我们看到了熟悉的 <code>resolveInstanceMethod</code>，但是在这之后有 2 个之前我们没探索过的方法: <code>forwardingTargetForSelector</code> 和 <code>methodSignatureForSelector</code>。然后会有 <code>doesNotRecognizeSelector</code> 方法的打印，此时 <code>Xcode</code> 控制台打印如下:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b9baa4045?w=816&h=220&f=png&s=131549" alt="image.png"></p>
+<p>我们可以看到 <code>___forwarding___</code> 发生在 <code>CoreFoundation</code> 框架里面。我们还是老规矩，<strong>以官方文档为准</strong>，查询一下 <code>forwardingTargetForSelector</code> 和 <code>methodSignatureForSelector</code>。</p>
+<p>先是 <code>forwardingTargetForSelector</code>:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4b9f67d9fb?w=624&h=103&f=png&s=31577" alt="image.png"></p>
+<p><code>forwardingTargetForSelector</code> 的官方定义是返回未找到 <code>IMP</code> 的消息首先定向到的对象，说人话就是在这个方法可以实现<strong>狸猫换太子</strong>，不是找不到 <code>IMP</code> 吗，我把这个消息交给其他的对象来处理不就完事了吗？我们直接用代码说话:</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">id</span>)forwardingTargetForSelector:(SEL)aSelector&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%s -- %@"</span>,__func__,<span class="built_in">NSStringFromSelector</span>(aSelector));</span><br><span class="line">    <span class="keyword">if</span> (aSelector == <span class="keyword">@selector</span>(saySomething)) &#123;</span><br><span class="line">        <span class="keyword">return</span> [LGTeacher alloc];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> [<span class="keyword">super</span> forwardingTargetForSelector:aSelector];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们直接返回 <code>[LGTeacher alloc]</code>，我们运行试试看:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4ba912aec1?w=812&h=56&f=png&s=39009" alt="image.png"></p>
+<p>完美~，我们对 <code>LGStudent</code> 实例对象发送 <code>saySomething</code> 消息，结果最后是由 <code>LGTeacher</code> 响应了这个消息。关于 <code>forwardingTargetForSelector</code> ，苹果还给出了几点提示:</p>
+<blockquote>
+<p>If an object implements (or inherits) this method, and returns a non-nil (and non-self) result, that returned object is used as the new receiver object and the message dispatch resumes to that new object. (Obviously if you return self from this method, the code would just fall into an infinite loop.)<br>译: 如果一个对象实现或继承了该方法，然后返回一个非空(非 <code>self</code>)的结果，那么这个返回值会被当做新的消息接受者对象，消息会被转发到该对象身上。(如果你在这个方法里返回 <code>self</code>，那么显然就会发生一个<strong>死循环</strong>)。</p>
+</blockquote>
+<blockquote>
+<p>If you implement this method in a non-root class, if your class has nothing to return for the given selector then you should return the result of invoking super’s implementation.<br>译: 如果你在一个非基类中实现了该方法，并且这个类没有任何可以返回的内容，那么你需要返回父类的实现。也就是 <code>return [super forwardingTargetForSelector:aSelector];</code>。</p>
+</blockquote>
+<blockquote>
+<p>This method gives an object a chance to redirect an unknown message sent to it before the much more expensive forwardInvocation: machinery takes over. This is useful when you simply want to redirect messages to another object and can be an order of magnitude faster than regular forwarding. It is not useful where the goal of the forwarding is to capture the NSInvocation, or manipulate the arguments or return value during the forwarding.<br>译: 这个方法使对象有机会在更昂贵的 <code>forwardInvocation：</code> 机械接管之前重定向发送给它的未知消息。当你只想将消息重定向到另一个对象，并且比常规转发快一个数量级时，这个方法就很有用。在转发的目标是捕获 <code>NSInvocation</code> 或在转发过程中操纵参数或返回值的情况下，此功能就无用了。</p>
+</blockquote>
+<p>通过上面的官方文档定义，我们可以理清下思路：</p>
+<ul>
+<li><code>forwardingTargetForSelector</code> 是一种快速的消息转发流程，它直接让其他对象来响应未知的消息。</li>
+<li><code>forwardingTargetForSelector</code> 不能返回 <code>self</code>，否则会陷入死循环，因为返回 <code>self</code> 又回去当前实例对象身上走一遍消息查找流程，显然又会来到 <code>forwardingTargetForSelector</code>。</li>
+<li><code>forwardingTargetForSelector</code> 适用于消息转发给其他能响应未知消息的对象，什么意思呢，就是最终返回的内容必须和要查找的消息的参数和返回值一致，如果想要不一致，就需要走其他的流程。</li>
+</ul>
+<p><a name="cad7e4df"></a></p>
+<h1 id="三、消息转发慢速流程"><a href="#三、消息转发慢速流程" class="headerlink" title="三、消息转发慢速流程"></a>三、消息转发慢速流程</h1><p>上面说到如果想要最终返回的内容必须和要查找的消息的参数和返回值不一致，需要走其他流程，那么到底是什么流程呢，我们接着看一下刚才另外一个方法 <code>methodSignatureForSelector</code> 的官方文档:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4bb37b830c?w=716&h=144&f=png&s=38557" alt="image.png"></p>
+<p>官方的定义是 <code>methodSignatureForSelector</code> 返回一个 <code>NSMethodSignature</code> 方法签名对象，这个该对象包含由给定选择器标识的方法的描述。</p>
+<blockquote>
+<p>This method is used in the implementation of protocols. This method is also used in situations where an NSInvocation object must be created, such as during message forwarding. If your object maintains a delegate or is capable of handling messages that it does not directly implement, you should override this method to return an appropriate method signature.<br>译: 这个方法用于协议的实现。同时在消息转发的时候，在必须创建 <code>NSInvocation</code> 对象的情况下，也会用到这个方法。如果您的对象维护一个委托或能够处理它不直接实现的消息，则应重写此方法以返回适当的方法签名。</p>
+</blockquote>
+<p>我们在文档的最后可以看到有一个叫 <code>forwardInvocation:</code> 的方法</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4bb6b5e364?w=737&h=138&f=png&s=37188" alt="image.png"></p>
+<p>我们来到该方法的文档处：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4bc7344775?w=537&h=109&f=png&s=25377" alt="image.png"></p>
+<blockquote>
+<p>To respond to methods that your object does not itself recognize, you must override methodSignatureForSelector: in addition to forwardInvocation:. The mechanism for forwarding messages uses information obtained from methodSignatureForSelector: to create the NSInvocation object to be forwarded. Your overriding method must provide an appropriate method signature for the given selector, either by pre formulating one or by asking another object for one.<br>译：要响应对象本身无法识别的方法，除了 <code>forwardInvocation：</code>外，还必须重写<code>methodSignatureForSelector:</code> 。 转发消息的机制使用从<code>methodSignatureForSelector：</code>获得的信息来创建要转发的 <code>NSInvocation</code> 对象。 你的重写方法必须为给定的选择器提供适当的方法签名，方法是预先制定一个公式，也可以要求另一个对象提供一个方法签名。</p>
+</blockquote>
+<p>显然，<code>methodSignatureForSelector</code> 和 <code>forwardInvocation</code> 不是孤立存在的，需要一起出现。我们直接上代码说话:</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">NSMethodSignature</span> *)methodSignatureForSelector:(SEL)aSelector&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%s -- %@"</span>,__func__,<span class="built_in">NSStringFromSelector</span>(aSelector));</span><br><span class="line">    <span class="keyword">if</span> (aSelector == <span class="keyword">@selector</span>(saySomething)) &#123; <span class="comment">// v @ :</span></span><br><span class="line">        <span class="keyword">return</span> [<span class="built_in">NSMethodSignature</span> signatureWithObjCTypes:<span class="string">"v@:"</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> [<span class="keyword">super</span> methodSignatureForSelector:aSelector];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)forwardInvocation:(<span class="built_in">NSInvocation</span> *)anInvocation&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%s "</span>,__func__);</span><br><span class="line"></span><br><span class="line">   SEL aSelector = [anInvocation selector];</span><br><span class="line"></span><br><span class="line">   <span class="keyword">if</span> ([[LGTeacher alloc] respondsToSelector:aSelector])</span><br><span class="line">       [anInvocation invokeWithTarget:[LGTeacher alloc]];</span><br><span class="line">   <span class="keyword">else</span></span><br><span class="line">       [<span class="keyword">super</span> forwardInvocation:anInvocation];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后查看打印结果：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4bca9e252f?w=829&h=73&f=png&s=59803" alt="image.png"></p>
+<p>可以看到，先是来到了 <code>methodSignatureForSelector</code>，然后来到了 <code>forwardInvocation</code>，最后 <code>saySomething</code> 消息被查找到了。</p>
+<p>关于 <code>forwardInvocation</code>，还有几个注意点：</p>
+<ul>
+<li><code>forwardInvocation</code> 方法有两个任务:<ul>
+<li>查找可以响应 <code>inInvocation</code> 中编码的消息的对象。对于所有消息，此对象不必相同。</li>
+<li>使用 <code>anInvocation</code> 将消息发送到该对象。<code>anInvocation</code> 将保存结果，运行时系统将提取结果并将其传递给原始发送者。</li>
+</ul>
+</li>
+<li><code>forwardInvocation</code> 方法的实现不仅仅可以转发消息。<code>forwardInvocation</code>还可以，例如，可以用于合并响应各种不同消息的代码，从而避免了必须为每个选择器编写单独方法的麻烦。<code>forwardInvocation</code> 方法在对给定消息的响应中还可能涉及其他几个对象，而不是仅将其转发给一个对象。</li>
+<li><code>NSObject</code> 的 <code>forwardInvocation</code> 实现：只会调用 <code>dosNotRecognizeSelector：方法，它不会转发任何消息。因此，如果选择不实现</code>forwardInvocation`，将无法识别的消息发送给对象将引发异常。</li>
+</ul>
+<p>至此，消息转发的慢速流程我们就探索完了。</p>
+<p><a name="Ba7gD"></a></p>
+<h1 id="四、消息转发流程图"><a href="#四、消息转发流程图" class="headerlink" title="四、消息转发流程图"></a>四、消息转发流程图</h1><p>我们从动态消息解析到快速转发流程再到慢速转发流程可以总结出如下的流程图：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65a4bcc761fb7?w=3064&h=1789&f=png&s=1101322" alt="image.png"></p>
+<h1 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h1><p>我们从 <code>objc_msgSend</code> 开始，探索了消息发送之后是怎么样的一个流程，这对于我们理解 <code>iOS</code> 底层有很大的帮助。当然，限于笔者的水平，探索的过程可能会有一定的瑕疵。我们简单总结一下：</p>
+<ul>
+<li>动态方法解析分为<strong>对象方法动态解析</strong>和<strong>类方法动态解析</strong><ul>
+<li><strong>对象方法动态解析</strong>需要消息发送者实现 <code>+(BOOL)resolveInstanceMethod:(SEL)sel</code> 方法</li>
+<li><strong>类方法动态解析</strong>需要消息发送者实现 <code>+(BOOL)resolveClassMethod:(SEL)sel</code> 方法</li>
+</ul>
+</li>
+<li>动态方法解析失败会进入消息转发流程</li>
+</ul>
+<ul>
+<li>消息转发分为两个流程：快速转发和慢速转发</li>
+<li>快速转发的实现是 <code>forwardingTargetForSelector</code>，让其他能响应要查找消息的对象来干活</li>
+<li>慢速转发的实现是 <code>methodSignatureForSelector</code> 和 <code>forwardInvocation</code> 的结合，提供了更细粒度的控制，先返回方法签名给 <code>Runtime</code>，然后让 <code>anInvocation</code> 来把消息发送给提供的对象，最后由 <code>Runtime</code> 提取结果然后传递给原始的消息发送者。</li>
+</ul>
+<p><code>iOS</code> 底层探索已经来到了第七篇，我们接下来将会从 <code>app</code> 加载开始探索，探究 <code>冷启动</code> 和 <code>热启动</code>，以及 <code>dyld</code> 是如何工作的。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    leejunhui
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://leejunhui.com/2020/01/08/iOS-底层探索-消息转发/" title="iOS 底层探索 - 消息转发">http://leejunhui.com/2020/01/08/iOS-底层探索-消息转发/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS/" rel="tag"># iOS</a>
+          
+            <a href="/tags/Objective-C/" rel="tag"># Objective-C</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/07/iOS-底层探索-消息查找/" rel="next" title="iOS 底层探索 - 消息查找">
+                <i class="fa fa-chevron-left"></i> iOS 底层探索 - 消息查找
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">leejunhui</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、动态方法解析流程分析"><span class="nav-number">1.</span> <span class="nav-text">一、动态方法解析流程分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-对象方法动态解析"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 对象方法动态解析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-类方法动态解析"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 类方法动态解析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-特殊的-NSObject-对象方法动态解析"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 特殊的 NSObject 对象方法动态解析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、消息转发快速流程"><span class="nav-number">2.</span> <span class="nav-text">二、消息转发快速流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、消息转发慢速流程"><span class="nav-number">3.</span> <span class="nav-text">三、消息转发慢速流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、消息转发流程图"><span class="nav-number">4.</span> <span class="nav-text">四、消息转发流程图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五、总结"><span class="nav-number">5.</span> <span class="nav-text">五、总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2019 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">leejunhui</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
