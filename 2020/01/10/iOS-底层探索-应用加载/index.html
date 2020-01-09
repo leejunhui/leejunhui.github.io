@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS,Objective-C,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="leejunhui's blog" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="App 从被用户在主屏幕上点击之后就开启了它的生命周期，那么在这之中，究竟发生了什么呢?让我们从 App 启动开始探索。在探索之前，我们需要熟悉一些前导知识点。">
+<meta name="keywords" content="iOS,Objective-C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 底层探索 - 应用加载">
+<meta property="og:url" content="http://leejunhui.com/2020/01/10/iOS-底层探索-应用加载/index.html">
+<meta property="og:site_name" content="leejunhui&#39;s blog">
+<meta property="og:description" content="App 从被用户在主屏幕上点击之后就开启了它的生命周期，那么在这之中，究竟发生了什么呢?让我们从 App 启动开始探索。在探索之前，我们需要熟悉一些前导知识点。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a906af6229?w=1173&h=726&f=png&s=170462">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a906b709d5?w=1200&h=603&f=png&s=215900">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a906d047c5?w=312&h=53&f=png&s=15245">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a90805e5f7?w=399&h=109&f=png&s=40641">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a90804c202?w=212&h=111&f=png&s=17152">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a90820f586?w=1146&h=180&f=png&s=16936">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9408cd69c?w=1194&h=804&f=png&s=70754">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a94085d1cf?w=1194&h=735&f=png&s=78948">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9427a82ee?w=1495&h=752&f=png&s=162341">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a945582cb1?w=1820&h=1038&f=png&s=179992">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a946c5db85?w=1418&h=762&f=png&s=170390">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a95f6c4802?w=346&h=105&f=png&s=44780">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a96cd8f8a3?w=1423&h=489&f=png&s=114505">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a96f53b89d?w=1398&h=491&f=png&s=151076">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a96f567e70?w=1442&h=683&f=png&s=190726">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9709e0842?w=1485&h=931&f=png&s=235078">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9823b7561?w=1252&h=923&f=png&s=191239">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a99ec0ebb3?w=1559&h=919&f=png&s=448118">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a99ec8f360?w=1506&h=915&f=png&s=420489">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9afb88cad?w=1453&h=874&f=png&s=212865">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9c38824d8?w=1481&h=879&f=png&s=217886">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9c6928a48?w=1519&h=893&f=png&s=191601">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9cb854686?w=2400&h=1360&f=png&s=764555">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9cee75696?w=681&h=176&f=png&s=110355">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9dfc3e6a2?w=1150&h=277&f=png&s=176870">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9f3423723?w=995&h=48&f=png&s=10126">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa10b932de?w=885&h=466&f=png&s=321492">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa1bd5873a?w=871&h=839&f=png&s=426943">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa20f39578?w=687&h=200&f=png&s=118113">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa2228b68d?w=374&h=57&f=png&s=22871">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa238533bf?w=575&h=140&f=png&s=83887">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa464c03aa?w=390&h=49&f=png&s=22396">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa4d8715bf?w=728&h=62&f=png&s=65739">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa4e057edd?w=744&h=189&f=png&s=112467">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa540253e5?w=2202&h=266&f=png&s=342262">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa5c1aafdc?w=2106&h=310&f=png&s=306061">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa5f01153d?w=2996&h=822&f=png&s=831234">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa698cbc3e?w=1838&h=1530&f=png&s=1207328">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa772de4f3?w=2754&h=1372&f=png&s=1649230">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa87ac8a00?w=2714&h=286&f=png&s=652480">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa8a83f7f6?w=2188&h=798&f=png&s=772514">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa8e4b3fe5?w=2082&h=506&f=png&s=499627">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa8e7e0166?w=2478&h=944&f=png&s=1185548">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aaa2f657c8?w=3158&h=412&f=png&s=624597">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aab373779d?w=2494&h=860&f=png&s=1063972">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aac702efed?w=2582&h=642&f=png&s=662703">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aacce15aa8?w=3004&h=1398&f=png&s=1375098">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab07f5c3c0?w=778&h=124&f=png&s=68090">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab081ff41e?w=794&h=57&f=png&s=52237">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aae9d91b0a?w=916&h=182&f=png&s=112565">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aaf5d18c42?w=2488&h=634&f=png&s=793386">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab11a0d786?w=3198&h=1024&f=png&s=1578550">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab12db7400?w=1040&h=136&f=png&s=127211">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab171053dd?w=1940&h=254&f=png&s=206419">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab2dfe6846?w=1864&h=1228&f=png&s=1215014">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab384d0841?w=586&h=90&f=png&s=56052">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab67d5bb30?w=1318&h=466&f=png&s=339528">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab6cf36faf?w=1724&h=530&f=png&s=397840">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab7a3c7082?w=2070&h=634&f=png&s=706205">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab8b189595?w=1494&h=204&f=png&s=194458">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab9914b8fb?w=2208&h=1020&f=png&s=1195465">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab9b5b1d39?w=2038&h=988&f=png&s=863889">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aba3a929e9?w=1244&h=256&f=png&s=186203">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aba8fc33ec?w=1290&h=818&f=png&s=542698">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2abd92927ac?w=1040&h=122&f=png&s=66719">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2abda85fa61?w=1206&h=472&f=png&s=251540">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2abdc19c992?w=2098&h=1356&f=png&s=1439046">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2abdca7162f?w=1928&h=914&f=png&s=1015509">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2abebf9b282?w=2888&h=1322&f=png&s=1556679">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ac81605e9f?w=2874&h=550&f=png&s=1048295">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ac29697bf9?w=2536&h=766&f=png&s=859314">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ac52fcf871?w=2114&h=926&f=png&s=1094149">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ac9d9cb4e7?w=1206&h=790&f=png&s=564174">
+<meta property="og:updated_time" content="2020-01-09T16:46:47.362Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS 底层探索 - 应用加载">
+<meta name="twitter:description" content="App 从被用户在主屏幕上点击之后就开启了它的生命周期，那么在这之中，究竟发生了什么呢?让我们从 App 启动开始探索。在探索之前，我们需要熟悉一些前导知识点。">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a906af6229?w=1173&h=726&f=png&s=170462">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://leejunhui.com/2020/01/10/iOS-底层探索-应用加载/">
+
+
+
+
+
+  <title>iOS 底层探索 - 应用加载 | leejunhui's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">leejunhui's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/10/iOS-底层探索-应用加载/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="leejunhui">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="leejunhui's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS 底层探索 - 应用加载</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-10T00:45:45+08:00">
+                2020-01-10
+              </time>
+            
+
+            
+
+            
+          </span>
+          
+          <span class="post-updated">
+            &nbsp; | &nbsp; 更新于
+            <time itemprop="dateUpdated" datetime="2020-01-10T00:46:47+08:00" content="2020-01-10">
+              2020-01-10
+            </time>
+          </span>
+          
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS 底层原理</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><code>App</code> 从被用户在主屏幕上点击之后就开启了它的生命周期，那么在这之中，究竟发生了什么呢?让我们从 <code>App</code> 启动开始探索。在探索之前，我们需要熟悉一些前导知识点。</p>
+<a id="more"></a>
+<p><a name="19898fd3"></a></p>
+<h1 id="一、前导知识"><a href="#一、前导知识" class="headerlink" title="一、前导知识"></a>一、前导知识</h1><p>以下参考自 <code>WWDC 2016 Optimizing App Startup Time</code> ：</p>
+<p><a name="dd967b64"></a></p>
+<h2 id="1-1-Mach-O"><a href="#1-1-Mach-O" class="headerlink" title="1.1 Mach-O"></a>1.1 Mach-O</h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a906af6229?w=1173&h=726&f=png&s=170462" alt="image.png"></p>
+<blockquote>
+<p>Mach-O is a bunch of file types for different run time executables.<br><code>Mach-O</code> 是 <code>iOS</code> 系统不同运行时期<strong>可执行的文件</strong>的文件类型统称。</p>
+</blockquote>
+<p>维基百科上关于 <code>Mach-O</code> 的描述：</p>
+<blockquote>
+<p>Mach-O 是 Mach object 文件格式的缩写，它是一种用于记录可执行文件、对象代码、共享库、动态加载代码和内存转储的文件格式。作为 a.out 格式的替代品，Mach-O 提供了更好的扩展性，并提升了符号表中信息的访问速度。<br>大多数基于 Mach 内核的操作系统都使用 Mach-O。NeXTSTEP、OS X 和 iOS 是使用这种格式作为本地可执行文件、库和对象代码的例子。</p>
+</blockquote>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a906b709d5?w=1200&h=603&f=png&s=215900" alt="image.png"></p>
+<p><code>Mach-O</code> 有三种文件类型: <code>Executable</code>、<code>Dylib</code>、<code>Bundle</code></p>
+<ul>
+<li><code>Executable</code> 类型</li>
+</ul>
+<blockquote>
+<p>So the first executable, that’s the main binary in an app, it’s also the main binary in an app extension.<br><code>executable</code> 是 <code>app</code> 的二进制主文件，同时也是 <code>app extension</code> 的二进制主文件</p>
+</blockquote>
+<p>我们一般可以在 <code>Xcode</code> 项目中的 <code>Products</code> 文件夹中找到它：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a906d047c5?w=312&h=53&f=png&s=15245" alt="image.png"></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a90805e5f7?w=399&h=109&f=png&s=40641" alt="image.png"></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a90804c202?w=212&h=111&f=png&s=17152" alt="image.png"></p>
+<p>如上图箭头所示，<code>App加载流程</code> 就是我们 <code>App</code> 的二进制主文件。</p>
+<ul>
+<li><code>Dylib</code> 类型</li>
+</ul>
+<blockquote>
+<p>A dylib is a dynamic library, on other platforms meet, you may know those as DSOs or DLLs.<br><code>dylib</code> 是动态库，在其他平台也叫 <code>DSO</code> 或者 <code>DLL</code>。</p>
+</blockquote>
+<p>对于接触 <code>iOS</code> 开发比较早的同学，可能知道我们在 <code>Xcode 7</code> 之前添加一些比如 <code>sqlite</code> 的库的时候，其后缀名为 <code>dylib</code>，而 <code>Xcode 7</code> 之后后缀名都改成了 <code>tbd</code>。</p>
+<p>这里引用 <a href="https://stackoverflow.com/questions/31450690/why-xcode-7-shows-tbd-instead-of-dylib" target="_blank" rel="noopener">StackoverFlow</a> 上的一篇回答。</p>
+<blockquote>
+<p>So it appears that the .dylib file is the actual library of binary code that your project is using and is located in the /usr/lib/ directory on the user’s device. The .tbd file, on the other hand, is just a text file that is included in your project and serves as a link to the required .dylib binary. Since this text file is much smaller than the binary library, it makes the SDK’s download size smaller.<br>看起来 <code>.dylib</code> 文件是项目中真正使用到的二进制库文件，它位于用户设备上的 <code>/usr/lib</code> 目录下。而 <code>.tbd</code> 文件，只是位于你项目中的一个文本文件，它扮演的是链接到真正的 <code>.dylib</code> 二进制文件的角色。因为文本文件的大小远远小于二进制文件的大小，所以让 <code>Xcode 的</code>SDK` 的下载大小更小。</p>
+</blockquote>
+<p>这里再插一句，那么有动态库，肯定就有静态库，它们的区别是什么呢？</p>
+<p>我们先梳理一下整个的编译过程。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a90820f586?w=1146&h=180&f=png&s=16936" alt="image.png"></p>
+<p>当然，这个过程中间其实还设计到编译器前端的 <code>词法分析</code>、<code>语法分析</code>、<code>语义分析</code>、<code>优化</code> 等流程，我们在后面探索 <code>LLVM</code> 和 <code>Clang</code> 的时候会详细介绍。</p>
+<p>回到刚才的话题，静态库和动态库的区别：</p>
+<blockquote>
+<p>Static frameworks are linked at <strong>compile time</strong>. Dynamic frameworks are linked <strong>at runtime</strong>.</p>
+</blockquote>
+<p>静态库和动态库都是编译好的二进制文件，只是用法不同。那为什么要分动态和静态库呢？</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9408cd69c?w=1194&h=804&f=png&s=70754" alt="image.png"></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a94085d1cf?w=1194&h=735&f=png&s=78948" alt="image.png"></p>
+<p>通过上面两幅图我们可以知道：</p>
+<ul>
+<li>静态库表现为：在链接阶段会将汇编生成的目标文件与引用的库一起链接打包进可执行文件中。</li>
+<li>动态库表现为：程序编译并不会链接到目标代码中，在程序可执行文件里面会保留对动态库的引用。其中，动态库分为动态链接库和动态加载库。<ul>
+<li><strong>动态链接库</strong>：在没有被加载到内存的前提下，当可执行文件被加载，动态库也随着被加载到内存中。在 <code>Linked Framework and Libraries</code> 设置的一些 <code>share libraries</code>。【随着程序启动而启动】</li>
+<li><strong>动态加载库</strong>：当需要的时候再使用 <code>dlopen</code> 等通过代码或者命令的方式来加载。【在程序启动之后】</li>
+</ul>
+</li>
+<li><code>Bundle</code> 类型</li>
+</ul>
+<blockquote>
+<p>Now a bundle’s a special kind of dylib that you cannot link against, all you can do is load it at run time by an dlopen and that’s used on a Mac OS for plug-ins.<br>现阶段 <code>Bundle</code> 是一种特殊类型的 <code>dylib</code>，你是无法对其进行链接的。你所能做的是在 <code>Runtime</code> 运行时去通过 <code>dlopen</code> 来加载它，它可以在 <code>macOS</code> 上用于插件。</p>
+</blockquote>
+<ul>
+<li><code>Image</code> 和 <code>Framework</code></li>
+</ul>
+<blockquote>
+<p>Image refers to any of these three types.<br>镜像文件包含了上述的三种文件类型</p>
+</blockquote>
+<blockquote>
+<p>a framework is a dylib with a special directory structure around it to holds files needed by that dylib.<br>有很多东西都叫做 <code>Framework</code>，但在本文中，<code>Framework</code> 指的是一个 <code>dylib</code>，它周围有一个特殊的目录结构来保存该 <code>dylib</code> 所需的文件。</p>
+</blockquote>
+<p><a name="e2ef8223"></a></p>
+<h3 id="1-1-1-Mach-O-结构分析"><a href="#1-1-1-Mach-O-结构分析" class="headerlink" title="1.1.1 Mach-O 结构分析"></a>1.1.1 Mach-O 结构分析</h3><p><a name="179572f3"></a></p>
+<h4 id="1-1-1-1-segment-段"><a href="#1-1-1-1-segment-段" class="headerlink" title="1.1.1.1 segment 段"></a>1.1.1.1 segment 段</h4><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9427a82ee?w=1495&h=752&f=png&s=162341" alt="image.png"></p>
+<p><code>Mach-O</code> 镜像文件是由 <code>segments</code> 段组成的。</p>
+<ul>
+<li>段的名称为大写格式<br><br>所有的段都是 <code>page size</code> 的倍数。</li>
+<li>arm64 上段大小为 <code>16</code> 字节</li>
+<li>其它架构为 <code>4</code> 字节</li>
+</ul>
+<p>这里再普及一下<strong>虚拟内存</strong>和<strong>内存页</strong>的知识：</p>
+<blockquote>
+<p>具有 <code>VM</code> 机制的操作系统，会对每个运行的进程创建一个逻辑地址空间 <code>logical address space</code> 或者叫虚拟地址空间 <code>virtual address space</code>；该空间的大小由操作系统位数决定：<code>32</code> 位的操作系统，其逻辑地址空间的大小为 <code>4GB</code>，64位的操作系统为 <code>18 exabyes</code>（其计算方式是 <code>2^32</code> || <code>2^64</code>）。</p>
+</blockquote>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a945582cb1?w=1820&h=1038&f=png&s=179992" alt="image.png"></p>
+<blockquote>
+<p>虚拟地址空间(或者逻辑地址空间)会被分为相同大小的块，这些块被称为内存页（page）。计算机处理器和它的内存管理单元（MMU - memory management uinit）维护着一张将程序的逻辑地址空间映射到物理地址上的分页表 <code>page table</code>。</p>
+</blockquote>
+<blockquote>
+<p>在 <code>masOS</code> 和早版本的 <code>iOS</code> 中，分页的大小为 <code>4kB</code>。在之后的基于 <code>A7</code> 和 <code>A8</code> 的系统中，虚拟内存（<code>64</code> 位的地址空间）地址空间的分页大小变为了 <code>16KB</code>，而物理RAM上的内存分页大小仍然维持在 <code>4KB</code>；基于A9及之后的系统，虚拟内存和物理内存的分页都是<code>16KB</code>。</p>
+</blockquote>
+<p><a name="6b863bfb"></a></p>
+<h4 id="1-1-1-2-section"><a href="#1-1-1-2-section" class="headerlink" title="1.1.1.2 section"></a>1.1.1.2 section</h4><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a946c5db85?w=1418&h=762&f=png&s=170390" alt="image.png"></p>
+<p>在 <code>segment</code> 段内部还有许多的 <code>section</code> 区。<code>section</code> 名称为小写格式。</p>
+<blockquote>
+<p>But sections are really just a subrange of a segment, they don’t have any of the constraints of being page size, but they are non-overlapping.<br>但是 <code>sections</code> 节实际上只是一个 <code>segment</code> 段的子范围，它们没有页面大小的任何限制，但是它们是不重叠的。</p>
+</blockquote>
+<p>通过 <code>MachOView</code> 工具查看 <code>app</code> 的二进制可执行文件可以查看到:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a95f6c4802?w=346&h=105&f=png&s=44780" alt="image.png"></p>
+<p><a name="62be2bd8"></a></p>
+<h4 id="1-1-1-3-常见的-segments"><a href="#1-1-1-3-常见的-segments" class="headerlink" title="1.1.1.3 常见的 segments"></a>1.1.1.3 常见的 <code>segments</code></h4><ul>
+<li><code>__TEXT</code>：代码段，包括头文件、代码和常量。只读不可修改</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a96cd8f8a3?w=1423&h=489&f=png&s=114505" alt="image.png"></p>
+<ul>
+<li><code>__DATA</code>：数据段，包括全局变量, 静态变量等。可读可写。</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a96f53b89d?w=1398&h=491&f=png&s=151076" alt="image.png"></p>
+<ul>
+<li><code>__LINKEDIT</code>：如何加载程序, 包含了方法和变量的元数据（位置，偏移量），以及代码签名等信息。只读不可修改。</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a96f567e70?w=1442&h=683&f=png&s=190726" alt="image.png"></p>
+<p><a name="53a67cea"></a></p>
+<h3 id="1-1-2-Mach-O-Universal-Files"><a href="#1-1-2-Mach-O-Universal-Files" class="headerlink" title="1.1.2 Mach-O Universal Files"></a>1.1.2 Mach-O Universal Files</h3><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9709e0842?w=1485&h=931&f=png&s=235078" alt="image.png"></p>
+<p><code>Mach-O</code> 通用文件，将多种架构的 <code>Mach-O</code> 文件合并而成。它通过 <code>header</code> 来记录不同架构在文件中的偏移量，<code>segement</code> 占多个分页，<code>header</code>占一页的空间。可能有人会觉得 <code>header</code> 单独占一页会浪费空间，但这有利于虚拟内存的实现。</p>
+<p><a name="c3056047"></a></p>
+<h2 id="1-2-虚拟内存"><a href="#1-2-虚拟内存" class="headerlink" title="1.2 虚拟内存"></a>1.2 虚拟内存</h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9823b7561?w=1252&h=923&f=png&s=191239" alt="image.png"></p>
+<p>虚拟内存是一层<strong>间接寻址</strong>。</p>
+<p>虚拟内存解决的是管理所有进程使用<strong>物理 RAM</strong> 的问题。通过添加间接层来让每个进程使用<strong>逻辑地址空间</strong>，它可以映射到 RAM 上的某个物理页上。这种映射不是一对一的，逻辑地址可能映射不到 RAM 上，也可能有多个逻辑地址映射到同一个物理 RAM 上。</p>
+<ul>
+<li>针对第一种情况，当进程要存储逻辑地址内容时会触发 <code>page fault</code>。</li>
+<li>而第二种情况就是多进程共享内存。</li>
+<li>对于文件可以不用一次性读入整个文件，可以使用分页映射 <code>mmap()</code> 的方式读取。也就是把文件<strong>某个片段</strong>映射到进程逻辑内存的<strong>某个页</strong>上。当某个想要读取的页没有在内存中，就会触发 <code>page fault</code>，内核只会读入那一页，实现文件的<strong>懒加载</strong>。也就是说 <code>Mach-O</code> 文件中的 <code>__TEXT</code> 段可以映射到多个进程，并可以懒加载，且进程之间<strong>共享内存</strong>。</li>
+<li><code>__DATA</code> 段是可读写的。这里使用到了 <code>Copy-On-Write</code> 技术，简称 <code>COW</code>。也就是多个进程共享一页内存空间时，一旦有进程要做写操作，它会先将这页内存内容<strong>复制</strong>一份出来，然后重新映射逻辑地址到新的 <code>RAM</code> 页上。也就是这个进程自己拥有了那页内存的拷贝。这就涉及到了 <code>clean/dirty page</code> 的概念。<code>dirty page</code> 含有进程自己的信息，而 <code>clean page</code> 可以被内核重新生成（重新读磁盘）。所以 <code>dirty page</code> 的代价大于 <code>clean page</code>。</li>
+</ul>
+<p><a name="ca76b4ff"></a></p>
+<h2 id="1-3-多进程加载-Mach-O-镜像"><a href="#1-3-多进程加载-Mach-O-镜像" class="headerlink" title="1.3 多进程加载 Mach-O 镜像"></a>1.3 多进程加载 Mach-O 镜像</h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a99ec0ebb3?w=1559&h=919&f=png&s=448118" alt="image.png"></p>
+<ul>
+<li>所以在多个进程加载 <code>Mach-O</code> 镜像时 <code>__TEXT</code> 和 <code>__LINKEDIT</code> 因为只读，都是可以共享内存的，读取速度就会很快。</li>
+<li>而 <code>__DATA</code> 因为可读写，就有可能会产生 <code>dirty page</code>，如果检测到有 <code>clean page</code> 就可以直接使用，反之就需要重新读取 <code>DATA page</code>。一旦产生了 <code>dirty page</code>，当 <code>dyld</code> 执行结束后，<code>__LINKEDIT</code> 需要通知内核当前页面不再需要了，当别人需要的使用时候就可以重新 <code>clean</code> 这些页面。</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a99ec8f360?w=1506&h=915&f=png&s=420489" alt="image.png"></p>
+<p><a name="0939ddd2"></a></p>
+<h2 id="1-4-ASLR"><a href="#1-4-ASLR" class="headerlink" title="1.4 ASLR"></a>1.4 ASLR</h2><p><code>ASLR</code> (Address Space Layout Randomization) 地址空间布局随机化，镜像会在随机的地址上加载。</p>
+<p><a name="97a1a8f9"></a></p>
+<h2 id="1-5-Code-Signing"><a href="#1-5-Code-Signing" class="headerlink" title="1.5 Code Signing"></a>1.5 Code Signing</h2><p>可能我们认为 <code>Xcode</code> 会把整个文件都做加密 <code>hash</code> 并用做数字签名。其实为了在运行时验证 <code>Mach-O</code> 文件的签名，并不是每次重复读入整个文件，而是把每页内容都生成一个单独的加密散列值，并存储在 <code>__LINKEDIT</code> 中。这使得文件每页的内容都能及时被校验确并保不被篡改。</p>
+<p><a name="42fe1670"></a></p>
+<h2 id="1-6-exec"><a href="#1-6-exec" class="headerlink" title="1.6 exec()"></a>1.6 <code>exec()</code></h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9afb88cad?w=1453&h=874&f=png&s=212865" alt="image.png"></p>
+<blockquote>
+<p>Exec is a system call. When you trap into the kernel, you basically say I want to replace this process with this new program.</p>
+</blockquote>
+<blockquote>
+<p><code>exec()</code> 是一个系统调用。系统内核把应用映射到新的地址空间，且每次起始位置都是随机的（因为使用 <code>ASLR</code>）。并将起始位置到 <code>0x000000</code> 这段范围的进程权限都标记为不可读写不可执行。如果是 <code>32</code> 位进程，这个范围至少是 <code>4KB</code>；对于 <code>64</code> 位进程则至少是 <code>4GB</code> 。<code>NULL</code> 指针引用和指针截断误差都是会被它捕获。这个范围也叫做 <code>PAGEZERO</code>。</p>
+</blockquote>
+<p><a name="5607ce89"></a></p>
+<h2 id="1-7-dyld"><a href="#1-7-dyld" class="headerlink" title="1.7 dyld"></a>1.7 dyld</h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9c38824d8?w=1481&h=879&f=png&s=217886" alt="image.png"></p>
+<blockquote>
+<p>Unix 的前二十年很安逸，因为那时还没有发明动态链接库。有了动态链接库后，一个用于加载链接库的帮助程序被创建。在苹果的平台里是 <code>dyld</code>，其他 <code>Unix</code> 系统也有 <code>ld.so</code>。 当内核完成映射进程的工作后会将名字为 <code>dyld</code> 的 <code>Mach-O</code> 文件映射到进程中的随机地址，它将 <code>PC</code> 寄存器设为 <code>dyld</code> 的地址并运行。<code>dyld</code> 在应用进程中运行的工作是加载应用依赖的所有动态链接库，准备好运行所需的一切，它拥有的权限跟应用一样。</p>
+</blockquote>
+<p><a name="3dd32303"></a></p>
+<h2 id="1-8-dyld-流程"><a href="#1-8-dyld-流程" class="headerlink" title="1.8 dyld 流程"></a>1.8 dyld 流程</h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9c6928a48?w=1519&h=893&f=png&s=191601" alt="image.png"></p>
+<ul>
+<li>Load dylibs</li>
+</ul>
+<blockquote>
+<p>从主执行文件的 <code>header</code> 获取到需要加载的所依赖动态库列表，而 <code>header</code> 早就被内核映射过。然后它需要找到每个 <code>dylib</code>，然后打开文件读取文件起始位置，确保它是 <code>Mach-O</code> 文件。接着会找到代码签名并将其注册到内核。然后在 <code>dylib</code> 文件的每个 <code>segment</code> 上调用 <code>mmap()</code>。应用所依赖的 <code>dylib</code> 文件可能会再依赖其他 <code>dylib</code>，所以 <code>dyld</code> 所需要加载的是动态库列表一个递归依赖的集合。一般应用会加载 <code>100</code> 到 <code>400</code> 个 <code>dylib</code> 文件，但大部分都是系统 <code>dylib</code>，它们会被预先计算和缓存起来，加载速度很快。</p>
+</blockquote>
+<ul>
+<li>Fix-ups</li>
+</ul>
+<blockquote>
+<p>在加载所有的动态链接库之后，它们只是处在相互独立的状态，需要将它们<strong>绑定</strong>起来，这就是 <code>Fix-ups</code>。代码签名使得我们不能修改指令，那样就不能让一个 <code>dylib</code> 的调用另一个 <code>dylib</code>。这时需要加很多间接层。<br>现代 <code>code-gen</code> 被叫做动态 <strong>PIC（Position Independent Code）</strong>，意味着代码可以被加载到间接的地址上。当调用发生时，<code>code-gen</code> 实际上会在 <code>__DATA</code> 段中创建一个指向被调用者的指针，然后加载指针并跳转过去。所以 <code>dyld</code> 做的事情就是修正（<code>fix-up</code>）指针和数据。<code>Fix-up</code> 有两种类型，<code>rebasing</code> 和 <code>binding</code>。</p>
+</blockquote>
+<ul>
+<li>Rebasing 和 Binding</li>
+</ul>
+<blockquote>
+<p>Rebasing：在镜像内部<strong>调整</strong>指针的指向<br>Binding：将指针<strong>指向镜像外部</strong>的内容</p>
+</blockquote>
+<p><code>dyld</code> 的时间线由上图可知为：</p>
+<p>Load dylibs -&gt; Rebase -&gt; Bind -&gt; ObjC -&gt; Initializers</p>
+<p><a name="a57b44d7"></a></p>
+<h2 id="1-9-dyld2-amp-amp-dyld3"><a href="#1-9-dyld2-amp-amp-dyld3" class="headerlink" title="1.9 dyld2 &amp;&amp; dyld3"></a>1.9 dyld2 &amp;&amp; dyld3</h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9cb854686?w=2400&h=1360&f=png&s=764555" alt="image.png"></p>
+<p>在 <code>iOS 13</code> 之前，所有的第三方 <code>App</code> 都是通过 <code>dyld 2</code> 来启动 <code>App</code> 的，主要过程如下：</p>
+<ul>
+<li>解析 <code>Mach-O</code> 的 <code>Header</code> 和 <code>Load Commands</code>，找到其依赖的库，并递归找到所有依赖的库</li>
+<li>加载 <code>Mach-O</code> 文件</li>
+<li>进行符号查找</li>
+<li>绑定和变基</li>
+<li>运行初始化程序</li>
+</ul>
+<p><code>dyld3</code> 被分为了<strong>三个组件</strong>：</p>
+<ul>
+<li>一个进程外的 <code>MachO</code> 解析器<ul>
+<li>预先处理了所有可能影响启动速度的 <code>search path</code>、<code>@rpaths</code> 和环境变量</li>
+<li>然后分析 <code>Mach-O</code> 的 <code>Header</code> 和依赖，并完成了所有符号查找的工作</li>
+<li>最后将这些结果创建成了一个启动闭包</li>
+<li>这是一个普通的 <code>daemon</code> 进程，可以使用通常的测试架构</li>
+</ul>
+</li>
+<li>一个进程内的引擎，用来运行启动闭包<ul>
+<li>这部分在进程中处理</li>
+<li>验证启动闭包的安全性，然后映射到 <code>dylib</code> 之中，再跳转到 <code>main</code> 函数</li>
+<li>不需要解析 <code>Mach-O</code> 的 <code>Header</code> 和依赖，也不需要符号查找。</li>
+</ul>
+</li>
+<li>一个启动闭包缓存服务<ul>
+<li>系统 <code>App</code> 的启动闭包被构建在一个 <code>Shared Cache</code> 中， 我们甚至不需要打开一个单独的文件</li>
+<li>对于第三方的 <code>App</code>，我们会在 <code>App</code> 安装或者升级的时候构建这个启动闭包。</li>
+<li>在 <code>iOS</code>、<code>tvOS</code>、<code>watchOS</code>中，这这一切都是 <code>App</code> 启动之前完成的。在 <code>macOS</code> 上，由于有 <code>Side Load App</code>，进程内引擎会在首次启动的时候启动一个 <code>daemon</code> 进程，之后就可以使用启动闭包启动了。</li>
+</ul>
+</li>
+</ul>
+<p>dyld 3 把很多耗时的查找、计算和 <code>I/O</code> 的事前都预先处理好了，这使得启动速度有了很大的提升。</p>
+<p>好了，先导知识就总结到这里，接下来让我们调整呼吸进入下一章~</p>
+<p><a name="b0014624"></a></p>
+<h1 id="二、App-加载分析"><a href="#二、App-加载分析" class="headerlink" title="二、App 加载分析"></a>二、App 加载分析</h1><p>我们在探索 <code>iOS</code> 底层的时候，对于对象、类、方法有了一定的认知哦，接下来我们就一起来探索一下应用是怎么加载的。</p>
+<p>我们直接新建一个 <code>Single View App</code> 的项目，然后在 <code>main.m</code> 中打一个断点:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9cee75696?w=681&h=176&f=png&s=110355" alt="image.png"></p>
+<p>然后我们可以看到在 <code>main</code> 方法执行前有一步 <code>start</code>，而这一流程是由 <code>libdyld.dylib</code> 这个动态库来执行的。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9dfc3e6a2?w=1150&h=277&f=png&s=176870" alt="image.png"></p>
+<p>这个现象说明了什么呢？说明我们的 <code>app</code> 在 <code>main</code> 函数执行之前其实还通过 <code>dyld</code> 做了很多事情。那为了搞清楚具体的流程，我们不妨从 <a href="https://opensource.apple.com/tarballs/" target="_blank" rel="noopener">Apple OpenSource</a> 上下载 <code>dyld</code> 的源码来进行探索。</p>
+<p>我们选择最新的 <code>655.1.1</code> 版本：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2a9f3423723?w=995&h=48&f=png&s=10126" alt="image.png"></p>
+<p><a name="079b22e2"></a></p>
+<h1 id="三、dyld-源码分析"><a href="#三、dyld-源码分析" class="headerlink" title="三、dyld 源码分析"></a>三、<code>dyld</code> 源码分析</h1><p>面对 <code>dyld</code> 的源码，我们不可能一行一行的去分析。我们不妨在刚才创建的项目中断点一下 <code>load</code> 方法，看下调用堆栈:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa10b932de?w=885&h=466&f=png&s=321492" alt="image.png"></p>
+<p>这一次我们发现，<code>load</code> 方法的调用要早于 <code>main</code> 函数的调用，其次，我们得到了一个非常有价值的线索: <code>_dyld_start</code>。</p>
+<p><a name="710a9b0e"></a></p>
+<h2 id="3-1-dyld-start"><a href="#3-1-dyld-start" class="headerlink" title="3.1 _dyld_start"></a>3.1 _dyld_start</h2><p>我们直接在 <code>dyld 655.1.1</code> 中全局搜索这个 <code>_dyld_start</code>，我们可以来到 <code>dyldStartup.s</code> 这个汇编文件，然后我们聚焦于 <code>arm64</code> 架构下的汇编代码:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa1bd5873a?w=871&h=839&f=png&s=426943" alt="image.png"></p>
+<p>对于这里的汇编代码，我们肯定也没必要逐行分析，我们直接定位到 <code>bl</code> 语句后面(<code>bl</code> 在汇编层面是跳转的意思)：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bl	__ZN13dyldbootstrap5startEPK12macho_headeriPPKclS2_Pm</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到这里有一行注释:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">// call dyldbootstrap::start(app_mh, argc, argv, slide, dyld_mh, &amp;startGlue)</span><br></pre></td></tr></table></figure>
+
+<p>这行注释的意思是调用位于 <code>dyldbootstrap</code> 命名空间下的 <code>start</code> 方法，我们继续搜索一下这个 <code>start</code> 方法，结果位于 <code>dyldInitialization.cpp</code> 文件(从文件名我们可以看出该文件主要是用来初始化 <code>dyld</code>)，这里查找 <code>start</code> 的时候可能会有很多结果，我们其实可以先搜索命名空间，再搜索 <code>start</code> 方法。</p>
+<p><a name="5332c719"></a></p>
+<h2 id="3-2-dyldbootstrap-start"><a href="#3-2-dyldbootstrap-start" class="headerlink" title="3.2 dyldbootstrap::start"></a>3.2 dyldbootstrap::start</h2><p><code>start</code> 方法源码如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//  This is code to bootstrap dyld.  This work in normally done for a program by dyld and crt.</span></span><br><span class="line"><span class="comment">//  In dyld we have to do this manually.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="keyword">uintptr_t</span> start(<span class="keyword">const</span> struct macho_header* appsMachHeader, <span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span>* argv[], </span><br><span class="line">				<span class="keyword">intptr_t</span> slide, <span class="keyword">const</span> struct macho_header* dyldsMachHeader,</span><br><span class="line">				<span class="keyword">uintptr_t</span>* startGlue)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">// if kernel had to slide dyld, we need to fix up load sensitive locations</span></span><br><span class="line">	<span class="comment">// we have to do this before using any global variables</span></span><br><span class="line">    slide = slideOfMainExecutable(dyldsMachHeader);</span><br><span class="line">    <span class="keyword">bool</span> shouldRebase = slide != <span class="number">0</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> __has_feature(ptrauth_calls)</span></span><br><span class="line">    shouldRebase = <span class="literal">true</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    <span class="keyword">if</span> ( shouldRebase ) &#123;</span><br><span class="line">        rebaseDyld(dyldsMachHeader, slide);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// allow dyld to use mach messaging</span></span><br><span class="line">	mach_init();</span><br><span class="line"></span><br><span class="line">	<span class="comment">// kernel sets up env pointer to be just past end of agv array</span></span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">char</span>** envp = &amp;argv[argc+<span class="number">1</span>];</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// kernel sets up apple pointer to be just past end of envp array</span></span><br><span class="line">	<span class="keyword">const</span> <span class="keyword">char</span>** apple = envp;</span><br><span class="line">	<span class="keyword">while</span>(*apple != <span class="literal">NULL</span>) &#123; ++apple; &#125;</span><br><span class="line">	++apple;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// set up random value for stack canary</span></span><br><span class="line">	__guard_setup(apple);</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> DYLD_INITIALIZER_SUPPORT</span></span><br><span class="line">	<span class="comment">// run all C++ initializers inside dyld</span></span><br><span class="line">	runDyldInitializers(dyldsMachHeader, slide, argc, argv, envp, apple);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// now that we are done bootstrapping dyld, call dyld's main</span></span><br><span class="line">	<span class="keyword">uintptr_t</span> appsSlide = slideOfMainExecutable(appsMachHeader);</span><br><span class="line">	<span class="keyword">return</span> dyld::_main(appsMachHeader, appsSlide, argc, argv, envp, apple, startGlue);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们刚才探索到了 <code>start</code> 方法，具体流程如下:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa20f39578?w=687&h=200&f=png&s=118113" alt="image.png"></p>
+<ul>
+<li>根据 <code>dyld</code> 的 <code>Mach-O</code> 文件的 <code>header</code> 判断是否需要对 <code>dyld</code> 这个 <code>Mach-O</code> 进行 <code>rebase</code> 操作</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa2228b68d?w=374&h=57&f=png&s=22871" alt="image.png"></p>
+<ul>
+<li>初始化 <code>mach</code>，使得 <code>dyld</code> 可以进行 <code>mach</code> 通讯。</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa238533bf?w=575&h=140&f=png&s=83887" alt="image.png"></p>
+<ul>
+<li>内核将 <code>env</code> 指针设置为刚好超出 <code>agv</code> 数组的末尾；内核将 <code>apple</code> 指针设置为刚好超出 <code>envp</code> 数组的末尾</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa464c03aa?w=390&h=49&f=png&s=22396" alt="image.png"></p>
+<ul>
+<li>栈溢出保护</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa4d8715bf?w=728&h=62&f=png&s=65739" alt="image.png"></p>
+<ul>
+<li>读取 <code>app</code> 主二进制文件 <code>Mach-O</code> 的 <code>header</code> 来得到偏移量 <code>appSlide</code>，然后调用 <code>dyld</code> 命名空间下的 <code>_main</code> 方法。</li>
+</ul>
+<p><a name="cbf8a53b"></a></p>
+<h2 id="3-3-dyldbootstrap-main"><a href="#3-3-dyldbootstrap-main" class="headerlink" title="3.3 dyldbootstrap::_main"></a>3.3 dyldbootstrap::_main</h2><p>我们通过搜索来到 <code>dyld.cpp</code> 文件下的 <code>_main</code> 方法：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa4e057edd?w=744&h=189&f=png&s=112467" alt="image.png"></p>
+<p><code>_main方法</code> 官方的注释如下：</p>
+<blockquote>
+<p><code>dyld</code> 的入口。内核加载了 <code>dyld</code> 然后跳转到 <code>__dyld_start</code> 来设置一些寄存器的值然后调用到了这个方法。<br>返回 <code>__dyld_start</code> 所跳转到的目标程序的 <code>main</code> 函数地址。</p>
+</blockquote>
+<p>我们乍一看，这个方法有四五百行，所以我们不能老老实实的一行一行来看，这样太累了。我们应该着重于有注释的地方。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa540253e5?w=2202&h=266&f=png&s=342262" alt="image.png"></p>
+<ul>
+<li>我们首先可以看到这里是从环境变量中获取主要可执行文件的 <code>cdHash</code> 值。这个哈希值 <code>mainExecutableCDHash</code> 在后面用来校验 <code>dyld3</code> 的启动闭包。</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa5c1aafdc?w=2106&h=310&f=png&s=306061" alt="image.png"></p>
+<ul>
+<li>上图代码作用是追踪 <code>dyld</code> 的加载。然后判断当前是否为模拟器环境，如果不是模拟器，则追踪主二进制可执行文件的加载。</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa5f01153d?w=2996&h=822&f=png&s=831234" alt="image.png"></p>
+<ul>
+<li>显示宏定义判断是否为 <code>macOS</code> 执行环境，如果是则判断 <code>DYLD_ROOT_PATH</code> 环境变量是否存在，如果存在，然后判断模拟器是否有自己的 <code>dyld</code>，如果有就使用，如果没有，则返回错误信息。</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa698cbc3e?w=1838&h=1530&f=png&s=1207328" alt="image.png"></p>
+<ul>
+<li>打印日志：<code>dyld 启动开始</code></li>
+<li>根据传入 <code>dyldbootstrap::_main</code> 方法的参数来设置上下文</li>
+<li>拾取指向 <code>exec</code> 路径的指针</li>
+<li>从 <code>dyl</code> d移除临时 <code>apple [0]</code> 过渡代码</li>
+<li>判断 <code>exec</code> 路径是否为绝对路径，如果为相对路径，使用 <code>cwd</code> 转化为绝对路径</li>
+<li>为了后续的日志打印从 <code>exec</code> 路径中取出进程的名称 (<code>strrchr</code> 函数是获取第二个参数出现的最后的一个位置，然后返回从这个位置开始到结束的内容)</li>
+<li>根据 <code>App</code> 主二进制可执行文件 <code>Mach-O</code> 的 <code>Header</code> 的内容配置进程的一些限制条件</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa772de4f3?w=2754&h=1372&f=png&s=1649230" alt="image.png"></p>
+<ul>
+<li>判断是否为 <code>macOS</code> 执行环境，如果是的话，再判断上下文的一些配置属性是否被设置了，如果没有被设置，则再次进行一次 <code>setContext</code> 上下文配置操作。</li>
+<li>根据传入的参数 <code>envp</code> 检查环境变量</li>
+<li>默认未初始化的后备路径</li>
+<li>判断是否为 <code>macOS</code> 执行环境，如果是的话，再判断当前 <code>app</code> 的 <code>Mach-O</code> 可执行文件是否为 <code>iOSMac</code> 类型且不为 <code>macOS</code> 类型的话，则重置上下文的根路径，然后再判断 <code>DYLD_FALLBACK_LIBRARY_PATH</code> 和 <code>DYLD_FALLBACK_FRAMEWORK_PATH</code> 这两个环境变量是否都是默认后备路径，如果是的话赋值为受限的后备路径。<br></li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa87ac8a00?w=2714&h=286&f=png&s=652480" alt="image.png"></p>
+<ul>
+<li>根据环境变量 <code>DYLD_PRINT_OPTS</code> 和 <code>DYLD_PRINT_ENV</code> 来判断是否需要打印</li>
+<li>通过当前 <code>app</code> 的 <code>Mach-O</code> 可执行文件的 <code>header</code> 和 <code>ASLR</code> 之后的偏移量来获取架构信息。在这里会判断如果是 <code>GC</code> 的程序则会禁用掉共享缓存。<br></li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa8a83f7f6?w=2188&h=798&f=png&s=772514" alt="image.png"></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa8e4b3fe5?w=2082&h=506&f=png&s=499627" alt="image.png"></p>
+<ul>
+<li>判断共享缓存是否开启，如果开启了就将共享缓存映射到当前进程的逻辑内存空间内</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aa8e7e0166?w=2478&h=944&f=png&s=1185548" alt="image.png"></p>
+<ul>
+<li>检查共享缓存这里会先判断 <code>app</code> 的 <code>Mach-O</code> 二进制可执行文件是否有段覆盖了共享缓存区域，如果覆盖了则禁用共享缓存。但是这里的前提是 <code>macOS</code>，在 <code>iOS</code> 中，共享缓存是必需的。</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aaa2f657c8?w=3158&h=412&f=png&s=624597" alt="image.png"></p>
+<blockquote>
+<p>这里为了方便查看，我们可以折叠一些分支条件。</p>
+</blockquote>
+<ul>
+<li>通过共享缓存中的头的版本信息来判断是走 <code>dyld 2</code> 还是 <code>dyld 3</code> 的流程</li>
+</ul>
+<p><a name="d37f93ae"></a></p>
+<h2 id="3-4-dyld3-的处理"><a href="#3-4-dyld3-的处理" class="headerlink" title="3.4 dyld3 的处理"></a>3.4 dyld3 的处理</h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aab373779d?w=2494&h=860&f=png&s=1063972" alt="image.png"></p>
+<ul>
+<li>由于 <code>dyld3</code> 会创建一个启动闭包，我们需要来读取它，这里会现在缓存中查找是否有启动闭包的存在，前面我们已经说过了，系统级的 <code>app</code> 的启动闭包是存在于共享缓存中，而我们自己开发的 <code>app</code> 的启动闭包是在 <code>app</code> 安装或者升级的时候构建的，所以这里检查 <code>dyld</code> 中的缓存是有意义的。</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aac702efed?w=2582&h=642&f=png&s=662703" alt="image.png"></p>
+<ul>
+<li>宏定义判断代码执行条件为真机。</li>
+<li>如果 <code>dyld</code> 缓存中没有找到启动闭包或者找到了启动闭包但是验证失败（我们最开始提到的 <code>cdHash</code> 在这里出现了）<ul>
+<li>从启动闭包缓存中查找<ul>
+<li>如果还是没有找到，那就创建一个新的启动闭包</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aacce15aa8?w=3004&h=1398&f=png&s=1375098" alt="image.png"></p>
+<ul>
+<li>打印日志信息：<code>dyld3 启动开始</code></li>
+<li>尝试通过启动闭包进行启动<ul>
+<li>如果启动失败，则创建一个新的启动闭包尝试再次启动</li>
+<li>如果启动成功，由于 <code>start()</code> 是以函数指针的方式调用 <code>_main</code> 方法的返回的指针，需要进行签名。</li>
+</ul>
+</li>
+</ul>
+<p>至此，<code>dyld3</code> 的流程就处理完毕，我们再接着往下分析 <code>dyld2</code> 的流程。</p>
+<p><a name="d3cd4993"></a></p>
+<h2 id="3-5-dyld2-的处理"><a href="#3-5-dyld2-的处理" class="headerlink" title="3.5 dyld2 的处理"></a>3.5 dyld2 的处理</h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab07f5c3c0?w=778&h=124&f=png&s=68090" alt="image.png"></p>
+<ul>
+<li>这里会添加 <code>dyld</code> 的镜像文件到 <code>UUID</code> 列表中，主要的目的是启用堆栈的符号化。<br></li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab081ff41e?w=794&h=57&f=png&s=52237" alt="image.png"></p>
+<hr>
+<p><strong>reloadAllImages</strong></p>
+<blockquote>
+<p><code>ImageLoader</code> 是一个用于加载可执行文件的基类，它负责链接镜像，但不关心具体文件格式，因为这些都交给子类去实现。每个可执行文件都会对应一个 <code>ImageLoader</code>实例。<code>ImageLoaderMachO</code> 是用于加载 <code>Mach-O</code> 格式文件的 <code>ImageLoader</code> 子类，而 <code>ImageLoaderMachOClassic</code> 和 <code>ImageLoaderMachOCompressed</code> 都继承于 <code>ImageLoaderMachO</code>，分别用于加载那些 <code>__LINKEDIT</code> 段为传统格式和压缩格式的 <code>Mach-O</code> 文件。</p>
+</blockquote>
+<p>接下来就来到重头戏了 <code>reloadAllImages</code> 了：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aae9d91b0a?w=916&h=182&f=png&s=112565" alt="image.png"></p>
+<hr>
+<p><strong>实例化主程序</strong></p>
+<p>这里我们看到有一行代码:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// instantiate ImageLoader for main executable</span></span><br><span class="line">		sMainExecutable = instantiateFromLoadedImage(mainExecutableMH, mainExecutableSlide, sExecPath);</span><br></pre></td></tr></table></figure>
+
+<p>显然，在这里我们的主程序被实例化了，我们进入这个方法内部：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aaf5d18c42?w=2488&h=634&f=png&s=793386" alt="image.png"></p>
+<p>这里相当于要为已经映射到主可执行文件中的文件创建一个 <code>ImageLoader*</code>。</p>
+<p>从上面代码我们不难看出这里真正执行的逻辑是 <code>ImageLoaderMachO::instantiateMainExecutable</code> 方法：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab11a0d786?w=3198&h=1024&f=png&s=1578550" alt="image.png"></p>
+<p>我们再进入 <code>sniiffLoadCommands</code> 方法内部：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab12db7400?w=1040&h=136&f=png&s=127211" alt="image.png"></p>
+<p>通过注释不难看出：<code>sniiffLoadCommands</code> 会确定此 <code>mach-o</code> 文件是否具有原始的或压缩的 <code>LINKEDIT</code> 以及 <code>mach-o</code> 文件的 <code>segement</code> 的个数。</p>
+<p><code>sniiffLoadCommands</code> 完成后，判断 <code>LINKEDIT</code> 是压缩的格式还是传统格式，然后分别调用对应的 <code>instantiateMainExecutable</code> 方法来实例化主程序。</p>
+<hr>
+<p><strong>加载任何插入的动态库</strong><br><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab171053dd?w=1940&h=254&f=png&s=206419" alt="image.png"></p>
+<hr>
+<p><strong>链接库</strong></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab2dfe6846?w=1864&h=1228&f=png&s=1215014" alt="image.png"></p>
+<p>先是链接主二进制可执行文件，然后链接任何插入的动态库。这里都用到了 <code>link</code> 方法，在这个方法内部会执行递归的 <code>rebase</code> 操作来修正 <code>ASLR</code> 偏移量问题。同时还会有一个 <code>recursiveApplyInterposing</code> 方法来递归的将动态加载的镜像文件插入。</p>
+<hr>
+<p><strong>运行所有初始化程序</strong></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab384d0841?w=586&h=90&f=png&s=56052" alt="image.png"></p>
+<p>完成链接之后需要进行初始化了，这里会来到 <code>initializeMainExecutable</code>:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab67d5bb30?w=1318&h=466&f=png&s=339528" alt="image.png"></p>
+<p>这里注意执行顺序：</p>
+<ul>
+<li>先为所有插入并链接完成的动态库执行初始化操作</li>
+<li>然后再为主程序可执行文件执行初始化操作</li>
+</ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab6cf36faf?w=1724&h=530&f=png&s=397840" alt="image.png"></p>
+<p>在 <code>runInitializers</code> 内部我们继续探索到 <code>processInitializers</code>:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab7a3c7082?w=2070&h=634&f=png&s=706205" alt="image.png"></p>
+<p>然后我们来到 <code>recursiveInitialization</code>:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab8b189595?w=1494&h=204&f=png&s=194458" alt="image.png"></p>
+<p>然后我们来到 <code>notifySingle</code>:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab9914b8fb?w=2208&h=1020&f=png&s=1195465" alt="image.png"></p>
+<p>箭头所示的地方是获取镜像文件的真实地址。</p>
+<p>我们全局搜索一下 <code>sNotifyObjcInit</code> 可以来到 <code>registerObjCNotifiers</code>：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ab9b5b1d39?w=2038&h=988&f=png&s=863889" alt="image.png"></p>
+<p>接着搜索 <code>registerObjCNotifiers</code>：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aba3a929e9?w=1244&h=256&f=png&s=186203" alt="image.png"></p>
+<p>此时，我们打开 <code>libObjc</code> 的源码可以看到:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2aba8fc33ec?w=1290&h=818&f=png&s=542698" alt="image.png"></p>
+<p>上面这一连串的跳转，结果很显然：<code>dyld</code> 注册了回调才使得 <code>libobjc</code> 能知道镜像何时加载完毕。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2abd92927ac?w=1040&h=122&f=png&s=66719" alt="image.png"></p>
+<p>在 <code>ImageLoader::recursiveInitialization</code> 方法中还有一个 <code>doInitialization</code> 值得注意，这里是真正做初始化操作的地方。</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2abda85fa61?w=1206&h=472&f=png&s=251540" alt="image.png"></p>
+<p><code>doInitialization</code> 主要有两个操作，一个是 <code>doImageInit</code>，一个是 <code>doModInitFunctions</code>:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2abdc19c992?w=2098&h=1356&f=png&s=1439046" alt="image.png"></p>
+<p><code>doImageInit</code> 内部会通过初始地址 + 偏移量拿到初始化器 <code>func</code>，然后进行签名的验证。验证通过后还要判断初始化器是否在镜像文件中以及 <code>libSystem</code> 库是否已经初始化，最后才执行初始化器。</p>
+<hr>
+<p><strong>通知监听 dyld 的 main</strong></p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2abdca7162f?w=1928&h=914&f=png&s=1015509" alt="image.png"></p>
+<p>一切工作做完后通知监听 <code>dyld</code> 的 <code>main</code>，然后为主二进制可执行文件找到入口，最后对结果进行签名。</p>
+<p><a name="0455da84"></a></p>
+<h1 id="四、探索-objc-init"><a href="#四、探索-objc-init" class="headerlink" title="四、探索 _objc_init"></a>四、探索 _objc_init</h1><p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2abebf9b282?w=2888&h=1322&f=png&s=1556679" alt="image.png"></p>
+<p>我们直接通过 <code>LLDB</code> 大法来断点调试 <code>libObjc</code> 中的 <code>_objc_init</code>，然后通过 <code>bt</code> 命令打印出当前的调用堆栈，根据上一节我们探索 <code>dyld</code> 的源码，此刻一切的一切都是那么的清晰明了：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ac81605e9f?w=2874&h=550&f=png&s=1048295" alt="image.png"></p>
+<p>我们可以看到 <code>dyld</code> 的最后一个流程是 <code>doModInitFunctions</code> 方法的执行。</p>
+<p>我们打开 <code>libSystem</code> 的源码，全局搜索 <code>libSystem_initializer</code> 可以看到：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ac29697bf9?w=2536&h=766&f=png&s=859314" alt="image.png"></p>
+<p>然后我们打开 <code>libDispatch</code> 的源码，全局搜索 <code>libdispatch_init</code> 可以看到：</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ac52fcf871?w=2114&h=926&f=png&s=1094149" alt="image.png"></p>
+<p>我们再搜索 <code>_os_object_init</code>:</p>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/10/16f8b2ac9d9cb4e7?w=1206&h=790&f=png&s=564174" alt="image.png"></p>
+<p>完美~，<code>_objc_init</code> 在这里就被调用了。所以 <code>_objc_init</code> 的流程是</p>
+<p>dyld -&gt; libSystem -&gt; libDispatch -&gt; libObc -&gt; <code>_objc_init</code></p>
+<p><a name="f5e882ad"></a></p>
+<h1 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h1><p>本文主要探索了 <code>app</code> 启动之后 <code>dyld</code> 的流程，整个分析过程确实比较复杂，但在探索的过程中，我们不仅对底层源码有了新的认知，同时对于优化我们 <code>app</code> 启动也是有很多好处的。下一章，我们会对 <code>objc_init</code> 内部的 <code>map_images</code> 和 <code>load_images</code> 进行更深入的分析，敬请期待~</p>
+<p><a name="1808d429"></a></p>
+<h1 id="六、参考资料"><a href="#六、参考资料" class="headerlink" title="六、参考资料"></a>六、参考资料</h1><p><a href="https://developer.apple.com/videos/play/wwdc2016/406/" target="_blank" rel="noopener">Optimizing App Startup Time</a></p>
+<p><a href="https://xiaozhuanlan.com/topic/4690823715" target="_blank" rel="noopener">优化 App 启动</a></p>
+<p><a href="https://github.com/Damonvvong/DevNotes/blob/master/Notes/framework.md" target="_blank" rel="noopener">iOS 开发中的『库』(一)</a></p>
+<p><a href="https://www.awsomejiang.com/2018/01/15/Memory-Management-For-iOS-Apps-No-2/" target="_blank" rel="noopener">iOS应用的内存管理（二）</a></p>
+<p><a href="http://yulingtianxia.com/blog/2016/10/30/Optimizing-App-Startup-Time/#%E5%8A%A0%E8%BD%BD-Dylib" target="_blank" rel="noopener">优化 App 的启动时间</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    leejunhui
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://leejunhui.com/2020/01/10/iOS-底层探索-应用加载/" title="iOS 底层探索 - 应用加载">http://leejunhui.com/2020/01/10/iOS-底层探索-应用加载/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS/" rel="tag"># iOS</a>
+          
+            <a href="/tags/Objective-C/" rel="tag"># Objective-C</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/08/iOS-底层探索-消息转发/" rel="next" title="iOS 底层探索 - 消息转发">
+                <i class="fa fa-chevron-left"></i> iOS 底层探索 - 消息转发
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">leejunhui</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、前导知识"><span class="nav-number">1.</span> <span class="nav-text">一、前导知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-Mach-O"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 Mach-O</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-1-Mach-O-结构分析"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1.1 Mach-O 结构分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-1-1-segment-段"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">1.1.1.1 segment 段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-1-2-section"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">1.1.1.2 section</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-1-3-常见的-segments"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">1.1.1.3 常见的 segments</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-2-Mach-O-Universal-Files"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.1.2 Mach-O Universal Files</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-虚拟内存"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 虚拟内存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-多进程加载-Mach-O-镜像"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 多进程加载 Mach-O 镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-ASLR"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 ASLR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-Code-Signing"><span class="nav-number">1.5.</span> <span class="nav-text">1.5 Code Signing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-6-exec"><span class="nav-number">1.6.</span> <span class="nav-text">1.6 exec()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-7-dyld"><span class="nav-number">1.7.</span> <span class="nav-text">1.7 dyld</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-8-dyld-流程"><span class="nav-number">1.8.</span> <span class="nav-text">1.8 dyld 流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-9-dyld2-amp-amp-dyld3"><span class="nav-number">1.9.</span> <span class="nav-text">1.9 dyld2 &amp;&amp; dyld3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、App-加载分析"><span class="nav-number">2.</span> <span class="nav-text">二、App 加载分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、dyld-源码分析"><span class="nav-number">3.</span> <span class="nav-text">三、dyld 源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-dyld-start"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 _dyld_start</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-dyldbootstrap-start"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 dyldbootstrap::start</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-dyldbootstrap-main"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 dyldbootstrap::_main</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-dyld3-的处理"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 dyld3 的处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-dyld2-的处理"><span class="nav-number">3.5.</span> <span class="nav-text">3.5 dyld2 的处理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、探索-objc-init"><span class="nav-number">4.</span> <span class="nav-text">四、探索 _objc_init</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五、总结"><span class="nav-number">5.</span> <span class="nav-text">五、总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#六、参考资料"><span class="nav-number">6.</span> <span class="nav-text">六、参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2019 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">leejunhui</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
