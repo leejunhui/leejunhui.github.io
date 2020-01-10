@@ -81,74 +81,74 @@
 
 
 
-<meta name="description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调">
+<meta name="description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFun">
 <meta name="keywords" content="iOS,Objective-C">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS 底层探索 - 类的加载">
 <meta property="og:url" content="http://leejunhui.com/2020/01/11/iOS-底层探索-类的加载/index.html">
 <meta property="og:site_name" content="leejunhui&#39;s blog">
-<meta property="og:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调">
+<meta property="og:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFun">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329ccda74e8?w=1064&h=642&f=png&s=587989">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329cd933b33?w=640&h=128&f=png&s=62998">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329de4109a5?w=1392&h=1126&f=png&s=1117545">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329d7958eaa?w=2742&h=950&f=png&s=3488566">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329e03ed033?w=1436&h=1344&f=png&s=1190411">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329dd45fffc?w=1906&h=516&f=png&s=270969">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a0d454646?w=2154&h=144&f=png&s=104541">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a0dbf6b51?w=1238&h=524&f=png&s=111955">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a12f6dde2?w=2040&h=976&f=png&s=356538">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a278c0d69?w=1034&h=128&f=png&s=59484">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a2a5d0ab1?w=1708&h=1512&f=png&s=484522">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a1cca9f2d?w=1254&h=134&f=png&s=31131">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a52c3eb3c?w=1834&h=466&f=png&s=147797">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a5879836b?w=1424&h=918&f=png&s=188162">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a5e7bb65d?w=1360&h=1602&f=png&s=399014">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a6584d8ae?w=1090&h=652&f=png&s=136253">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032aaef40816?w=1474&h=744&f=png&s=183723">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032ad7a2da2f?w=1410&h=352&f=png&s=112739">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032ae45a2e5b?w=1278&h=354&f=png&s=120788">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032ae90c3235?w=1384&h=132&f=png&s=68340">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032af5bf1b90?w=1280&h=242&f=png&s=89887">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b22d0abd7?w=1332&h=1076&f=png&s=295460">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b1057f929?w=2134&h=1618&f=png&s=499905">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032afa959dd3?w=1180&h=658&f=png&s=170983">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b28947688?w=1312&h=78&f=png&s=41201">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b2bf05f9d?w=1080&h=622&f=png&s=143781">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b3023cd3c?w=1356&h=1256&f=png&s=282135">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b51b3f8ca?w=1372&h=662&f=png&s=161671">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b3baaef26?w=1102&h=578&f=png&s=164251">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b4c017edb?w=1108&h=356&f=png&s=93626">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b55980447?w=1194&h=78&f=png&s=29457">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b6a7a2dd4?w=1246&h=92&f=png&s=33495">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b73e7d2db?w=446&h=78&f=png&s=16174">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b7ae844b4?w=1462&h=1044&f=png&s=208548">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b936fad4e?w=1068&h=228&f=png&s=100861">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b952f910a?w=800&h=1092&f=png&s=143996">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b953a323c?w=1206&h=964&f=png&s=245597">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032babf0eb16?w=988&h=96&f=png&s=28225">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032bcf58d493?w=1372&h=718&f=png&s=218953">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032be76aa042?w=1374&h=470&f=png&s=159138">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032bd70a03bb?w=1202&h=518&f=png&s=154798">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032bd7caa0c9?w=1320&h=348&f=png&s=137208">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032be7598531?w=932&h=202&f=png&s=57447">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c160a6a72?w=868&h=1370&f=png&s=233458">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c16a26753?w=1208&h=104&f=png&s=44994">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c16fb6903?w=1010&h=130&f=png&s=37801">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c17c29916?w=1012&h=224&f=png&s=47697">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c1b072069?w=1260&h=276&f=png&s=101852">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c2bb658d1?w=1200&h=80&f=png&s=37876">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c3f8d69ad?w=1318&h=96&f=png&s=22281">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c52592950?w=1186&h=588&f=png&s=143089">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c57867da9?w=1816&h=680&f=png&s=278430">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c6aa3bb47?w=1276&h=998&f=png&s=289198">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c7073d52c?w=1404&h=222&f=png&s=89710">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c93a52eaa?w=1300&h=164&f=png&s=73216">
-<meta property="og:updated_time" content="2020-01-10T16:30:03.771Z">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625875308-ba370903-0c7b-4fe8-b701-f16b1e83aedf.png#align=left&display=inline&height=642&name=image.png&originHeight=642&originWidth=1064&size=587989&status=done&style=none&width=1064">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625882118-7a8746e1-e91c-4301-8870-54303778c399.png#align=left&display=inline&height=128&name=image.png&originHeight=128&originWidth=640&size=62998&status=done&style=none&width=640">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625887674-a96d8b90-ddd4-41d0-9cd5-0ecaf4769e46.png#align=left&display=inline&height=1126&name=image.png&originHeight=1126&originWidth=1392&size=1117545&status=done&style=none&width=1392">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625897434-0e6af647-3a6d-4dd5-a5fc-a441f2bd1d4f.png#align=left&display=inline&height=950&name=image.png&originHeight=950&originWidth=2742&size=3488566&status=done&style=none&width=2742">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625912183-d2fcb6d6-5315-4b10-9081-a895403bfe03.png#align=left&display=inline&height=1344&name=image.png&originHeight=1344&originWidth=1436&size=1190411&status=done&style=none&width=1436">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578626217854-4de447ad-c5ec-4bd7-b685-cb84c254fe78.png#align=left&display=inline&height=258&name=image.png&originHeight=516&originWidth=1906&size=270969&status=done&style=none&width=953">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632707400-2ae88c98-1a21-4225-b6fa-e65f3d05559c.png#align=left&display=inline&height=72&name=image.png&originHeight=144&originWidth=2154&size=104541&status=done&style=none&width=1077">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632770351-7c4e5d35-cb73-4995-9240-918fea63cff7.png#align=left&display=inline&height=262&name=image.png&originHeight=524&originWidth=1238&size=111955&status=done&style=none&width=619">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632921014-f6e4616f-4c0e-4d33-9cb9-31cb229d2dec.png#align=left&display=inline&height=488&name=image.png&originHeight=976&originWidth=2040&size=356538&status=done&style=none&width=1020">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578633013620-6831716c-ed53-427a-b7be-b618e148c57d.png#align=left&display=inline&height=64&name=image.png&originHeight=128&originWidth=1034&size=59484&status=done&style=none&width=517">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578633344116-43dec6f0-9989-4b7c-ad0f-75940a20dc2b.png#align=left&display=inline&height=756&name=image.png&originHeight=1512&originWidth=1708&size=484522&status=done&style=none&width=854">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634076306-e8b99c13-9c2b-4022-8708-368d83e80038.png#align=left&display=inline&height=67&name=image.png&originHeight=134&originWidth=1254&size=31131&status=done&style=none&width=627">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634487119-7b4c65e4-b8af-4017-b8cc-9085e1537104.png#align=left&display=inline&height=233&name=image.png&originHeight=466&originWidth=1834&size=147797&status=done&style=none&width=917">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634983904-0804de6d-2daf-43af-817f-a9260d20278c.png#align=left&display=inline&height=459&name=image.png&originHeight=918&originWidth=1424&size=188162&status=done&style=none&width=712">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635005447-0e4f6af1-11b2-4cea-9bc8-32f011fe3bea.png#align=left&display=inline&height=801&name=image.png&originHeight=1602&originWidth=1360&size=399014&status=done&style=none&width=680">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635019672-021be666-1d9e-46da-8c27-ebb2364ac8fa.png#align=left&display=inline&height=326&name=image.png&originHeight=652&originWidth=1090&size=136253&status=done&style=none&width=545">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635622502-369db9f7-36fa-4ff9-8b05-96d91e2d1fa3.png#align=left&display=inline&height=372&name=image.png&originHeight=744&originWidth=1474&size=183723&status=done&style=none&width=737">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578636061685-96cdf6ce-3904-4d6c-accc-1e98e6ac01f8.png#align=left&display=inline&height=176&name=image.png&originHeight=352&originWidth=1410&size=112739&status=done&style=none&width=705">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637133590-604b1099-860d-4e9a-b237-ca23f2ae5d5e.png#align=left&display=inline&height=177&name=image.png&originHeight=354&originWidth=1278&size=120788&status=done&style=none&width=639">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578636305807-09cf75d6-695a-4f53-af9c-f6374d36e154.png#align=left&display=inline&height=66&name=image.png&originHeight=132&originWidth=1384&size=68340&status=done&style=none&width=692">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637192179-f9e22f4f-8bee-4022-986c-cb7146e10db7.png#align=left&display=inline&height=121&name=image.png&originHeight=242&originWidth=1280&size=89887&status=done&style=none&width=640">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637945784-4a70d53e-3ff1-4753-97e5-15eadd1c624e.png#align=left&display=inline&height=538&name=image.png&originHeight=1076&originWidth=1332&size=295460&status=done&style=none&width=666">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578638760375-743824ac-c2af-4df2-8159-fda8d87a4591.png#align=left&display=inline&height=809&name=image.png&originHeight=1618&originWidth=2134&size=499905&status=done&style=none&width=1067">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639069879-68ee439b-c6b6-4f56-be8a-aa7b5a0a9bfc.png#align=left&display=inline&height=329&name=image.png&originHeight=658&originWidth=1180&size=170983&status=done&style=none&width=590">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639275834-35510283-a0ed-492c-ac7a-45dd2da28114.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=1312&size=41201&status=done&style=none&width=656">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639405625-26db6178-52ee-4555-a34c-6a9663801022.png#align=left&display=inline&height=311&name=image.png&originHeight=622&originWidth=1080&size=143781&status=done&style=none&width=540">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639695744-2e5e52ef-0e81-4577-94c1-2bc3bd90d1cf.png#align=left&display=inline&height=628&name=image.png&originHeight=1256&originWidth=1356&size=282135&status=done&style=none&width=678">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578640160376-c5ab3061-b721-4291-9b4f-9fa79a5c870b.png#align=left&display=inline&height=331&name=image.png&originHeight=662&originWidth=1372&size=161671&status=done&style=none&width=686">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641091841-62f1c1dc-45e3-439b-abf6-b695cca86a06.png#align=left&display=inline&height=289&name=image.png&originHeight=578&originWidth=1102&size=164251&status=done&style=none&width=551">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641165020-ea66e050-ecf9-4d05-9180-2a0e75303e65.png#align=left&display=inline&height=178&name=image.png&originHeight=356&originWidth=1108&size=93626&status=done&style=none&width=554">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641252205-9862913d-4283-4806-9838-948fd7ff5553.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=1194&size=29457&status=done&style=none&width=597">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641300236-d9bbbb8d-50ab-4fe0-a717-d87af018940f.png#align=left&display=inline&height=46&name=image.png&originHeight=92&originWidth=1246&size=33495&status=done&style=none&width=623">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641362118-5d7e0d3d-63e4-43b7-b5bf-3553c9cda4c2.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=446&size=16174&status=done&style=none&width=223">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641575844-9a2af26a-7a0c-411b-af0a-8d8b0555e42f.png#align=left&display=inline&height=522&name=image.png&originHeight=1044&originWidth=1462&size=208548&status=done&style=none&width=731">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578656828083-7b19106f-9d92-40c5-964f-c3a150cc94dc.png#align=left&display=inline&height=114&name=image.png&originHeight=228&originWidth=1068&size=100861&status=done&style=none&width=534">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657185207-335c7c30-34ab-40e2-8a81-f1ff147eee70.png#align=left&display=inline&height=546&name=image.png&originHeight=1092&originWidth=800&size=143996&status=done&style=none&width=400">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657323902-3b292677-6631-4819-b59b-92d00c0b8528.png#align=left&display=inline&height=482&name=image.png&originHeight=964&originWidth=1206&size=245597&status=done&style=none&width=603">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657622375-ab244c96-19e1-49e6-bb09-a37ac9f723ec.png#align=left&display=inline&height=48&name=image.png&originHeight=96&originWidth=988&size=28225&status=done&style=none&width=494">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657676918-4824471e-bbc5-4d37-873e-e8d84f254712.png#align=left&display=inline&height=359&name=image.png&originHeight=718&originWidth=1372&size=218953&status=done&style=none&width=686">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657804846-b3b299a9-6cdb-4ce3-992e-b97e62379f73.png#align=left&display=inline&height=235&name=image.png&originHeight=470&originWidth=1374&size=159138&status=done&style=none&width=687">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658011882-2a7d585f-033b-4582-85c3-62bbe27869a5.png#align=left&display=inline&height=259&name=image.png&originHeight=518&originWidth=1202&size=154798&status=done&style=none&width=601">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658764319-32ad18ba-bf5c-44ce-b316-f2adce0ed395.png#align=left&display=inline&height=174&name=image.png&originHeight=348&originWidth=1320&size=137208&status=done&style=none&width=660">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658963968-1af4f514-e441-4103-aa8e-65c47eee86da.png#align=left&display=inline&height=101&name=image.png&originHeight=202&originWidth=932&size=57447&status=done&style=none&width=466">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659337429-4b1a2b62-8af8-4ca8-bf2c-11997b21d549.png#align=left&display=inline&height=685&name=image.png&originHeight=1370&originWidth=868&size=233458&status=done&style=none&width=434">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659491937-cd75fe74-d303-4aa5-bdee-0659324268ba.png#align=left&display=inline&height=52&name=image.png&originHeight=104&originWidth=1208&size=44994&status=done&style=none&width=604">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659689541-3ab78a66-9df4-4822-85fe-5e07fae4105f.png#align=left&display=inline&height=65&name=image.png&originHeight=130&originWidth=1010&size=37801&status=done&style=none&width=505">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659813408-cdef75d4-fb3a-4f3b-88a4-a3bd7ddbca59.png#align=left&display=inline&height=112&name=image.png&originHeight=224&originWidth=1012&size=47697&status=done&style=none&width=506">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578660189728-455df7e6-fa97-43be-b9f1-c6bff1bcb58a.png#align=left&display=inline&height=138&name=image.png&originHeight=276&originWidth=1260&size=101852&status=done&style=none&width=630">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668146104-e44d6291-606b-425f-892e-3eb96fef535f.png#align=left&display=inline&height=40&name=image.png&originHeight=80&originWidth=1200&size=37876&status=done&style=none&width=600">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668156597-fd9d4fa7-5702-4acf-85a6-766580c67cde.png#align=left&display=inline&height=48&name=image.png&originHeight=96&originWidth=1318&size=22281&status=done&style=none&width=659">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668182796-b810bf6c-9768-45a0-b5f2-d15fd5ac462e.png#align=left&display=inline&height=294&name=image.png&originHeight=588&originWidth=1186&size=143089&status=done&style=none&width=593">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578669523547-a2e68448-1194-416a-b97e-6474038c57e7.png#align=left&display=inline&height=340&name=image.png&originHeight=680&originWidth=1816&size=278430&status=done&style=none&width=908">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578670024551-0eed762f-4497-4498-80ee-715640ac2bd9.png#align=left&display=inline&height=499&name=image.png&originHeight=998&originWidth=1276&size=289198&status=done&style=none&width=638">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578670785565-93c7915e-07e5-4a0b-80fc-a7bf9c3ee527.png#align=left&display=inline&height=111&name=image.png&originHeight=222&originWidth=1404&size=89710&status=done&style=none&width=702">
+<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578671153455-444e4023-c8df-48f8-96fc-fe45faf428aa.png#align=left&display=inline&height=82&name=image.png&originHeight=164&originWidth=1300&size=73216&status=done&style=none&width=650">
+<meta property="og:updated_time" content="2020-01-10T16:33:04.371Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 底层探索 - 类的加载">
-<meta name="twitter:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调">
-<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329ccda74e8?w=1064&h=642&f=png&s=587989">
+<meta name="twitter:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFun">
+<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625875308-ba370903-0c7b-4fe8-b701-f16b1e83aedf.png#align=left&display=inline&height=642&name=image.png&originHeight=642&originWidth=1064&size=587989&status=done&style=none&width=1064">
 
 
 
@@ -352,7 +352,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-11T00:30:03+08:00" content="2020-01-11">
+            <time itemprop="dateUpdated" datetime="2020-01-11T00:33:04+08:00" content="2020-01-11">
               2020-01-11
             </time>
           </span>
@@ -412,26 +412,27 @@
 <ul>
 <li>系统调用 <code>exec()</code> 会我们的应用<strong>映射</strong>到新的地址空间</li>
 <li>然后通过 <code>dyld</code> 进行加载、链接、初始化主程序和主程序所依赖的各种动态库</li>
-<li>最后在 <code>initializeMainExecutable</code> 方法中经过一系列初始化调用 <code>notifySingle</code> 函数，该函数会执行一个 <code>load_images</code> 的回调<a id="more"></a></li>
+<li>最后在 <code>initializeMainExecutable</code> 方法中经过一系列初始化调用 <code>notifySingle</code> 函数，该函数会执行一个 <code>load_images</code> 的回调</li>
 <li>然后在 <code>doModinitFuntions</code> 函数内部会调用 <code>__attribute__((constructor))</code> 的 <code>c</code> 函数</li>
-<li>然后 <code>dyld</code> 返回主程序的入口函数，开始进入主程序的 <code>main</code> 函数<br><a name="dd967b64"></a><br>在 <code>main</code> 函数执行执行，其实 <code>dyld</code> 还会在流程中初始化 <code>libSystem</code>，而 <code>libSystem</code> 又会去初始化 <code>libDispatch</code>，在 <code>libDispatch</code> 初始化方法里面又会有一步 <code>_os_object_init</code>，在 <code>_os_object_init</code> 内部就会调起 <code>_objc_init</code>。而对于 <code>_objc_init</code> 我们还需要继续探索，因为这里面会进行类的加载等一系列重要的工作。</li>
+<li>然后 <code>dyld</code> 返回主程序的入口函数，开始进入主程序的 <code>main</code> 函数<a id="more"></a>
+在 <code>main</code> 函数执行执行，其实 <code>dyld</code> 还会在流程中初始化 <code>libSystem</code>，而 <code>libSystem</code> 又会去初始化 <code>libDispatch</code>，在 <code>libDispatch</code> 初始化方法里面又会有一步 <code>_os_object_init</code>，在 <code>_os_object_init</code> 内部就会调起 <code>_objc_init</code>。而对于 <code>_objc_init</code> 我们还需要继续探索，因为这里面会进行类的加载等一系列重要的工作。</li>
 </ul>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f90329ccda74e8?w=1064&h=642&f=png&s=587989" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625875308-ba370903-0c7b-4fe8-b701-f16b1e83aedf.png#align=left&display=inline&height=642&name=image.png&originHeight=642&originWidth=1064&size=587989&status=done&style=none&width=1064" alt="image.png"></p>
 <p><a name="054f9d72"></a></p>
 <h1 id="二、探索-objc-init"><a href="#二、探索-objc-init" class="headerlink" title="二、探索 _objc_init"></a>二、探索 <code>_objc_init</code></h1><p>首先来到 <code>libObjc</code> 源码的 <code>_objc_init</code> 方法处，你可以直接添加一个符号断点 <code>_objc_init</code> 或者全局搜索关键字来到这里：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> _objc_init(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">bool</span> initialized = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (initialized) <span class="keyword">return</span>;</span><br><span class="line">    initialized = <span class="literal">true</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// fixme defer initialization until an objc-using image is found?</span></span><br><span class="line">    environ_init();</span><br><span class="line">    tls_init();</span><br><span class="line">    static_init();</span><br><span class="line">    lock_init();</span><br><span class="line">    exception_init();</span><br><span class="line"></span><br><span class="line">    _dyld_objc_notify_register(&amp;map_images, load_images, unmap_image);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>我们接着进行分析:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f90329cd933b33?w=640&h=128&f=png&s=62998" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625882118-7a8746e1-e91c-4301-8870-54303778c399.png#align=left&display=inline&height=128&name=image.png&originHeight=128&originWidth=640&size=62998&status=done&style=none&width=640" alt="image.png"></p>
 <ul>
 <li>判断是否已经初始化了，如果初始化过了，直接返回。</li>
 </ul>
 <p><a name="07f9091b"></a></p>
 <h2 id="2-1-environ-init"><a href="#2-1-environ-init" class="headerlink" title="2.1 environ_init"></a>2.1 environ_init</h2><p>接着来到 <code>environ_init</code> 方法内部:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f90329de4109a5?w=1392&h=1126&f=png&s=1117545" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625887674-a96d8b90-ddd4-41d0-9cd5-0ecaf4769e46.png#align=left&display=inline&height=1126&name=image.png&originHeight=1126&originWidth=1392&size=1117545&status=done&style=none&width=1392" alt="image.png"></p>
 <p>我们可以看到，这里主要是读取影响 <code>Runtime</code> 的一些环境变量，如果需要，还可以打印环境变量帮助提示。</p>
 <p>我们可以在终端上测试一下，直接输入 <code>export OBJC_HELP=1</code>:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f90329d7958eaa?w=2742&h=950&f=png&s=3488566" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625897434-0e6af647-3a6d-4dd5-a5fc-a441f2bd1d4f.png#align=left&display=inline&height=950&name=image.png&originHeight=950&originWidth=2742&size=3488566&status=done&style=none&width=2742" alt="image.png"></p>
 <p>可以看到不同的环境变量对应的内容都被打印出来了。</p>
 <p><a name="698ca41f"></a></p>
 <h2 id="2-2-tls-init"><a href="#2-2-tls-init" class="headerlink" title="2.2 tls_init"></a>2.2 tls_init</h2><p>接着来到 <code>tls_init</code> 方法内部:</p>
@@ -453,7 +454,7 @@
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***********************************************************************</span></span><br><span class="line"><span class="comment">* exception_init</span></span><br><span class="line"><span class="comment">* Initialize libobjc's exception handling system.</span></span><br><span class="line"><span class="comment">* Called by map_images().</span></span><br><span class="line"><span class="comment">**********************************************************************/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">exception_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    old_terminate = <span class="built_in">std</span>::set_terminate(&amp;_objc_terminate);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这里是初始化 <code>libobjc</code> 的异常处理系统，我们程序触发的异常都会来到：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f90329e03ed033?w=1436&h=1344&f=png&s=1190411" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625912183-d2fcb6d6-5315-4b10-9081-a895403bfe03.png#align=left&display=inline&height=1344&name=image.png&originHeight=1344&originWidth=1436&size=1190411&status=done&style=none&width=1436" alt="image.png"></p>
 <p>我们可以看到 <code>_objc_terminate</code> 是未处理异常的回调函数，其内部逻辑如下:</p>
 <ul>
 <li>检查是否是一个活跃的异常</li>
@@ -463,17 +464,17 @@
 </ul>
 <p><a name="wC2Z6"></a></p>
 <h2 id="2-6-dyld-objc-notify-register"><a href="#2-6-dyld-objc-notify-register" class="headerlink" title="2.6 _dyld_objc_notify_register"></a>2.6 _dyld_objc_notify_register</h2><p>接下来使我们今天探索的重点了： <code>_dyld_objc_notify_register</code> ，我们先看下它的定义:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f90329dd45fffc?w=1906&h=516&f=png&s=270969" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578626217854-4de447ad-c5ec-4bd7-b685-cb84c254fe78.png#align=left&display=inline&height=258&name=image.png&originHeight=516&originWidth=1906&size=270969&status=done&style=none&width=953" alt="image.png"></p>
 <blockquote>
 <p>注意：仅供 <code>objc</code> 运行时使用<br>当 <code>objc</code> 镜像被<strong>映射（mapped）</strong>、<strong>卸载（unmapped）</strong>和<strong>初始化（initialized）</strong>的时候，注册的回调函数就会被调用。<br>这个方法是 <code>dlyd</code> 中声明的，一旦调用该方法，调用结果会作为该函数的参数回传回来。比如，当所有的 <code>images</code> 以及 <code>section</code> 为 <code>objc-image-info</code> 被加载之后会回调 <code>mapped</code> 方法。<br><code>load</code> 方法也将在这个方法中被调用。</p>
 </blockquote>
 <p><code>_dyld_objc_notify_register</code>  方法的三个参数 <code>map_images</code> 、 <code>load_images</code> 、 <code>unmap_image</code>  其实都是函数指针：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a0d454646?w=2154&h=144&f=png&s=104541" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632707400-2ae88c98-1a21-4225-b6fa-e65f3d05559c.png#align=left&display=inline&height=72&name=image.png&originHeight=144&originWidth=2154&size=104541&status=done&style=none&width=1077" alt="image.png"></p>
 <p>这三个函数指针是在 <code>dyld</code> 中回调的，我们打开 <code>dyld</code> 的源码即可一探究竟，我们直接搜索 <code>_dyld_objc_notify_register</code> :</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a0dbf6b51?w=1238&h=524&f=png&s=111955" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632770351-7c4e5d35-cb73-4995-9240-918fea63cff7.png#align=left&display=inline&height=262&name=image.png&originHeight=524&originWidth=1238&size=111955&status=done&style=none&width=619" alt="image.png"></p>
 <p>接着来到 <code>dyld</code> 的 <code>registerObjCNotifiers</code> 方法内部：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a12f6dde2?w=2040&h=976&f=png&s=356538" alt="image.png"></p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a278c0d69?w=1034&h=128&f=png&s=59484" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632921014-f6e4616f-4c0e-4d33-9cb9-31cb229d2dec.png#align=left&display=inline&height=488&name=image.png&originHeight=976&originWidth=2040&size=356538&status=done&style=none&width=1020" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578633013620-6831716c-ed53-427a-b7be-b618e148c57d.png#align=left&display=inline&height=64&name=image.png&originHeight=128&originWidth=1034&size=59484&status=done&style=none&width=517" alt="image.png"></p>
 <p>通过上面两张截图的内容说明在 <code>registerObjCNotifiers</code> 内部， <code>libObjc</code> 传过来的这三个函数指针被 <code>dyld</code> 保存在了本地静态变量中。换句话来说，最终函数指针是否能被调用，取决于这三个静态变量：</p>
 <ul>
 <li><code>sNotifyObjCMapped</code> </li>
@@ -485,7 +486,7 @@
 <p>call ‘mapped’ function with all images mapped so far<br>调用 <code>mapped</code> 函数来映射所有的镜像</p>
 </blockquote>
 <p>那么也就是说 <code>notifyBatchPartial</code> 里面会进行真正的函数指针的调用，我们进入这个方法内部：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a2a5d0ab1?w=1708&h=1512&f=png&s=484522" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578633344116-43dec6f0-9989-4b7c-ad0f-75940a20dc2b.png#align=left&display=inline&height=756&name=image.png&originHeight=1512&originWidth=1708&size=484522&status=done&style=none&width=854" alt="image.png"></p>
 <p>我们可以看到，在 <code>notifyBatchPartial</code> 方法内部，这里的注释:</p>
 <blockquote>
 <p>tell objc about new images 告诉 <code>objc</code> 镜像已经映射完成了</p>
@@ -504,25 +505,25 @@
 </blockquote>
 <p>这里会继续往下走到 <code>map_images_nolock</code> </p>
 <p><code>map_images_nolock</code> 内部代码十分冗长，我们经过分析之后，前面的工作基本上都是进行镜像文件信息的提取与统计，所以可以定位到最后的 <code>_read_images</code> ：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a1cca9f2d?w=1254&h=134&f=png&s=31131" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634076306-e8b99c13-9c2b-4022-8708-368d83e80038.png#align=left&display=inline&height=67&name=image.png&originHeight=134&originWidth=1254&size=31131&status=done&style=none&width=627" alt="image.png"></p>
 <blockquote>
 <p>这里进入 <code>_read_images</code> 的条件是 <code>hCount</code> 大于 0， <code>hCount</code> 表示的是 <code>Mach-O</code> 中 <code>header</code> 的数量</p>
 </blockquote>
 <p>OK，我们的主角登场了， <code>_read_images</code> 和 <code>lookupImpOrForward</code> 可以说是我们学习 <code>Runtime</code> 和 <code>iOS</code> 底层里面非常重要的两个概念了， <code>lookUpImpOrForward</code> 已经探索过了，剩下的 <code>_read_images</code> 我们也不能落下。</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a52c3eb3c?w=1834&h=466&f=png&s=147797" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634487119-7b4c65e4-b8af-4017-b8cc-9085e1537104.png#align=left&display=inline&height=233&name=image.png&originHeight=466&originWidth=1834&size=147797&status=done&style=none&width=917" alt="image.png"></p>
 <p><a name="jR2RQ"></a></p>
 <h2 id="3-1-read-images-定义"><a href="#3-1-read-images-定义" class="headerlink" title="3.1 _read_images 定义"></a>3.1 _read_images 定义</h2><blockquote>
 <p>Perform initial processing of the headers in the linked list beginning with headerList.<br>从 <code>headerList</code> 开始，对已经链接了的 <code>Mach-O</code> 镜像表中的头部进行初始化处理</p>
 </blockquote>
 <p>我们可以看到，整个 <code>_read_images</code> 有接近 400 行代码。我们不妨折叠一下里面的分支代码，然后总览一下：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a5879836b?w=1424&h=918&f=png&s=188162" alt="image.png"></p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a5e7bb65d?w=1360&h=1602&f=png&s=399014" alt="image.png"></p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a6584d8ae?w=1090&h=652&f=png&s=136253" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634983904-0804de6d-2daf-43af-817f-a9260d20278c.png#align=left&display=inline&height=459&name=image.png&originHeight=918&originWidth=1424&size=188162&status=done&style=none&width=712" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635005447-0e4f6af1-11b2-4cea-9bc8-32f011fe3bea.png#align=left&display=inline&height=801&name=image.png&originHeight=1602&originWidth=1360&size=399014&status=done&style=none&width=680" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635019672-021be666-1d9e-46da-8c27-ebb2364ac8fa.png#align=left&display=inline&height=326&name=image.png&originHeight=652&originWidth=1090&size=136253&status=done&style=none&width=545" alt="image.png"></p>
 <p>通过折叠代码，以及日志打印提示信息，我们大致可以将 <code>_read_images</code> 分为下面几个流程:</p>
 <p><a name="OzBK6"></a></p>
 <h2 id="3-2-read-images-具体流程"><a href="#3-2-read-images-具体流程" class="headerlink" title="3.2 _read_images 具体流程"></a>3.2 _read_images 具体流程</h2><hr>
 <p><strong>doneOnce 流程</strong><br>**<br>我们从第一个分支 <code>doneOnce</code> 开始，这个名词顾名思义，只会执行一次：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032aaef40816?w=1474&h=744&f=png&s=183723" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635622502-369db9f7-36fa-4ff9-8b05-96d91e2d1fa3.png#align=left&display=inline&height=372&name=image.png&originHeight=744&originWidth=1474&size=183723&status=done&style=none&width=737" alt="image.png"></p>
 <ul>
 <li>通过宏 <code>SUPPORT_NONPOINTER_ISA</code> 判断当前是否支持开启内存优化的 <code>isa</code> <ul>
 <li>如果支持，则在某些条件下需要禁用这个优化</li>
@@ -533,13 +534,13 @@
 </ul>
 </li>
 </ul>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032ad7a2da2f?w=1410&h=352&f=png&s=112739" alt="image.png"><br> </p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578636061685-96cdf6ce-3904-4d6c-accc-1e98e6ac01f8.png#align=left&display=inline&height=176&name=image.png&originHeight=352&originWidth=1410&size=112739&status=done&style=none&width=705" alt="image.png"><br> </p>
 <ul>
 <li>通过宏 <code>TARGET_OS_OSX</code> 判断是否是 <code>macOS</code> 执行环境</li>
 <li>判断 <code>macOS</code> 的系统版本，如果小于 <code>10.11</code> 则说明 <code>app</code> 太陈旧了，需要禁用掉 <code>non-pointer isa</code> </li>
 <li>然后再遍历所有的 <code>Mach-O</code> 的头部，判断如果有 <code>__DATA__,__objc_rawisa</code> 段的存在，则禁用掉 <code>non-pointer isa</code> ，因为很多新的 <code>app</code> 加载老的扩展的时候会需要这样的判断操作。</li>
 </ul>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032ae45a2e5b?w=1278&h=354&f=png&s=120788" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637133590-604b1099-860d-4e9a-b237-ca23f2ae5d5e.png#align=left&display=inline&height=177&name=image.png&originHeight=354&originWidth=1278&size=120788&status=done&style=none&width=639" alt="image.png"></p>
 <blockquote>
 <p>预先优化过的类不会加入到 <code>gdb_objc_realized_classes</code> 这个哈希表中来， <code>gdb_objc_realized_classes</code> 哈希表的装载因子为 0.75，这是一个经过验证的效率很高的扩容临界值。</p>
 </blockquote>
@@ -547,7 +548,7 @@
 <li>加载所有类到类的 <code>gdb_objc_realized_classes</code> 表中来<br></li>
 </ul>
 <p>我们查看这个表的定义：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032ae90c3235?w=1384&h=132&f=png&s=68340" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578636305807-09cf75d6-695a-4f53-af9c-f6374d36e154.png#align=left&display=inline&height=66&name=image.png&originHeight=132&originWidth=1384&size=68340&status=done&style=none&width=692" alt="image.png"></p>
 <blockquote>
 <p>// This is a misnomer: gdb_objc_realized_classes is actually a list of<br>// named classes not in the dyld shared cache, whether realized or not.</p>
 </blockquote>
@@ -555,20 +556,20 @@
 <p>这是一个误称：gdb_objc_realized_classes 表实际上存储的是不在 <code>dyld</code> 共享缓存里面的命名类，无论这些类是否实现</p>
 </blockquote>
 <p>除了 <code>gdb_objc_realized_classes</code> 表之外，还有一张表 <code>allocatedClasses</code> :</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032af5bf1b90?w=1280&h=242&f=png&s=89887" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637192179-f9e22f4f-8bee-4022-986c-cb7146e10db7.png#align=left&display=inline&height=121&name=image.png&originHeight=242&originWidth=1280&size=89887&status=done&style=none&width=640" alt="image.png"></p>
 <ul>
 <li>通过 <code>objc_allocateClassPair</code> 开辟之后的类和元类存储的表（也就是说需要 <code>alloc</code> ）</li>
 </ul>
 <p>其实 <code>gdb_objc_realized_classes</code> 对 <code>allocatedClasses</code> 是一种包含的关系，一张是类的总表，一张是已经开辟了内存的类表，</p>
 <hr>
-<p><strong>Discover classes 流程</strong><br><strong><br></strong><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b22d0abd7?w=1332&h=1076&f=png&s=295460" alt="image.png"><strong><br></strong></p>
+<p><strong>Discover classes 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637945784-4a70d53e-3ff1-4753-97e5-15eadd1c624e.png#align=left&display=inline&height=538&name=image.png&originHeight=1076&originWidth=1332&size=295460&status=done&style=none&width=666" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>Discover classes. Fix up unresolved future classes. Mark bundle classes.<br>发现类。修正未解析的 <code>future</code> 类，标记 <code>bundle</code> 类。</p>
 </blockquote>
 <ul>
 <li>先通过 <code>_getObjc2ClassList</code> 来获取到所有的类，我们可以通过 <code>MachOView</code> 来验证：</li>
 </ul>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b1057f929?w=2134&h=1618&f=png&s=499905" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578638760375-743824ac-c2af-4df2-8159-fda8d87a4591.png#align=left&display=inline&height=809&name=image.png&originHeight=1618&originWidth=2134&size=499905&status=done&style=none&width=1067" alt="image.png"></p>
 <ul>
 <li>接着还是遍历所有的 <code>Mach-O</code> 的 <code>header</code> 部分，然后通过 <code>mustReadClasses</code> 来判断哪些条件可以跳过读取类这一步骤</li>
 <li>读取 <code>header</code> 是否是 <code>Bundle</code> </li>
@@ -580,7 +581,7 @@
 </li>
 </ul>
 <hr>
-<p><strong>Fix up remapped classes 流程</strong><br><strong><br></strong><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032afa959dd3?w=1180&h=658&f=png&s=170983" alt="image.png"><strong><br></strong></p>
+<p><strong>Fix up remapped classes 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639069879-68ee439b-c6b6-4f56-be8a-aa7b5a0a9bfc.png#align=left&display=inline&height=329&name=image.png&originHeight=658&originWidth=1180&size=170983&status=done&style=none&width=590" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>修复 重映射类<br>类表和非懒加载类表没有被重映射 (也就是 <strong>_objc_classlist</strong>)<br>由于消息转发，类引用和父类引用会被重映射 (也就是 <strong>_objc_classrefs</strong>)</p>
 </blockquote>
@@ -592,9 +593,9 @@
 </ul>
 </li>
 </ul>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b28947688?w=1312&h=78&f=png&s=41201" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639275834-35510283-a0ed-492c-ac7a-45dd2da28114.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=1312&size=41201&status=done&style=none&width=656" alt="image.png"></p>
 <hr>
-<p><strong>Fix up @selector references 流程</strong><br><strong><br></strong><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b2bf05f9d?w=1080&h=622&f=png&s=143781" alt="image.png"><strong><br></strong></p>
+<p><strong>Fix up @selector references 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639405625-26db6178-52ee-4555-a34c-6a9663801022.png#align=left&display=inline&height=311&name=image.png&originHeight=622&originWidth=1080&size=143781&status=done&style=none&width=540" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>修正 <code>SEL</code> 引用</p>
 </blockquote>
@@ -608,7 +609,7 @@
 </li>
 </ul>
 <p>也就是说这一流程最主要的目的就是注册 <code>SEL</code> ，我们注册真正发生的地方: <code>__sel_registerName</code> ，这个函数如果大家经常玩 <code>Runtime</code> 肯定不会陌生：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b3023cd3c?w=1356&h=1256&f=png&s=282135" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639695744-2e5e52ef-0e81-4577-94c1-2bc3bd90d1cf.png#align=left&display=inline&height=628&name=image.png&originHeight=1256&originWidth=1356&size=282135&status=done&style=none&width=678" alt="image.png"></p>
 <p>我们简单分析一下 <code>__sel_registerName</code> 方法的流程：</p>
 <ul>
 <li>判断是否要加锁</li>
@@ -619,7 +620,7 @@
 <li>如果上面的流程都没有找到，则需要调用 <code>sel_alloc</code> 来创建一下 <code>SEL</code> ，然后把新创建的 <code>SEL</code> 插入哈希表中进行缓存的填充</li>
 </ul>
 <hr>
-<p><strong>Fix up old objc_msgSend_fixup call sites 流程</strong><br><strong><br></strong><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b51b3f8ca?w=1372&h=662&f=png&s=161671" alt="image.png"><strong><br></strong></p>
+<p><strong>Fix up old objc_msgSend_fixup call sites 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578640160376-c5ab3061-b721-4291-9b4f-9fa79a5c870b.png#align=left&display=inline&height=331&name=image.png&originHeight=662&originWidth=1372&size=161671&status=done&style=none&width=686" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>修正旧的 <code>objc_msgSend_fixup</code> 调用</p>
 </blockquote>
@@ -632,37 +633,37 @@
 </li>
 </ul>
 <hr>
-<p><strong>Discover protocols 流程</strong><br><strong><br></strong><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b3baaef26?w=1102&h=578&f=png&s=164251" alt="image.png"><strong><br></strong></p>
+<p><strong>Discover protocols 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641091841-62f1c1dc-45e3-439b-abf6-b695cca86a06.png#align=left&display=inline&height=289&name=image.png&originHeight=578&originWidth=1102&size=164251&status=done&style=none&width=551" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>发现协议，并修正协议引用</p>
 </blockquote>
 <p>**</p>
 <hr>
-<p><strong>Fix up @protocol references 流程</strong><br><strong><br></strong><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b4c017edb?w=1108&h=356&f=png&s=93626" alt="image.png"><strong><br></strong></p>
+<p><strong>Fix up @protocol references 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641165020-ea66e050-ecf9-4d05-9180-2a0e75303e65.png#align=left&display=inline&height=178&name=image.png&originHeight=356&originWidth=1108&size=93626&status=done&style=none&width=554" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>对所有的协议做重映射</p>
 </blockquote>
 <p>**</p>
 <hr>
-<p><strong>Realize non-lazy classes 流程</strong><br><strong><br></strong><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b55980447?w=1194&h=78&f=png&s=29457" alt="image.png"><strong><br></strong></p>
+<p><strong>Realize non-lazy classes 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641252205-9862913d-4283-4806-9838-948fd7ff5553.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=1194&size=29457&status=done&style=none&width=597" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>初始化<strong>非懒加载类( **`</strong>+load<strong>` 方法和静态实例</strong>)**</p>
 </blockquote>
 <hr>
-<p><strong>Realize newly-resolved future classes 流程</strong><br><strong><br></strong><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b6a7a2dd4?w=1246&h=92&f=png&s=33495" alt="image.png"><strong><br></strong></p>
+<p><strong>Realize newly-resolved future classes 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641300236-d9bbbb8d-50ab-4fe0-a717-d87af018940f.png#align=left&display=inline&height=46&name=image.png&originHeight=92&originWidth=1246&size=33495&status=done&style=none&width=623" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>初始化新解析出来的 <code>future</code> 类</p>
 </blockquote>
 <p>**</p>
 <hr>
-<p><strong>Discover categories 流程</strong><br><strong><br></strong><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b73e7d2db?w=446&h=78&f=png&s=16174" alt="image.png"><strong><br></strong></p>
+<p><strong>Discover categories 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641362118-5d7e0d3d-63e4-43b7-b5bf-3553c9cda4c2.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=446&size=16174&status=done&style=none&width=223" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p><strong>处理所有的分类，包括类和元类</strong></p>
 </blockquote>
 <p>**</p>
 <hr>
 <p>到这里， <code>_read_images</code> 的流程就分析完毕，我们可以新建一个文件来去掉一些干扰的信息，只保留核心的逻辑，这样从宏观的角度来分析更直观:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b7ae844b4?w=1462&h=1044&f=png&s=208548" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641575844-9a2af26a-7a0c-411b-af0a-8d8b0555e42f.png#align=left&display=inline&height=522&name=image.png&originHeight=1044&originWidth=1462&size=208548&status=done&style=none&width=731" alt="image.png"></p>
 <blockquote>
 <p>Q &amp; A 环节<br>Q： <code>dyld</code> 主要逻辑是加载库，也就是镜像文件，但是加载完是怎么读取的呢？<br>A： <code>_read_images</code> 是真正读取的地方</p>
 <p>Q: <code>SEL</code> 方法编号何时加载？<br>A: <code>_read_images</code></p>
@@ -673,25 +674,25 @@
 <li>根据上一小节我们探索的结果， <code>doneOnce</code> 流程中会创建两个哈希表，并没有涉及到类的加载，所以我们跳过</li>
 <li>我们来到第二个流程 - *<em>类处理 *</em></li>
 </ul>
-<p><strong><br>我们在下图所示的位置处打上断点：<br></strong><br><strong><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b936fad4e?w=1068&h=228&f=png&s=100861" alt="image.png"></strong><br>**<br>如上图所示，从 <code>classList</code> 中取出的 <code>cls</code> 只是一个内存地址，我们尝试通过 <code>LLDB</code> 打印 <code>cls</code> 的 <code>clas_rw_t</code> :</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b952f910a?w=800&h=1092&f=png&s=143996" alt="image.png"></p>
+<p><strong><br>我们在下图所示的位置处打上断点：<br></strong><br><strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578656828083-7b19106f-9d92-40c5-964f-c3a150cc94dc.png#align=left&display=inline&height=114&name=image.png&originHeight=228&originWidth=1068&size=100861&status=done&style=none&width=534" alt="image.png"></strong><br>**<br>如上图所示，从 <code>classList</code> 中取出的 <code>cls</code> 只是一个内存地址，我们尝试通过 <code>LLDB</code> 打印 <code>cls</code> 的 <code>clas_rw_t</code> :</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657185207-335c7c30-34ab-40e2-8a81-f1ff147eee70.png#align=left&display=inline&height=546&name=image.png&originHeight=1092&originWidth=800&size=143996&status=done&style=none&width=400" alt="image.png"></p>
 <p>可以看到 <code>cls</code> 的属性、方法、协议以及类名都为空，说明这里类并没有被真正加载完成，我们接着聚焦到 <code>read_class</code> 函数上面，我们进入其内部实现，我们大致浏览之后会定位到如下图所示的代码：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b953a323c?w=1206&h=964&f=png&s=245597" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657323902-3b292677-6631-4819-b59b-92d00c0b8528.png#align=left&display=inline&height=482&name=image.png&originHeight=964&originWidth=1206&size=245597&status=done&style=none&width=603" alt="image.png"></p>
 <p>看起来类的信息在这里完成了加载，那么为了验证我们的猜想，直接断点调试一下但发现断点根本走不进来，原因在于这里的判断语句 </p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Class newCls = popFutureNamedClass(mangledName))</span><br></pre></td></tr></table></figure>
 
 <p>判断当前传入的类的类名是否有 <code>future</code> 类的实现，但是我们刚才已经打印了，类名是空的，所以肯定不会执行这里。我们接着往下走：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032babf0eb16?w=988&h=96&f=png&s=28225" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657622375-ab244c96-19e1-49e6-bb09-a37ac9f723ec.png#align=left&display=inline&height=48&name=image.png&originHeight=96&originWidth=988&size=28225&status=done&style=none&width=494" alt="image.png"></p>
 <ul>
 <li>addNamedClass 内部其实是将 <code>cls</code>  插入到 <code>gdb_objc_realized_classes</code> 表 </li>
 </ul>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032bcf58d493?w=1372&h=718&f=png&s=218953" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657676918-4824471e-bbc5-4d37-873e-e8d84f254712.png#align=left&display=inline&height=359&name=image.png&originHeight=718&originWidth=1372&size=218953&status=done&style=none&width=686" alt="image.png"></p>
 <ul>
 <li>addclassTableEntry 内部是将 <code>cls</code> 插入到 <code>allocatedClasses</code> 表</li>
 </ul>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032be76aa042?w=1374&h=470&f=png&s=159138" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657804846-b3b299a9-6cdb-4ce3-992e-b97e62379f73.png#align=left&display=inline&height=235&name=image.png&originHeight=470&originWidth=1374&size=159138&status=done&style=none&width=687" alt="image.png"></p>
 <p>分析完 <code>read_class</code> ，我们回到 <code>_read_images</code> 方法</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032bd70a03bb?w=1202&h=518&f=png&s=154798" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658011882-2a7d585f-033b-4582-85c3-62bbe27869a5.png#align=left&display=inline&height=259&name=image.png&originHeight=518&originWidth=1202&size=154798&status=done&style=none&width=601" alt="image.png"></p>
 <p>我们可以看到 <code>read_class</code> 返回的 <code>newCls</code> 会进行一个判断，判断与传入 <code>read_class</code> 之前的 <code>cls</code> 是否相等，而在 <code>read_class</code> 内部只有一个地方对类的内容进行了改动，但是我们刚才测试了是进不去的，所以这个 <code>if</code> 里面的内容我们可以略过，也就是说 <code>resolvedFutureClasses</code> 的内容我们都可以暂时略过。</p>
 <p>总结一下 <code>readClass</code> ：</p>
 <ul>
@@ -704,23 +705,23 @@
 </ul>
 <p><a name="5SkXf"></a></p>
 <h2 id="3-4-realizeClassWithoutSwift-分析"><a href="#3-4-realizeClassWithoutSwift-分析" class="headerlink" title="3.4 realizeClassWithoutSwift 分析"></a>3.4 realizeClassWithoutSwift 分析</h2><p>通过分析 <code>read_class</code> ，我们可以得知，类已经被注册到两个哈希表中去了，那么现在一切时机都已经成熟了。但是我们还是要略过像 <code>Fix up remapped classes</code> 、 <code>Fix up @selector references</code> 、 <code>fix up old objc_msgSend_fixup call sites</code> 、 <code>Discover protocols. Fix up protocol refs</code> 、 <code>Fix up @protocol references</code> ，因为我们的重点是类的加载，我们最终来到了 <code>Realize non-lazy classes (for +load methods and static instances)</code> ，略去无关信息之后，我们可以看到我们的<br>主角 <code>realizeClassWithoutSwift</code> 闪亮登场了：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032bd7caa0c9?w=1320&h=348&f=png&s=137208" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658764319-32ad18ba-bf5c-44ce-b316-f2adce0ed395.png#align=left&display=inline&height=174&name=image.png&originHeight=348&originWidth=1320&size=137208&status=done&style=none&width=660" alt="image.png"></p>
 <p>从方法的名称以及方法注释我们可以知道， <code>realizeClassWithoutSwift</code> 是进行类的第一次初始化操作，包括分配读写数据也就是我们常说的 <code>rw</code> ，但是并不会进行任何的 <code>Swift</code> 端初始化。我们直接聚焦下面的代码：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032be7598531?w=932&h=202&f=png&s=57447" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658963968-1af4f514-e441-4103-aa8e-65c47eee86da.png#align=left&display=inline&height=101&name=image.png&originHeight=202&originWidth=932&size=57447&status=done&style=none&width=466" alt="image.png"></p>
 <ul>
 <li>通过 <code>calloc</code> 开辟内存空间，返回一个新的 <code>rw</code> </li>
 <li>把 <code>cls</code> 取出来的 <code>ro</code> 赋值给这个 <code>rw</code> </li>
 <li>将 <code>rw</code> 设置到 <code>cls</code> 身上</li>
 </ul>
 <p>那么是不是说在这里 <code>rw</code> 就有值了呢，我们 <code>LLDB</code> 打印大法走起:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c160a6a72?w=868&h=1370&f=png&s=233458" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659337429-4b1a2b62-8af8-4ca8-bf2c-11997b21d549.png#align=left&display=inline&height=685&name=image.png&originHeight=1370&originWidth=868&size=233458&status=done&style=none&width=434" alt="image.png"></p>
 <p>可以清楚地看到，此时 <code>rw</code> 还是为空，说明这里只是对 <code>rw</code> 进行了初始化，但是方法、属性、协议这些都没有被添加上。</p>
 <p>我们接着往下走:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c16a26753?w=1208&h=104&f=png&s=44994" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659491937-cd75fe74-d303-4aa5-bdee-0659324268ba.png#align=left&display=inline&height=52&name=image.png&originHeight=104&originWidth=1208&size=44994&status=done&style=none&width=604" alt="image.png"></p>
 <p>这里可以看到父类和元类都会递归调用 <code>realizeClassWithoutSwift</code> 来初始化各自的 <code>rw</code> 。为什么在类的加载操作里面要去加载类和元类呢？回忆一下类的结构，答案很简单，要保证 <code>superclass</code> 和 <code>isa</code> 的完整性，也就是保证类的完整性，</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c16fb6903?w=1010&h=130&f=png&s=37801" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659689541-3ab78a66-9df4-4822-85fe-5e07fae4105f.png#align=left&display=inline&height=65&name=image.png&originHeight=130&originWidth=1010&size=37801&status=done&style=none&width=505" alt="image.png"></p>
 <p>上面的截图就是最好的证明，初始化完毕的父类和元类被赋值到了类的 <code>superclass</code> 和 <code>isa</code> 上面。</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c17c29916?w=1012&h=224&f=png&s=47697" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659813408-cdef75d4-fb3a-4f3b-88a4-a3bd7ddbca59.png#align=left&display=inline&height=112&name=image.png&originHeight=224&originWidth=1012&size=47697&status=done&style=none&width=506" alt="image.png"></p>
 <p>接着往下走可以看到，不光要把父类关联到类上面，还要让父类知道子类的存在。</p>
 <p>最后一行代码是 <code>methodizeClass(cls)</code> ，注释显示的是 <code>attach categories</code> ，附加分类到类？我们进入其内部实现一探究竟。</p>
 <p>在探索 <code>methodizeClass</code> 前，我们先总结一下 <code>realizeClassWithoutSwift</code> :</p>
@@ -740,7 +741,7 @@
 <li>将当前类链接到其父类的子类列表 addSubclass(supercls, cls)</li>
 </ul>
 <p><a name="84DFW"></a></p>
-<h2 id="3-5-methodizeClass-分析"><a href="#3-5-methodizeClass-分析" class="headerlink" title="3.5 methodizeClass 分析"></a>3.5 methodizeClass 分析</h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c1b072069?w=1260&h=276&f=png&s=101852" alt="image.png"></p>
+<h2 id="3-5-methodizeClass-分析"><a href="#3-5-methodizeClass-分析" class="headerlink" title="3.5 methodizeClass 分析"></a>3.5 methodizeClass 分析</h2><p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578660189728-455df7e6-fa97-43be-b9f1-c6bff1bcb58a.png#align=left&display=inline&height=138&name=image.png&originHeight=276&originWidth=1260&size=101852&status=done&style=none&width=630" alt="image.png"></p>
 <blockquote>
 <p>对类的方法列表、协议列表和属性列表进行修正<br>附加 <code>category</code>  到类上面来</p>
 </blockquote>
@@ -766,9 +767,9 @@
 <li>从 <code>cls</code> 中取出未附加的分类进行附加操作</li>
 </ul>
 <p>我们可以看到，这里有一个操作叫 <code>attachLists</code> ，为什么方法、属性、协议都能调用这个方法呢？</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c2bb658d1?w=1200&h=80&f=png&s=37876" alt="image.png"></p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c3f8d69ad?w=1318&h=96&f=png&s=22281" alt="image.png"></p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c52592950?w=1186&h=588&f=png&s=143089" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668146104-e44d6291-606b-425f-892e-3eb96fef535f.png#align=left&display=inline&height=40&name=image.png&originHeight=80&originWidth=1200&size=37876&status=done&style=none&width=600" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668156597-fd9d4fa7-5702-4acf-85a6-766580c67cde.png#align=left&display=inline&height=48&name=image.png&originHeight=96&originWidth=1318&size=22281&status=done&style=none&width=659" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668182796-b810bf6c-9768-45a0-b5f2-d15fd5ac462e.png#align=left&display=inline&height=294&name=image.png&originHeight=588&originWidth=1186&size=143089&status=done&style=none&width=593" alt="image.png"></p>
 <p>我们可以看到，方法、属性、协议的数据结构都是一个二维数组，我们深入 <code>attachLists</code> 方法内部实现:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">attachLists</span><span class="params">(List* <span class="keyword">const</span> * addedLists, <span class="keyword">uint32_t</span> addedCount)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (addedCount == <span class="number">0</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (hasArray()) &#123;</span><br><span class="line">        <span class="comment">// many lists -&gt; many lists</span></span><br><span class="line">        <span class="keyword">uint32_t</span> oldCount = <span class="built_in">array</span>()-&gt;count;<span class="comment">//10</span></span><br><span class="line">        <span class="keyword">uint32_t</span> newCount = oldCount + addedCount;<span class="comment">//4</span></span><br><span class="line">        setArray((<span class="keyword">array_t</span> *)<span class="built_in">realloc</span>(<span class="built_in">array</span>(), <span class="keyword">array_t</span>::byteSize(newCount)));</span><br><span class="line">        <span class="built_in">array</span>()-&gt;count = newCount;<span class="comment">// 10+4</span></span><br><span class="line">   </span><br><span class="line">        memmove(<span class="built_in">array</span>()-&gt;lists + addedCount, <span class="built_in">array</span>()-&gt;lists,</span><br><span class="line">                oldCount * <span class="keyword">sizeof</span>(<span class="built_in">array</span>()-&gt;lists[<span class="number">0</span>]));</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">memcpy</span>(<span class="built_in">array</span>()-&gt;lists, addedLists, </span><br><span class="line">               addedCount * <span class="keyword">sizeof</span>(<span class="built_in">array</span>()-&gt;lists[<span class="number">0</span>]));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="built_in">list</span>  &amp;&amp;  addedCount == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">// 0 lists -&gt; 1 list</span></span><br><span class="line">        <span class="built_in">list</span> = addedLists[<span class="number">0</span>];</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 1 list -&gt; many lists</span></span><br><span class="line">        List* oldList = <span class="built_in">list</span>;</span><br><span class="line">        <span class="keyword">uint32_t</span> oldCount = oldList ? <span class="number">1</span> : <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">uint32_t</span> newCount = oldCount + addedCount;</span><br><span class="line">        setArray((<span class="keyword">array_t</span> *)<span class="built_in">malloc</span>(<span class="keyword">array_t</span>::byteSize(newCount)));</span><br><span class="line">        <span class="built_in">array</span>()-&gt;count = newCount;</span><br><span class="line">        <span class="keyword">if</span> (oldList) <span class="built_in">array</span>()-&gt;lists[addedCount] = oldList;</span><br><span class="line">        <span class="built_in">memcpy</span>(<span class="built_in">array</span>()-&gt;lists, addedLists, </span><br><span class="line">               addedCount * <span class="keyword">sizeof</span>(<span class="built_in">array</span>()-&gt;lists[<span class="number">0</span>]));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -791,10 +792,10 @@
 </li>
 </ul>
 <p>我们接着探索 <code>_dyld_objc_notify_register</code> 的第二个参数 <code>load_images</code> ，这个函数指针是在什么时候调用的呢，同样的，我们接着在 <code>dyld</code> 源码中搜索对应的函数指针 <code>sNotifyObjCInit</code> :</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c57867da9?w=1816&h=680&f=png&s=278430" alt="image.png"></p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578669523547-a2e68448-1194-416a-b97e-6474038c57e7.png#align=left&display=inline&height=340&name=image.png&originHeight=680&originWidth=1816&size=278430&status=done&style=none&width=908" alt="image.png"></p>
 <p>可以看到，在 <code>notifySingle</code> 方法内部， <code>sNotifyObjCInit</code> 函数指针被调用了。根据我们上一篇文章探索 <code>dyld</code> 底层可以知道， <code>_load_images</code> 应该是对于每一个加载进来的 <code>Mach-O</code> 镜像都会递归调用一次。</p>
 <p>我们来到 <code>libObjc</code> 源码中 <code>load_images</code> 的定义处:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c6aa3bb47?w=1276&h=998&f=png&s=289198" alt="image.png"> </p>
+<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578670024551-0eed762f-4497-4498-80ee-715640ac2bd9.png#align=left&display=inline&height=499&name=image.png&originHeight=998&originWidth=1276&size=289198&status=done&style=none&width=638" alt="image.png"> </p>
 <blockquote>
 <p>处理由 <code>dyld</code> 映射的给定镜像中的 <code>+load</code>  方法</p>
 </blockquote>
@@ -812,14 +813,14 @@
 <li>然后通过 <code>schedule_class_load</code> 遍历这些类<ul>
 <li>递归调用遍历父类的 <code>load</code> 方法，确保父类的 <code>load</code> 方法顺序排在子类的前面</li>
 <li>通过 <code>add_class_to_loadable_list</code> , 把类的 <code>load</code> 方法存在 <code>loadable_classes</code> 里面</li>
-<li><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c7073d52c?w=1404&h=222&f=png&s=89710" alt="image.png"></li>
+<li><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578670785565-93c7915e-07e5-4a0b-80fc-a7bf9c3ee527.png#align=left&display=inline&height=111&name=image.png&originHeight=222&originWidth=1404&size=89710&status=done&style=none&width=702" alt="image.png"></li>
 </ul>
 </li>
 <li>完成 <code>schedule_class_load</code> 之后，通过 <code>_getObjc2NonlazyCategoryList</code> 取出所有分类数据</li>
 <li>然后遍历这些分类<ul>
 <li>通过 <code>realizeClassWithoutSwift</code> 来防止类没有初始化，如果已经初始化了则不影响</li>
 <li>通过 <code>add_category_to_loadable_list</code> ，加载分类中的 <code>load</code> 方法到 <code>loadable_categories</code> 里面</li>
-<li><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c93a52eaa?w=1300&h=164&f=png&s=73216" alt="image.png"></li>
+<li><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578671153455-444e4023-c8df-48f8-96fc-fe45faf428aa.png#align=left&display=inline&height=82&name=image.png&originHeight=164&originWidth=1300&size=73216&status=done&style=none&width=650" alt="image.png"></li>
 </ul>
 </li>
 </ul>

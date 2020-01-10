@@ -294,7 +294,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-11T00:30:03+08:00" content="2020-01-11">
+            <time itemprop="dateUpdated" datetime="2020-01-11T00:33:04+08:00" content="2020-01-11">
               2020-01-11
             </time>
           </span>
@@ -355,7 +355,9 @@
 <ul>
 <li>系统调用 <code>exec()</code> 会我们的应用<strong>映射</strong>到新的地址空间</li>
 <li>然后通过 <code>dyld</code> 进行加载、链接、初始化主程序和主程序所依赖的各种动态库</li>
-<li>最后在 <code>initializeMainExecutable</code> 方法中经过一系列初始化调用 <code>notifySingle</code> 函数，该函数会执行一个 <code>load_images</code> 的回调
+<li>最后在 <code>initializeMainExecutable</code> 方法中经过一系列初始化调用 <code>notifySingle</code> 函数，该函数会执行一个 <code>load_images</code> 的回调</li>
+<li>然后在 <code>doModinitFuntions</code> 函数内部会调用 <code>__attribute__((constructor))</code> 的 <code>c</code> 函数</li>
+<li>然后 <code>dyld</code> 返回主程序的入口函数，开始进入主程序的 <code>main</code> 函数
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2020/01/11/iOS-底层探索-类的加载/#more" rel="contents">
