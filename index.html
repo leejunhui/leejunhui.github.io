@@ -294,7 +294,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-11T00:28:02+08:00" content="2020-01-11">
+            <time itemprop="dateUpdated" datetime="2020-01-11T00:30:03+08:00" content="2020-01-11">
               2020-01-11
             </time>
           </span>
@@ -351,14 +351,11 @@
 
       
         
-          <p><a name="fe3bedb5"></a></p>
-<h1 id="一、应用加载回顾"><a href="#一、应用加载回顾" class="headerlink" title="一、应用加载回顾"></a>一、应用加载回顾</h1><p>上一章我们对应用的加载有了初步的认识，我们知道了</p>
+          <h1 id="一、应用加载回顾"><a href="#一、应用加载回顾" class="headerlink" title="一、应用加载回顾"></a>一、应用加载回顾</h1><p>上一章我们对应用的加载有了初步的认识，我们知道了</p>
 <ul>
 <li>系统调用 <code>exec()</code> 会我们的应用<strong>映射</strong>到新的地址空间</li>
 <li>然后通过 <code>dyld</code> 进行加载、链接、初始化主程序和主程序所依赖的各种动态库</li>
-<li>最后在 <code>initializeMainExecutable</code> 方法中经过一系列初始化调用 <code>notifySingle</code> 函数，该函数会执行一个 <code>load_images</code> 的回调</li>
-<li>然后在 <code>doModinitFuntions</code> 函数内部会调用 <code>__attribute__((constructor))</code> 的 <code>c</code> 函数</li>
-<li>然后 <code>dyld</code> 返回主程序的入口函数，开始进入主程序的 <code>main</code> 函数<br><a name="dd967b64"></a><br>在 <code>main</code> 函数执行执行，其实 <code>dyld</code> 还会在流程中初始化 <code>libSystem</code>，而 <code>libSystem</code> 又会去初始化 <code>libDispatch</code>，在 <code>libDispatch</code> 初始化方法里面又会有一步 <code>_os_object_init</code>，在 <code>_os_object_init</code> 内部就会调起 <code>_objc_init</code>。而对于 <code>_objc_init</code> 我们还需要继续探索，因为这里面会进行类的加载等一系列重要的工作。
+<li>最后在 <code>initializeMainExecutable</code> 方法中经过一系列初始化调用 <code>notifySingle</code> 函数，该函数会执行一个 <code>load_images</code> 的回调
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2020/01/11/iOS-底层探索-类的加载/#more" rel="contents">

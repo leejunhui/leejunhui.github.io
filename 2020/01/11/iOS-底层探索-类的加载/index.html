@@ -81,13 +81,13 @@
 
 
 
-<meta name="description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFu">
+<meta name="description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调">
 <meta name="keywords" content="iOS,Objective-C">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS 底层探索 - 类的加载">
 <meta property="og:url" content="http://leejunhui.com/2020/01/11/iOS-底层探索-类的加载/index.html">
 <meta property="og:site_name" content="leejunhui&#39;s blog">
-<meta property="og:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFu">
+<meta property="og:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329ccda74e8?w=1064&h=642&f=png&s=587989">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329cd933b33?w=640&h=128&f=png&s=62998">
@@ -144,10 +144,10 @@
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c6aa3bb47?w=1276&h=998&f=png&s=289198">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c7073d52c?w=1404&h=222&f=png&s=89710">
 <meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c93a52eaa?w=1300&h=164&f=png&s=73216">
-<meta property="og:updated_time" content="2020-01-10T16:28:02.121Z">
+<meta property="og:updated_time" content="2020-01-10T16:30:03.771Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 底层探索 - 类的加载">
-<meta name="twitter:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFu">
+<meta name="twitter:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调">
 <meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329ccda74e8?w=1064&h=642&f=png&s=587989">
 
 
@@ -352,7 +352,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-11T00:28:02+08:00" content="2020-01-11">
+            <time itemprop="dateUpdated" datetime="2020-01-11T00:30:03+08:00" content="2020-01-11">
               2020-01-11
             </time>
           </span>
@@ -408,16 +408,15 @@
       
 
       
-        <p><a name="fe3bedb5"></a></p>
-<h1 id="一、应用加载回顾"><a href="#一、应用加载回顾" class="headerlink" title="一、应用加载回顾"></a>一、应用加载回顾</h1><p>上一章我们对应用的加载有了初步的认识，我们知道了</p>
+        <h1 id="一、应用加载回顾"><a href="#一、应用加载回顾" class="headerlink" title="一、应用加载回顾"></a>一、应用加载回顾</h1><p>上一章我们对应用的加载有了初步的认识，我们知道了</p>
 <ul>
 <li>系统调用 <code>exec()</code> 会我们的应用<strong>映射</strong>到新的地址空间</li>
 <li>然后通过 <code>dyld</code> 进行加载、链接、初始化主程序和主程序所依赖的各种动态库</li>
-<li>最后在 <code>initializeMainExecutable</code> 方法中经过一系列初始化调用 <code>notifySingle</code> 函数，该函数会执行一个 <code>load_images</code> 的回调</li>
+<li>最后在 <code>initializeMainExecutable</code> 方法中经过一系列初始化调用 <code>notifySingle</code> 函数，该函数会执行一个 <code>load_images</code> 的回调<a id="more"></a></li>
 <li>然后在 <code>doModinitFuntions</code> 函数内部会调用 <code>__attribute__((constructor))</code> 的 <code>c</code> 函数</li>
-<li>然后 <code>dyld</code> 返回主程序的入口函数，开始进入主程序的 <code>main</code> 函数<br><a name="dd967b64"></a><br>在 <code>main</code> 函数执行执行，其实 <code>dyld</code> 还会在流程中初始化 <code>libSystem</code>，而 <code>libSystem</code> 又会去初始化 <code>libDispatch</code>，在 <code>libDispatch</code> 初始化方法里面又会有一步 <code>_os_object_init</code>，在 <code>_os_object_init</code> 内部就会调起 <code>_objc_init</code>。而对于 <code>_objc_init</code> 我们还需要继续探索，因为这里面会进行类的加载等一系列重要的工作。<a id="more"></a>
-<img src="https://user-gold-cdn.xitu.io/2020/1/11/16f90329ccda74e8?w=1064&h=642&f=png&s=587989" alt="image.png"></li>
+<li>然后 <code>dyld</code> 返回主程序的入口函数，开始进入主程序的 <code>main</code> 函数<br><a name="dd967b64"></a><br>在 <code>main</code> 函数执行执行，其实 <code>dyld</code> 还会在流程中初始化 <code>libSystem</code>，而 <code>libSystem</code> 又会去初始化 <code>libDispatch</code>，在 <code>libDispatch</code> 初始化方法里面又会有一步 <code>_os_object_init</code>，在 <code>_os_object_init</code> 内部就会调起 <code>_objc_init</code>。而对于 <code>_objc_init</code> 我们还需要继续探索，因为这里面会进行类的加载等一系列重要的工作。</li>
 </ul>
+<p><img src="https://user-gold-cdn.xitu.io/2020/1/11/16f90329ccda74e8?w=1064&h=642&f=png&s=587989" alt="image.png"></p>
 <p><a name="054f9d72"></a></p>
 <h1 id="二、探索-objc-init"><a href="#二、探索-objc-init" class="headerlink" title="二、探索 _objc_init"></a>二、探索 <code>_objc_init</code></h1><p>首先来到 <code>libObjc</code> 源码的 <code>_objc_init</code> 方法处，你可以直接添加一个符号断点 <code>_objc_init</code> 或者全局搜索关键字来到这里：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> _objc_init(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">bool</span> initialized = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (initialized) <span class="keyword">return</span>;</span><br><span class="line">    initialized = <span class="literal">true</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// fixme defer initialization until an objc-using image is found?</span></span><br><span class="line">    environ_init();</span><br><span class="line">    tls_init();</span><br><span class="line">    static_init();</span><br><span class="line">    lock_init();</span><br><span class="line">    exception_init();</span><br><span class="line"></span><br><span class="line">    _dyld_objc_notify_register(&amp;map_images, load_images, unmap_image);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
