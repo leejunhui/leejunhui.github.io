@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="iOS,Objective-C,">
 
 
 
@@ -81,13 +81,74 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="leejunhui&#39;s blog">
-<meta property="og:url" content="http://leejunhui.com/index.html">
+<meta name="description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFu">
+<meta name="keywords" content="iOS,Objective-C">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 底层探索 - 类的加载">
+<meta property="og:url" content="http://leejunhui.com/2020/01/11/iOS-底层探索-类的加载/index.html">
 <meta property="og:site_name" content="leejunhui&#39;s blog">
+<meta property="og:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFu">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329ccda74e8?w=1064&h=642&f=png&s=587989">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329cd933b33?w=640&h=128&f=png&s=62998">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329de4109a5?w=1392&h=1126&f=png&s=1117545">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329d7958eaa?w=2742&h=950&f=png&s=3488566">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329e03ed033?w=1436&h=1344&f=png&s=1190411">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329dd45fffc?w=1906&h=516&f=png&s=270969">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a0d454646?w=2154&h=144&f=png&s=104541">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a0dbf6b51?w=1238&h=524&f=png&s=111955">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a12f6dde2?w=2040&h=976&f=png&s=356538">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a278c0d69?w=1034&h=128&f=png&s=59484">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a2a5d0ab1?w=1708&h=1512&f=png&s=484522">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a1cca9f2d?w=1254&h=134&f=png&s=31131">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a52c3eb3c?w=1834&h=466&f=png&s=147797">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a5879836b?w=1424&h=918&f=png&s=188162">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a5e7bb65d?w=1360&h=1602&f=png&s=399014">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032a6584d8ae?w=1090&h=652&f=png&s=136253">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032aaef40816?w=1474&h=744&f=png&s=183723">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032ad7a2da2f?w=1410&h=352&f=png&s=112739">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032ae45a2e5b?w=1278&h=354&f=png&s=120788">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032ae90c3235?w=1384&h=132&f=png&s=68340">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032af5bf1b90?w=1280&h=242&f=png&s=89887">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b22d0abd7?w=1332&h=1076&f=png&s=295460">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b1057f929?w=2134&h=1618&f=png&s=499905">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032afa959dd3?w=1180&h=658&f=png&s=170983">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b28947688?w=1312&h=78&f=png&s=41201">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b2bf05f9d?w=1080&h=622&f=png&s=143781">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b3023cd3c?w=1356&h=1256&f=png&s=282135">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b51b3f8ca?w=1372&h=662&f=png&s=161671">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b3baaef26?w=1102&h=578&f=png&s=164251">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b4c017edb?w=1108&h=356&f=png&s=93626">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b55980447?w=1194&h=78&f=png&s=29457">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b6a7a2dd4?w=1246&h=92&f=png&s=33495">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b73e7d2db?w=446&h=78&f=png&s=16174">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b7ae844b4?w=1462&h=1044&f=png&s=208548">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b936fad4e?w=1068&h=228&f=png&s=100861">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b952f910a?w=800&h=1092&f=png&s=143996">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032b953a323c?w=1206&h=964&f=png&s=245597">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032babf0eb16?w=988&h=96&f=png&s=28225">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032bcf58d493?w=1372&h=718&f=png&s=218953">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032be76aa042?w=1374&h=470&f=png&s=159138">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032bd70a03bb?w=1202&h=518&f=png&s=154798">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032bd7caa0c9?w=1320&h=348&f=png&s=137208">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032be7598531?w=932&h=202&f=png&s=57447">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c160a6a72?w=868&h=1370&f=png&s=233458">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c16a26753?w=1208&h=104&f=png&s=44994">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c16fb6903?w=1010&h=130&f=png&s=37801">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c17c29916?w=1012&h=224&f=png&s=47697">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c1b072069?w=1260&h=276&f=png&s=101852">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c2bb658d1?w=1200&h=80&f=png&s=37876">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c3f8d69ad?w=1318&h=96&f=png&s=22281">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c52592950?w=1186&h=588&f=png&s=143089">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c57867da9?w=1816&h=680&f=png&s=278430">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c6aa3bb47?w=1276&h=998&f=png&s=289198">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c7073d52c?w=1404&h=222&f=png&s=89710">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f9032c93a52eaa?w=1300&h=164&f=png&s=73216">
+<meta property="og:updated_time" content="2020-01-10T16:21:06.005Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="leejunhui&#39;s blog">
+<meta name="twitter:title" content="iOS 底层探索 - 类的加载">
+<meta name="twitter:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFu">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/1/11/16f90329ccda74e8?w=1064&h=642&f=png&s=587989">
 
 
 
@@ -117,13 +178,13 @@
 
 
 
-  <link rel="canonical" href="http://leejunhui.com/">
+  <link rel="canonical" href="http://leejunhui.com/2020/01/11/iOS-底层探索-类的加载/">
 
 
 
 
 
-  <title>leejunhui's blog</title>
+  <title>iOS 底层探索 - 类的加载 | leejunhui's blog</title>
   
 
 
@@ -142,8 +203,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -236,9 +296,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -268,9 +328,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/11/iOS-底层探索-类的加载/" itemprop="url">iOS 底层探索 - 类的加载</a></h1>
+          <h1 class="post-title" itemprop="name headline">iOS 底层探索 - 类的加载</h1>
         
 
         <div class="post-meta">
@@ -350,9 +408,7 @@
       
 
       
-        
-          
-            <p><a name="fe3bedb5"></a></p>
+        <p><a name="fe3bedb5"></a></p>
 <h1 id="一、应用加载回顾"><a href="#一、应用加载回顾" class="headerlink" title="一、应用加载回顾"></a>一、应用加载回顾</h1><p>上一章我们对应用的加载有了初步的认识，我们知道了</p>
 <ul>
 <li>系统调用 <code>exec()</code> 会我们的应用<strong>映射</strong>到新的地址空间</li>
@@ -787,8 +843,6 @@
 <p><a name="seoEo"></a></p>
 <h1 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h1><p>至此， <code>_objc_init</code> 和 <code>_dyld_objc_notify_register</code> 我们就分析完了，我们对类的加载有了更细致的认知。 <code>iOS</code> 底层有时候探索起来确实很枯燥，但是如果能找到高效的方法以及明确自己的所探索的方向，会让自己从宏观上重新审视这门技术。是的，技术只是工具，我们不能被技术所绑架，我们要做到有的放矢的去探索，这样才能事半功倍。</p>
 
-          
-        
       
     </div>
     
@@ -800,1434 +854,73 @@
     
 
     
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/10/iOS-底层探索-应用加载/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/10/iOS-底层探索-应用加载/" itemprop="url">iOS 底层探索 - 应用加载</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-10T00:45:45+08:00">
-                2020-01-10
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-10T00:46:47+08:00" content="2020-01-10">
-              2020-01-10
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p><code>App</code> 从被用户在主屏幕上点击之后就开启了它的生命周期，那么在这之中，究竟发生了什么呢?让我们从 <code>App</code> 启动开始探索。在探索之前，我们需要熟悉一些前导知识点。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/10/iOS-底层探索-应用加载/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/08/iOS-底层探索-消息转发/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/08/iOS-底层探索-消息转发/" itemprop="url">iOS 底层探索 - 消息转发</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-08T15:33:00+08:00">
-                2020-01-08
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-08T15:33:34+08:00" content="2020-01-08">
-              2020-01-08
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p><a name="bd936ced"></a></p>
-<h1 id="一、动态方法解析流程分析"><a href="#一、动态方法解析流程分析" class="headerlink" title="一、动态方法解析流程分析"></a>一、动态方法解析流程分析</h1><p>我们在上一章《消息查找》分析到了<strong>动态方法解析</strong>，为了更好的掌握具体的流程，我们接下来直接进行源码追踪。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/08/iOS-底层探索-消息转发/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/07/iOS-底层探索-消息查找/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/07/iOS-底层探索-消息查找/" itemprop="url">iOS 底层探索 - 消息查找</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-07T11:06:03+08:00">
-                2020-01-07
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-07T11:07:50+08:00" content="2020-01-07">
-              2020-01-07
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="一、objc-msgSend-汇编补充"><a href="#一、objc-msgSend-汇编补充" class="headerlink" title="一、objc_msgSend 汇编补充"></a>一、<code>objc_msgSend</code> 汇编补充</h1><p>我们知道，之所以使用汇编来实现 <code>objc_msgSend</code> 有两个原因:</p>
-<ul>
-<li>因为 C 无法通过写一个函数来保留未知的参数并且跳转到一个任意的函数指针。</li>
-<li><code>objc_msgSend</code> 必须足够快。</li>
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    leejunhui
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://leejunhui.com/2020/01/11/iOS-底层探索-类的加载/" title="iOS 底层探索 - 类的加载">http://leejunhui.com/2020/01/11/iOS-底层探索-类的加载/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
 </ul>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/07/iOS-底层探索-消息查找/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS/" rel="tag"># iOS</a>
+          
+            <a href="/tags/Objective-C/" rel="tag"># Objective-C</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/10/iOS-底层探索-应用加载/" rel="next" title="iOS 底层探索 - 应用加载">
+                <i class="fa fa-chevron-left"></i> iOS 底层探索 - 应用加载
+              </a>
+            
           </div>
-          <!--/noindex-->
-        
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
       
     </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
   </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/07/iOS-底层探索-方法/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/07/iOS-底层探索-方法/" itemprop="url">iOS 底层探索 - 方法</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-07T10:48:15+08:00">
-                2020-01-07
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-07T10:51:23+08:00" content="2020-01-07">
-              2020-01-07
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>我们在前面探索了对象和类的底层原理，接下来我们要探索一下方法的本质，而在探索之前，我们先简单过一遍 <code>Runtime</code> 的知识点，如果读者对这块内容已经很熟悉了的话可以直接跳过第一章。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/07/iOS-底层探索-方法/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/06/iOS-底层探索-cache-t/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/06/iOS-底层探索-cache-t/" itemprop="url">iOS 底层探索 - cache_t</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-06T14:32:21+08:00">
-                2020-01-06
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-06T14:33:21+08:00" content="2020-01-06">
-              2020-01-06
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>上一篇我们一起探索了 <code>iOS</code> 类的底层原理，其中比较重要的四个属性我们都简单的过了一遍，我们接下来要重点探索第三个属性 <code>cache_t</code>，对于这个属性，我们可以学习到苹果对于缓存的设计与理解，同时也会接触到消息发送相关的知识。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/06/iOS-底层探索-cache-t/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/06/iOS-底层探索-类/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/06/iOS-底层探索-类/" itemprop="url">iOS 底层探索 - 类</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-06T02:34:29+08:00">
-                2020-01-06
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-06T02:35:23+08:00" content="2020-01-06">
-              2020-01-06
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>我们在前面探索了 <code>iOS</code> 中的对象原理，面向对象编程中有一句名言:</p>
-<blockquote>
-<p>万物皆对象</p>
-</blockquote>
-<p>那么对象又是从哪来的呢？有过面向对象编程基础的同学肯定都知道是类派生出对象的，那么今天我们就一起来探索一下类的底层原理吧。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/06/iOS-底层探索-类/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/05/iOS-底层探索-calloc-isa/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/05/iOS-底层探索-calloc-isa/" itemprop="url">iOS 底层探索 - calloc&isa</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-05T11:37:49+08:00">
-                2020-01-05
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-06T02:33:37+08:00" content="2020-01-06">
-              2020-01-06
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>上一篇文章主要我们探索了 <code>iOS</code>  对象的 <code>alloc</code> 和 <code>init</code> 以及对象是怎么开辟内存以及初始化的，如果在对象身上增加一些属性，是否会影响内存开辟呢？还有一个遗留问题就是通过 <code>calloc</code> ，我们的对象有了内存地址，但是对象结构里面的 <code>isa</code> 是怎么关联到我们的对象的内存地址的呢。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/05/iOS-底层探索-calloc-isa/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/05/iOS-底层探索-alloc-init/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/05/iOS-底层探索-alloc-init/" itemprop="url">iOS 底层探索 - alloc&init</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-05T11:17:38+08:00">
-                2020-01-05
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-05T11:40:43+08:00" content="2020-01-05">
-              2020-01-05
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p><a name="BrezX"></a></p>
-<p>作为 <code>iOS</code> 开发者，我们每天打交道最多的应该就是对象了，从面向对象设计的角度来说，对象的创建以及初始化是最基础的内容。那么，今天我们就一起来探索一下 <code>iOS</code> 中最常用的 <code>alloc</code> 和 <code>init</code>  的底层是怎么实现的吧。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/05/iOS-底层探索-alloc-init/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2019/12/10/WWDC2012-iOS-App-Performance-Responsiveness/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/10/WWDC2012-iOS-App-Performance-Responsiveness/" itemprop="url">WWDC2012 iOS App Performance:Responsiveness 笔记</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-10T11:55:32+08:00">
-                2019-12-10
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-05T11:41:03+08:00" content="2020-01-05">
-              2020-01-05
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/WWDC-笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">WWDC 笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>如果观看过 <a href="https://developer.apple.com/videos/play/wwdc2012/235/" target="_blank" rel="noopener">WWDC 2012 Session 305 - iOS App Performance: Responsiveness</a> 可以略过本文。</p>
-<p>首先，该篇 WWDC Session 有两个主题</p>
-<ul>
-<li>响应式：app 如何更快的响应用户操作</li>
-<li>性能优化：让 app 高效的运行
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/12/10/WWDC2012-iOS-App-Performance-Responsiveness/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </li></ul></div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-  </section>
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
-  </nav>
-
 
 
           </div>
@@ -2235,6 +928,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -2255,8 +952,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -2323,6 +1029,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、应用加载回顾"><span class="nav-number">1.</span> <span class="nav-text">一、应用加载回顾</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、探索-objc-init"><span class="nav-number">2.</span> <span class="nav-text">二、探索 _objc_init</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-environ-init"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 environ_init</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-tls-init"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 tls_init</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-static-init"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 static_init</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-lock-init"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 lock_init</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-exception-init"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 exception_init</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-6-dyld-objc-notify-register"><span class="nav-number">2.6.</span> <span class="nav-text">2.6 _dyld_objc_notify_register</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、探索-map-images"><span class="nav-number">3.</span> <span class="nav-text">三、探索 map_images</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-read-images-定义"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 _read_images 定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-read-images-具体流程"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 _read_images 具体流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-read-class-分析"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 read_class 分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-realizeClassWithoutSwift-分析"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 realizeClassWithoutSwift 分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-methodizeClass-分析"><span class="nav-number">3.5.</span> <span class="nav-text">3.5 methodizeClass 分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、探索-load-images"><span class="nav-number">4.</span> <span class="nav-text">四、探索 load_images</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-prepare-load-methods-分析"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 prepare_load_methods 分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-call-load-methods-分析"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 call_load_methods 分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五、总结"><span class="nav-number">5.</span> <span class="nav-text">五、总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -2470,6 +1192,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
