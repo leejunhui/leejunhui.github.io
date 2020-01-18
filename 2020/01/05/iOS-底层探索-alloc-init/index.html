@@ -89,24 +89,24 @@
 <meta property="og:site_name" content="leejunhui&#39;s blog">
 <meta property="og:description" content="alloc &amp;amp; init 探索作为 iOS 开发者，我们每天打交道最多的应该就是对象了，从面向对象设计的角度来说，对象的创建以及初始化是最基础的内容。那么，今天我们就一起来探索一下 iOS 中最常用的 alloc 和 init  的底层是怎么实现的吧。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231019.jpg?token=ACEXFMJB7GL4V54YKFXXASS6EMQBW">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231041.jpg?token=ACEXFMITLVVJOFF3CPOWB226EMQC6">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118234802.jpg?token=ACEXFMJWNEEX5SDCHE54KOS6EMUPA">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231138.jpg?token=ACEXFMMEIQH5VDZKABC5CB26EMQGO">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119014943.jpg?token=ACEXFMO3FLPSW5GTZAUXWNK6ENCXI">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119014959.jpg?token=ACEXFMM34D3F23QFA3HI2PK6ENCYM">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015038.jpg?token=ACEXFMPYZOEHF5R5AO6UYR26ENC2Y">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015127.jpg?token=ACEXFMI6GNPIJHHMZGNC7SC6ENC56">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015148.jpg?token=ACEXFMOZ4OE6LSB2G7GMNG26ENC7E">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015201.jpg?token=ACEXFML3RSKA76MSBZ6HEQK6ENDAA">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015214.jpg?token=ACEXFMLC5XI47VUAJFNEIPS6ENDA2">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015229.jpg?token=ACEXFMMJVIK65NBE2PNBJ526ENDBU">
-<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015244.jpg?token=ACEXFMIPY4X2SESNUZPNLFS6ENDCW">
-<meta property="og:updated_time" content="2020-01-18T17:56:11.260Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231019.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231041.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118234802.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231138.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119014943.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119014959.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015038.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015127.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015148.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015201.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015214.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015229.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015244.jpg">
+<meta property="og:updated_time" content="2020-01-18T18:01:13.302Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 底层探索 - alloc&amp;init">
 <meta name="twitter:description" content="alloc &amp;amp; init 探索作为 iOS 开发者，我们每天打交道最多的应该就是对象了，从面向对象设计的角度来说，对象的创建以及初始化是最基础的内容。那么，今天我们就一起来探索一下 iOS 中最常用的 alloc 和 init  的底层是怎么实现的吧。">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231019.jpg?token=ACEXFMJB7GL4V54YKFXXASS6EMQBW">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231019.jpg">
 
 
 
@@ -310,7 +310,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-19T01:56:11+08:00" content="2020-01-19">
+            <time itemprop="dateUpdated" datetime="2020-01-19T02:01:13+08:00" content="2020-01-19">
               2020-01-19
             </time>
           </span>
@@ -370,22 +370,22 @@
 <a id="more"></a>
 <h2 id="如何进行底层探索"><a href="#如何进行底层探索" class="headerlink" title="如何进行底层探索"></a>如何进行底层探索</h2><p>对于第三方开源框架来说，我们去剖析内部原理和细节是有一定的方法和套路可以掌握的。而对于 <code>iOS</code>  底层，特别是 <code>OC</code> 底层，我们可能就需要用到一些开发中不是很常用的方法。</p>
 <p>我们这个系列主要的目的是为了进行底层探索，那么我们作为 <code>iOS</code> 开发者，需要关注应该就是从应用启动到应用被 <code>kill</code> 掉这一整个生命周期的内容。我们不妨从我们最熟悉的 <code>main</code> 函数开始，一般来说，我们在 <code>main.m</code> 文件中打一个断点，左侧的调用堆栈视图应该如下图所示:</p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231019.jpg?token=ACEXFMJB7GL4V54YKFXXASS6EMQBW" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231019.jpg" alt></p>
 <blockquote>
 <p>要得到这样的调用堆栈有两个注意点:</p>
 <ul>
 <li>需要关闭 <code>Xcode</code> 左侧 <code>Debug</code> 区域最下面的 <code>show only stack frames with debug symbols and between libraries</code></li>
 </ul>
 </blockquote>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231041.jpg?token=ACEXFMITLVVJOFF3CPOWB226EMQC6" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231041.jpg" alt></p>
 <blockquote>
 <ul>
 <li>需要增加一个 <code>_objc_init</code> 的符号端点</li>
 </ul>
 </blockquote>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118234802.jpg?token=ACEXFMJWNEEX5SDCHE54KOS6EMUPA" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118234802.jpg" alt></p>
 <p>我们通过上面的调用堆栈信息不难得出一个简单粗略的加载流程结构</p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231138.jpg?token=ACEXFMMEIQH5VDZKABC5CB26EMQGO" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200118231138.jpg" alt></p>
 <p>我们现在心中建立这么一个简单的流程结构，在后期分析底层的时候我们会回过头来梳理整个启动的流程。</p>
 <p>接下来，让我们开始实际的探索过程。</p>
 <p>我们直接打开 <code>Xcode</code> 新建一个 <code>Single View App</code> 工程，然后我们在 <code>ViewController.m</code> 文件中调用 <code>alloc</code> 方法。</p>
@@ -393,19 +393,19 @@
 
 <p>我们按照常规探索源码的方式，直接按住 <code>Command</code> + <code>Control</code> 来进入到 <code>alloc</code> 内部实现，但结果并非如我们所愿，我们来到的是一个头文件，只有 <code>alloc</code> 方法的声明，并没有对应的实现。这个时候，我们会陷入深深的怀疑中，其实这个时候我们只要记住下面三种常用探索方式就能迎刃而解：</p>
 <h3 id="直接下代码断点"><a href="#直接下代码断点" class="headerlink" title="直接下代码断点"></a>直接下代码断点</h3><p>具体操作方式为 <code>Control</code> + <code>in</code> </p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119014943.jpg?token=ACEXFMO3FLPSW5GTZAUXWNK6ENCXI" alt><br> 这里的 <code>in</code> 指的是左侧图片中红色部分的按钮，其实这里的操作叫做 <code>Step into instruction</code> 。我们可以来到下图这里</p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119014959.jpg?token=ACEXFMM34D3F23QFA3HI2PK6ENCYM" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119014943.jpg" alt><br> 这里的 <code>in</code> 指的是左侧图片中红色部分的按钮，其实这里的操作叫做 <code>Step into instruction</code> 。我们可以来到下图这里</p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119014959.jpg" alt></p>
 <p>我们观察不难得出我们想要找的就是 <code>libobjc.A.dylib</code> 这个动态链接库了。</p>
 <h3 id="打开反汇编显示"><a href="#打开反汇编显示" class="headerlink" title="打开反汇编显示"></a>打开反汇编显示</h3><p>具体操作方式为打开 <code>Debug</code> 菜单下的 <code>Debug Workflow</code> 下的 <code>Always Show Disassembly</code> </p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015038.jpg?token=ACEXFMPYZOEHF5R5AO6UYR26ENC2Y" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015038.jpg" alt></p>
 <p>接着我们还是下代码断点，然后一步一步调试也会来到下图这里:</p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015127.jpg?token=ACEXFMI6GNPIJHHMZGNC7SC6ENC56" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015127.jpg" alt></p>
 <h3 id="下符号断点"><a href="#下符号断点" class="headerlink" title="下符号断点"></a>下符号断点</h3><p>我们先选择 <code>Symbolic Breakpoint</code>，然后输入 <code>objc_alloc</code> ，如下图所示：</p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015148.jpg?token=ACEXFMOZ4OE6LSB2G7GMNG26ENC7E" alt></p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015201.jpg?token=ACEXFML3RSKA76MSBZ6HEQK6ENDAA" alt></p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015214.jpg?token=ACEXFMLC5XI47VUAJFNEIPS6ENDA2" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015148.jpg" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015201.jpg" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015214.jpg" alt></p>
 <p>至此，我们得到了 <code>alloc</code> 实现位于 <code>libObjc</code> 这个动态库，而刚好苹果已经开源了这部分的代码，所以我们可以在 <a href="https://opensource.apple.com/release/macos-10145.html" target="_blank" rel="noopener">苹果开源官网 最新版本 10.14.5</a> 上下载即可。最新的 <code>libObc</code> 为 756。</p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015229.jpg?token=ACEXFMMJVIK65NBE2PNBJ526ENDBU" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015229.jpg" alt></p>
 <h2 id="探索-libObjc-源码"><a href="#探索-libObjc-源码" class="headerlink" title="探索 libObjc 源码"></a>探索 <code>libObjc</code> 源码</h2><p>我们下载了 <code>libObjc</code> 的源码到我们的电脑上后是不能直接运行的，我们需要进行一定的配置才能实现源码追踪流程。这一块内容不在本文范围内，读者可参考 <a href="https://juejin.im/post/5d9c829df265da5ba46f49c9" target="_blank" rel="noopener">iOS_objc4-756.2 最新源码编译调试</a>。</p>
 <p>配置好 <code>libObjc</code> 之后，我们新建一个命令行的项目，然后运行如下代码:</p>
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">NSObject</span> *myObj = [<span class="built_in">NSObject</span> alloc];</span><br></pre></td></tr></table></figure>
@@ -445,7 +445,7 @@
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">id</span> </span><br><span class="line">class_createInstance(Class cls, size_t extraBytes)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> _class_createInstanceFromZone(cls, extraBytes, <span class="literal">nil</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> __attribute__((always_inline)) </span><br><span class="line"><span class="keyword">id</span></span><br><span class="line">_class_createInstanceFromZone(Class cls, size_t extraBytes, <span class="keyword">void</span> *zone, </span><br><span class="line">                              <span class="keyword">bool</span> cxxConstruct = <span class="literal">true</span>, </span><br><span class="line">                              size_t *outAllocatedSize = <span class="literal">nil</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 对 cls 进行判空操作</span></span><br><span class="line">    <span class="keyword">if</span> (!cls) <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">	<span class="comment">// 断言 cls 是否实现了</span></span><br><span class="line">    assert(cls-&gt;isRealized());</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Read class's info bits all at once for performance</span></span><br><span class="line">    <span class="comment">// cls 是否有 C++ 的初始化构造器</span></span><br><span class="line">    <span class="keyword">bool</span> hasCxxCtor = cls-&gt;hasCxxCtor();</span><br><span class="line">    <span class="comment">// cls 是否有 C++ 的析构器</span></span><br><span class="line">    <span class="keyword">bool</span> hasCxxDtor = cls-&gt;hasCxxDtor();</span><br><span class="line">    <span class="comment">// cls 是否可以分配 Nonpointer，如果是，即代表开启了内存优化 </span></span><br><span class="line">    <span class="keyword">bool</span> fast = cls-&gt;canAllocNonpointer();</span><br><span class="line">		</span><br><span class="line">    <span class="comment">// 这里传入的 extraBytes 为0，然后获取 cls 的实例内存大小</span></span><br><span class="line">    size_t size = cls-&gt;instanceSize(extraBytes);</span><br><span class="line">    <span class="comment">// 这里 outAllocatedSize 是默认值 nil，跳过</span></span><br><span class="line">    <span class="keyword">if</span> (outAllocatedSize) *outAllocatedSize = size;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">id</span> obj;</span><br><span class="line">    <span class="comment">// 这里 zone 传入的也是nil，而 fast 拿到的是 true，所以会进入这里的逻辑</span></span><br><span class="line">    <span class="keyword">if</span> (!zone  &amp;&amp;  fast) &#123;</span><br><span class="line">        <span class="comment">// 根据 size 开辟内存</span></span><br><span class="line">        obj = (<span class="keyword">id</span>)calloc(<span class="number">1</span>, size);</span><br><span class="line">        <span class="comment">// 如果开辟失败，返回 nil</span></span><br><span class="line">        <span class="keyword">if</span> (!obj) <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">        <span class="comment">// 将 cls 和是否有 C++ 析构器传入给 initInstanceIsa，实例化 isa</span></span><br><span class="line">        obj-&gt;initInstanceIsa(cls, hasCxxDtor);</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 如果 zone 不为空，经过笔者测试，一般来说调用 alloc 不会来到这里，只有 allocWithZone</span></span><br><span class="line">        <span class="comment">// 或 copyWithZone 会来到下面的逻辑</span></span><br><span class="line">        <span class="keyword">if</span> (zone) &#123;</span><br><span class="line">            <span class="comment">// 根据给定的 zone 和 size 开辟内存</span></span><br><span class="line">            obj = (<span class="keyword">id</span>)malloc_zone_calloc ((malloc_zone_t *)zone, <span class="number">1</span>, size);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 根据 size 开辟内存</span></span><br><span class="line">            obj = (<span class="keyword">id</span>)calloc(<span class="number">1</span>, size);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果开辟失败，返回 nil</span></span><br><span class="line">        <span class="keyword">if</span> (!obj) <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Use raw pointer isa on the assumption that they might be </span></span><br><span class="line">        <span class="comment">// doing something weird with the zone or RR.</span></span><br><span class="line">        <span class="comment">// 初始化 isa</span></span><br><span class="line">        obj-&gt;initIsa(cls);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果有 C++ 初始化构造器和析构器，进行优化加速整个流程</span></span><br><span class="line">    <span class="keyword">if</span> (cxxConstruct &amp;&amp; hasCxxCtor) &#123;</span><br><span class="line">        obj = _objc_constructOrFree(obj, cls);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回最终的结果</span></span><br><span class="line">    <span class="keyword">return</span> obj;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>至此，我们的 <code>alloc</code> 流程就探索完毕，但在这其中我们还是有一些疑问点，比如，对象的内存大小时怎么确定出来的， <code>isa</code> 是怎么初始化出来的呢，没关系，我们下一篇接着探索。这里，先给出笔者自己画的一个 <code>alloc</code> 流程图:</p>
-<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015244.jpg?token=ACEXFMIPY4X2SESNUZPNLFS6ENDCW" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119015244.jpg" alt></p>
 <h3 id="init-简略分析"><a href="#init-简略分析" class="headerlink" title="init 简略分析"></a>init 简略分析</h3><p>分析完了 <code>alloc</code> 的流程，我们接着分析 <code>init</code> 的流程。相比于 <code>alloc</code> 来说， <code>init</code> 内部实现十分简单，先来到的是 <code>_objc_rootInit</code> ，然后就直接返回 <code>obj</code> 了。其实这里是一种抽象工厂设计模式的体现，对于 <code>NSObject</code> 自带的 <code>init</code> 方法来说，其实啥也没干，但是如果你继承于 <code>NSObject</code> 的话，然后就可以去重写 <code>initWithXXX</code> 之类的初始化方法来做一些初始化操作。</p>
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">id</span>)init &#123;</span><br><span class="line">    <span class="keyword">return</span> _objc_rootInit(<span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">id</span></span><br><span class="line">_objc_rootInit(<span class="keyword">id</span> obj)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// In practice, it will be hard to rely on this function.</span></span><br><span class="line">    <span class="comment">// Many classes do not properly chain -init calls.</span></span><br><span class="line">    <span class="keyword">return</span> obj;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
