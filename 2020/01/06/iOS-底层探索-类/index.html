@@ -89,31 +89,31 @@
 <meta property="og:site_name" content="leejunhui&#39;s blog">
 <meta property="og:description" content="我们在前面探索了 iOS 中的对象原理，面向对象编程中有一句名言:  万物皆对象  那么对象又是从哪来的呢？有过面向对象编程基础的同学肯定都知道是类派生出对象的，那么今天我们就一起来探索一下类的底层原理吧。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6461e2831f236?w=1759&h=405&f=png&s=83902">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6465a4d9639bf?w=1639&h=25&f=png&s=5612">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f650eea85ff33d?w=375&h=49&f=png&s=7547">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6514cefd5534a?w=564&h=120&f=png&s=18928">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6518589fae134?w=417&h=45&f=png&s=8620">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f651921a57a509?w=1396&h=241&f=png&s=21435">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f651a866d5c971?w=378&h=93&f=png&s=14926">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f651db9c320a63?w=299&h=35&f=png&s=5693">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6522da09563dc?w=400&h=498&f=png&s=42266">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6523636f6b969?w=193&h=48&f=png&s=3123">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6527a9d0588bc?w=335&h=257&f=png&s=29412">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6528a74e5ce89?w=581&h=160&f=png&s=24141">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f652ac4c248593?w=421&h=247&f=png&s=25177">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f652bca34f6ae2?w=341&h=125&f=png&s=12825">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6532607dfb725?w=592&h=182&f=png&s=22289">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f653375733d8ec?w=595&h=274&f=png&s=43368">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f65385ab1b0f8d?w=719&h=34&f=png&s=12884">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f653a695dc434e?w=696&h=35&f=png&s=12221">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f654895364c7c5?w=642&h=389&f=png&s=76084">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6549873654a90?w=1303&h=687&f=png&s=116926">
-<meta property="og:updated_time" content="2020-01-05T18:35:23.497Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022446.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022507.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022526.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022603.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022621.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022633.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022639.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022649.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022702.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022708.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022719.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022728.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022739.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022750.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022801.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022806.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022824.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022834.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022845.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022852.jpg">
+<meta property="og:updated_time" content="2020-01-18T18:29:02.513Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 底层探索 - 类">
 <meta name="twitter:description" content="我们在前面探索了 iOS 中的对象原理，面向对象编程中有一句名言:  万物皆对象  那么对象又是从哪来的呢？有过面向对象编程基础的同学肯定都知道是类派生出对象的，那么今天我们就一起来探索一下类的底层原理吧。">
-<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6461e2831f236?w=1759&h=405&f=png&s=83902">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022446.jpg">
 
 
 
@@ -317,8 +317,8 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-06T02:35:23+08:00" content="2020-01-06">
-              2020-01-06
+            <time itemprop="dateUpdated" datetime="2020-01-19T02:29:02+08:00" content="2020-01-19">
+              2020-01-19
             </time>
           </span>
           
@@ -387,12 +387,12 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -rewrite-objc main.m -o main.cpp</span><br></pre></td></tr></table></figure>
 
 <p>这个命令是将我们的 <code>main.m</code> 重写成 <code>main.cpp</code>，我们打开这个文件搜索 <code>Animal</code>:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6461e2831f236?w=1759&h=405&f=png&s=83902" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022446.jpg" alt></p>
 <p>我们发现有多个地方都出现了 <code>Animal</code>:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">objc_object</span> <span class="title">Animal</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Animal_IMPL</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">NSObject_IMPL</span> <span class="title">NSObject_IVARS</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3</span></span><br><span class="line">objc_getClass(<span class="string">"Animal"</span>)</span><br></pre></td></tr></table></figure>
 
 <p>我们先全局搜索第一个 <code>typedef struct objc_object</code>，发现有 843 个结果</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6465a4d9639bf?w=1639&h=25&f=png&s=5612" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022507.jpg" alt></p>
 <p>我们通过 <code>Command + G</code> 快捷键快速翻阅一下，最终在 7626 行找到了 <code>Class</code> 的定义:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">objc_class</span> *<span class="title">Class</span>;</span></span><br></pre></td></tr></table></figure>
 
@@ -461,7 +461,7 @@
 
 <p>我们打一个断点到 <code>main.m</code> 文件中的 <code>NSLog</code> 语句处，然后运行刚才新建的 <code>target</code>。</p>
 <p><code>target</code> 跑起来之后，我们在控制台先打印输出一下 <code>pClass</code> 的内容:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f650eea85ff33d?w=375&h=49&f=png&s=7547" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022526.jpg" alt></p>
 <h2 id="3-1-类的内存结构"><a href="#3-1-类的内存结构" class="headerlink" title="3.1 类的内存结构"></a>3.1 类的内存结构</h2><p>我们这个时候需要借助指针平移来探索，而对于类的内存结构我们先看下面这张表格:</p>
 <table>
 <thead>
@@ -488,39 +488,39 @@
 
 <p>从上面的代码我们可以看出，<code>cache</code> 属性其实是 <code>cache_t</code> 类型的结构体，其内部有一个 8 字节的结构体指针，有 2 个各为 4 字节的 <code>mask_t</code>。所以加起来就是 16 个字节。也就是说前三个属性总共的内存偏移量为 8 + 8 + 16 = 32 个字节，32 是 10 进制的表示，在 16 进制下就是 20。</p>
 <h2 id="3-2-探索-bits-属性"><a href="#3-2-探索-bits-属性" class="headerlink" title="3.2 探索 bits 属性"></a>3.2 探索 <code>bits</code> 属性</h2><p>我们刚才在控制台打印输出了 <code>pClass</code> 类对象的内容，我们简单画个图如下所示:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6514cefd5534a?w=564&h=120&f=png&s=18928" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022603.jpg" alt></p>
 <p>那么，类的 <code>bits</code> 属性的内存地址顺理成章的就是在 <code>isa</code> 的初始偏移量地址处进行 16 进制下的 20 递增。也就是</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0x1000021c8 + 0x20 = 0x1000021e8</span><br></pre></td></tr></table></figure>
 
 <p>我们尝试打印这个地址，注意这里需要强转一下:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6518589fae134?w=417&h=45&f=png&s=8620" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022621.jpg" alt></p>
 <p>这里报错了，问题其实是出在我们的 <code>target</code> 没有关联上 <code>libobjc.A.dylib</code> 这个动态库，我们关联上重新运行项目</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f651921a57a509?w=1396&h=241&f=png&s=21435" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022633.jpg" alt></p>
 <p>我们重复一遍上面的流程:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f651a866d5c971?w=378&h=93&f=png&s=14926" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022639.jpg" alt></p>
 <p>这一次成功了。在 <code>objc_class</code> 源码中有:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class_rw_t</span> *data() &#123; </span><br><span class="line">    <span class="keyword">return</span> bits.data();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>我们不妨打印一下里面的内容：</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f651db9c320a63?w=299&h=35&f=png&s=5693" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022649.jpg" alt></p>
 <p>返回了一个 <code>class_rw_t</code> 指针对象。我们在 <code>objc4-756</code> 源码中搜索 <code>class_rw_t</code>:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">class_rw_t</span> &#123;</span></span><br><span class="line">    <span class="comment">// Be warned that Symbolication knows the layout of this structure.</span></span><br><span class="line">    <span class="keyword">uint32_t</span> flags;</span><br><span class="line">    <span class="keyword">uint32_t</span> version;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">class_ro_t</span> *ro;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">method_array_t</span> methods;</span><br><span class="line">    <span class="keyword">property_array_t</span> properties;</span><br><span class="line">    <span class="keyword">protocol_array_t</span> protocols;</span><br><span class="line"></span><br><span class="line">    Class firstSubclass;</span><br><span class="line">    Class nextSiblingClass;</span><br><span class="line">    </span><br><span class="line">    ...省略代码...    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>显然的，<code>class_rw_t</code> 也是一个结构体类型，其内部有 <code>methods</code>、<code>properties</code>、<code>protocols</code> 等我们十分熟悉的内容。我们先猜想一下，我们的属性应该存放在 <code>class_rw_t</code> 的 <code>properties</code> 里面。为了验证我们的猜想，我们接着进行 <code>LLDB</code> 打印:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6522da09563dc?w=400&h=498&f=png&s=42266" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022702.jpg" alt></p>
 <p>我们再接着打印 <code>properties</code>:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6523636f6b969?w=193&h=48&f=png&s=3123" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022708.jpg" alt></p>
 <p><code>properties</code> 居然是空的，难道是 bug?其实不然，这里我们还漏掉了一个非常重要的属性 <code>ro</code>。我们来到它的定义:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">class_ro_t</span> &#123;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> flags;</span><br><span class="line">    <span class="keyword">uint32_t</span> instanceStart;</span><br><span class="line">    <span class="keyword">uint32_t</span> instanceSize;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __LP64__</span></span><br><span class="line">    <span class="keyword">uint32_t</span> reserved;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span> * ivarLayout;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> * name;</span><br><span class="line">    <span class="keyword">method_list_t</span> * baseMethodList;</span><br><span class="line">    <span class="keyword">protocol_list_t</span> * baseProtocols;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">ivar_list_t</span> * ivars;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span> * weakIvarLayout;</span><br><span class="line">    <span class="keyword">property_list_t</span> *baseProperties;</span><br><span class="line"></span><br><span class="line">    ...隐藏代码...    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><code>ro</code> 的类型是 <code>class_ro_t</code> 结构体，它包含了 <code>baseMethodList</code>、<code>baseProtocols</code>、<code>ivars</code>、<code>baseProperties</code> 等属性。我们刚才在 <code>class_rw_t</code> 中没有找到我们声明在 <code>Person</code> 类中的实例变量 <code>hobby</code> 和属性 <code>nickName</code>，那么希望就在 <code>class_ro_t</code> 身上了，我们打印看看它的内容:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6527a9d0588bc?w=335&h=257&f=png&s=29412" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022719.jpg" alt></p>
 <p>根据名称我们猜测属性应该在 <code>baseProperties</code> 里面，我们打印看看:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6528a74e5ce89?w=581&h=160&f=png&s=24141" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022728.jpg" alt></p>
 <p>Bingo! 我们的属性 <code>nickName</code> 被找到了，那么我们的实例变量 <code>hobby</code> 呢？我们从 $8 的 count 为 1 可以得知肯定不在 <code>baseProperites</code> 里面。根据名称我们猜测应该是在 <code>ivars</code> 里面。</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f652ac4c248593?w=421&h=247&f=png&s=25177" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022739.jpg" alt></p>
 <p>哈哈，<code>hobby</code> 实例变量也被我们找到了，不过这里的 <code>count</code> 为什么是 2 呢？我们打印第二个元素看看:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f652bca34f6ae2?w=341&h=125&f=png&s=12825" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022750.jpg" alt></p>
 <p>结果为 <code>_nickName</code>。这一结果证实了编译器会帮助我们给属性 <code>nickName</code> 生成一个带下划线前缀的实例变量 <code>_nickName</code>。</p>
 <p>至此，我们可以得出以下结论:</p>
 <blockquote>
@@ -531,15 +531,15 @@
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Person.h</span></span><br><span class="line">- (<span class="keyword">void</span>)sayHello;</span><br><span class="line">+ (<span class="keyword">void</span>)sayHappy;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Person.m</span></span><br><span class="line">- (<span class="keyword">void</span>)sayHello</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%s"</span>, __func__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">void</span>)sayHappy</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%s"</span>, __func__);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>按照上面的思路，我们直接读取 <code>class_ro_t</code> 中的 <code>baseMethodList</code> 的内容:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6532607dfb725?w=592&h=182&f=png&s=22289" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022801.jpg" alt></p>
 <p><code>sayHello</code> 被打印出来了，说明 <code>baseMethodList</code> 就是存储实例方法的地方。我们接着打印剩下的内容:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f653375733d8ec?w=595&h=274&f=png&s=43368" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022806.jpg" alt></p>
 <p>可以看到 <code>baseMethodList</code> 中除了我们的实例方法 <code>sayHello</code> 外，还有属性 <code>nickName</code> 的 <code>getter</code> 和 <code>setter</code> 方法以及一个 <code>C++</code> 析构方法。但是我们的类方法 <code>sayHappy</code> 并没有被打印出来。</p>
 <h1 id="五、类的类方法存在哪？"><a href="#五、类的类方法存在哪？" class="headerlink" title="五、类的类方法存在哪？"></a>五、类的类方法存在哪？</h1><p>我们上面已经得到了属性，实例方法的是怎么样存储，还留下了一个疑问点，就是类方法是怎么存储的，接下来我们用 <code>Runtime</code> 的 API 来实际测试一下。</p>
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main.m</span></span><br><span class="line"><span class="keyword">void</span> testInstanceMethod_classToMetaclass(Class pClass)&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *className = class_getName(pClass);</span><br><span class="line">    Class metaClass = objc_getMetaClass(className);</span><br><span class="line">    </span><br><span class="line">    Method method1 = class_getInstanceMethod(pClass, <span class="keyword">@selector</span>(sayHello));</span><br><span class="line">    Method method2 = class_getInstanceMethod(metaClass, <span class="keyword">@selector</span>(sayHello));</span><br><span class="line"></span><br><span class="line">    Method method3 = class_getInstanceMethod(pClass, <span class="keyword">@selector</span>(sayHappy));</span><br><span class="line">    Method method4 = class_getInstanceMethod(metaClass, <span class="keyword">@selector</span>(sayHappy));</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%p-%p-%p-%p"</span>,method1,method2,method3,method4);</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%s"</span>,__func__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> main(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> * argv[]) &#123;</span><br><span class="line">    <span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">        </span><br><span class="line">        Person *p = [[Person alloc] init];</span><br><span class="line">        Class pClass = object_getClass(p);</span><br><span class="line">        </span><br><span class="line">        testInstanceMethod_classToMetaclass(pClass);</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%p"</span>, p);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>运行后打印结果如下:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f65385ab1b0f8d?w=719&h=34&f=png&s=12884" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022824.jpg" alt></p>
 <p>首先 <code>testInstanceMethod_classToMetaclass</code> 方法测试的是分别从类和元类去获取实例方法、类方法的结果。由打印结果我们可以知道：</p>
 <ul>
 <li>对于类对象来说，<code>sayHello</code> 是实例方法，存储于类对象的内存中，不存在于元类对象中。而 <code>sayHappy</code> 是类方法，存储于元类对象的内存中，不存在于类对象中。</li>
@@ -549,7 +549,7 @@
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main.m</span></span><br><span class="line"><span class="keyword">void</span> testClassMethod_classToMetaclass(Class pClass)&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span> *className = class_getName(pClass);</span><br><span class="line">    Class metaClass = objc_getMetaClass(className);</span><br><span class="line">    </span><br><span class="line">    Method method1 = class_getClassMethod(pClass, <span class="keyword">@selector</span>(sayHello));</span><br><span class="line">    Method method2 = class_getClassMethod(metaClass, <span class="keyword">@selector</span>(sayHello));</span><br><span class="line"></span><br><span class="line">    Method method3 = class_getClassMethod(pClass, <span class="keyword">@selector</span>(sayHappy));</span><br><span class="line">    Method method4 = class_getClassMethod(metaClass, <span class="keyword">@selector</span>(sayHappy));</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%p-%p-%p-%p"</span>,method1,method2,method3,method4);</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%s"</span>,__func__);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> main(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> * argv[]) &#123;</span><br><span class="line">    <span class="keyword">@autoreleasepool</span> &#123;</span><br><span class="line">        </span><br><span class="line">        Person *p = [[Person alloc] init];</span><br><span class="line">        Class pClass = object_getClass(p);</span><br><span class="line">        </span><br><span class="line">        testClassMethod_classToMetaclass(pClass);</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%p"</span>, p);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>运行后打印结果如下:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f653a695dc434e?w=696&h=35&f=png&s=12221" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022834.jpg" alt></p>
 <p>从结果我们可以看出，对于类对象来说，通过 <code>class_getClassMethod</code> 获取 <code>sayHappy</code> 是有值的，而获取 <code>sayHello</code> 是没有值的；对于元类对象来说，通过 <code>class_getClassMethod</code> 获取 <code>sayHappy</code> 也是有值的，而获取 <code>sayHello</code> 是没有值的。这里第一点很好理解，但是第二点会有点让人糊涂，不是说类方法在元类中是体现为对象方法的吗？怎么通过 <code>class_getClassMethod</code> 从元类中也能拿到 <code>sayHappy</code>，我们进入到 <code>class_getClassMethod</code> 方法内部可以解开这个疑惑:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Method <span class="title">class_getClassMethod</span><span class="params">(Class cls, SEL sel)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!cls  ||  !sel) <span class="keyword">return</span> nil;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> class_getInstanceMethod(cls-&gt;getMeta(), sel);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">Class <span class="title">getMeta</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (isMetaClass()) <span class="keyword">return</span> (Class)<span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">return</span> <span class="keyword">this</span>-&gt;ISA();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -568,11 +568,11 @@
 <ul>
 <li><code>LLDB</code> 打印类和元类的指针</li>
 </ul>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f654895364c7c5?w=642&h=389&f=png&s=76084" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022845.jpg" alt></p>
 <ul>
 <li>编译项目后，使用 <code>MachoView</code> 打开程序二进制可执行文件查看:</li>
 </ul>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6549873654a90?w=1303&h=687&f=png&s=116926" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119022852.jpg" alt></p>
 <h1 id="六、总结"><a href="#六、总结" class="headerlink" title="六、总结"></a>六、总结</h1><ul>
 <li>类和元类创建于编译时，可以通过 <code>LLDB</code> 来打印类和元类的指针，或者 <code>MachOView</code> 查看二进制可执行文件</li>
 <li>万物皆对象：类的本质就是对象</li>
