@@ -81,74 +81,75 @@
 
 
 
-<meta name="description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFun">
+<meta name="description" content="iOS 底层探索系列  iOS 底层探索- alloc &amp;amp; init iOS 底层探索 - calloc 和 isa iOS 底层探索 - 类 iOS 底层探索 - cache_t iOS 底层探索 - 方法 iOS 底层探索 - 消息查找 iOS 底层探索 - 消息转发 iOS 底层探索 - 应用加载 iOS 底层探索 - 类的加载   一、应用加载回顾上一章我们对应用的加载有了初步">
 <meta name="keywords" content="iOS,Objective-C">
 <meta property="og:type" content="article">
 <meta property="og:title" content="iOS 底层探索 - 类的加载">
 <meta property="og:url" content="http://leejunhui.com/2020/01/11/iOS-底层探索-类的加载/index.html">
 <meta property="og:site_name" content="leejunhui&#39;s blog">
-<meta property="og:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFun">
+<meta property="og:description" content="iOS 底层探索系列  iOS 底层探索- alloc &amp;amp; init iOS 底层探索 - calloc 和 isa iOS 底层探索 - 类 iOS 底层探索 - cache_t iOS 底层探索 - 方法 iOS 底层探索 - 消息查找 iOS 底层探索 - 消息转发 iOS 底层探索 - 应用加载 iOS 底层探索 - 类的加载   一、应用加载回顾上一章我们对应用的加载有了初步">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625875308-ba370903-0c7b-4fe8-b701-f16b1e83aedf.png#align=left&display=inline&height=642&name=image.png&originHeight=642&originWidth=1064&size=587989&status=done&style=none&width=1064">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625882118-7a8746e1-e91c-4301-8870-54303778c399.png#align=left&display=inline&height=128&name=image.png&originHeight=128&originWidth=640&size=62998&status=done&style=none&width=640">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625887674-a96d8b90-ddd4-41d0-9cd5-0ecaf4769e46.png#align=left&display=inline&height=1126&name=image.png&originHeight=1126&originWidth=1392&size=1117545&status=done&style=none&width=1392">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625897434-0e6af647-3a6d-4dd5-a5fc-a441f2bd1d4f.png#align=left&display=inline&height=950&name=image.png&originHeight=950&originWidth=2742&size=3488566&status=done&style=none&width=2742">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625912183-d2fcb6d6-5315-4b10-9081-a895403bfe03.png#align=left&display=inline&height=1344&name=image.png&originHeight=1344&originWidth=1436&size=1190411&status=done&style=none&width=1436">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578626217854-4de447ad-c5ec-4bd7-b685-cb84c254fe78.png#align=left&display=inline&height=258&name=image.png&originHeight=516&originWidth=1906&size=270969&status=done&style=none&width=953">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632707400-2ae88c98-1a21-4225-b6fa-e65f3d05559c.png#align=left&display=inline&height=72&name=image.png&originHeight=144&originWidth=2154&size=104541&status=done&style=none&width=1077">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632770351-7c4e5d35-cb73-4995-9240-918fea63cff7.png#align=left&display=inline&height=262&name=image.png&originHeight=524&originWidth=1238&size=111955&status=done&style=none&width=619">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632921014-f6e4616f-4c0e-4d33-9cb9-31cb229d2dec.png#align=left&display=inline&height=488&name=image.png&originHeight=976&originWidth=2040&size=356538&status=done&style=none&width=1020">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578633013620-6831716c-ed53-427a-b7be-b618e148c57d.png#align=left&display=inline&height=64&name=image.png&originHeight=128&originWidth=1034&size=59484&status=done&style=none&width=517">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578633344116-43dec6f0-9989-4b7c-ad0f-75940a20dc2b.png#align=left&display=inline&height=756&name=image.png&originHeight=1512&originWidth=1708&size=484522&status=done&style=none&width=854">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634076306-e8b99c13-9c2b-4022-8708-368d83e80038.png#align=left&display=inline&height=67&name=image.png&originHeight=134&originWidth=1254&size=31131&status=done&style=none&width=627">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634487119-7b4c65e4-b8af-4017-b8cc-9085e1537104.png#align=left&display=inline&height=233&name=image.png&originHeight=466&originWidth=1834&size=147797&status=done&style=none&width=917">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634983904-0804de6d-2daf-43af-817f-a9260d20278c.png#align=left&display=inline&height=459&name=image.png&originHeight=918&originWidth=1424&size=188162&status=done&style=none&width=712">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635005447-0e4f6af1-11b2-4cea-9bc8-32f011fe3bea.png#align=left&display=inline&height=801&name=image.png&originHeight=1602&originWidth=1360&size=399014&status=done&style=none&width=680">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635019672-021be666-1d9e-46da-8c27-ebb2364ac8fa.png#align=left&display=inline&height=326&name=image.png&originHeight=652&originWidth=1090&size=136253&status=done&style=none&width=545">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635622502-369db9f7-36fa-4ff9-8b05-96d91e2d1fa3.png#align=left&display=inline&height=372&name=image.png&originHeight=744&originWidth=1474&size=183723&status=done&style=none&width=737">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578636061685-96cdf6ce-3904-4d6c-accc-1e98e6ac01f8.png#align=left&display=inline&height=176&name=image.png&originHeight=352&originWidth=1410&size=112739&status=done&style=none&width=705">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637133590-604b1099-860d-4e9a-b237-ca23f2ae5d5e.png#align=left&display=inline&height=177&name=image.png&originHeight=354&originWidth=1278&size=120788&status=done&style=none&width=639">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578636305807-09cf75d6-695a-4f53-af9c-f6374d36e154.png#align=left&display=inline&height=66&name=image.png&originHeight=132&originWidth=1384&size=68340&status=done&style=none&width=692">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637192179-f9e22f4f-8bee-4022-986c-cb7146e10db7.png#align=left&display=inline&height=121&name=image.png&originHeight=242&originWidth=1280&size=89887&status=done&style=none&width=640">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637945784-4a70d53e-3ff1-4753-97e5-15eadd1c624e.png#align=left&display=inline&height=538&name=image.png&originHeight=1076&originWidth=1332&size=295460&status=done&style=none&width=666">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578638760375-743824ac-c2af-4df2-8159-fda8d87a4591.png#align=left&display=inline&height=809&name=image.png&originHeight=1618&originWidth=2134&size=499905&status=done&style=none&width=1067">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639069879-68ee439b-c6b6-4f56-be8a-aa7b5a0a9bfc.png#align=left&display=inline&height=329&name=image.png&originHeight=658&originWidth=1180&size=170983&status=done&style=none&width=590">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639275834-35510283-a0ed-492c-ac7a-45dd2da28114.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=1312&size=41201&status=done&style=none&width=656">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639405625-26db6178-52ee-4555-a34c-6a9663801022.png#align=left&display=inline&height=311&name=image.png&originHeight=622&originWidth=1080&size=143781&status=done&style=none&width=540">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639695744-2e5e52ef-0e81-4577-94c1-2bc3bd90d1cf.png#align=left&display=inline&height=628&name=image.png&originHeight=1256&originWidth=1356&size=282135&status=done&style=none&width=678">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578640160376-c5ab3061-b721-4291-9b4f-9fa79a5c870b.png#align=left&display=inline&height=331&name=image.png&originHeight=662&originWidth=1372&size=161671&status=done&style=none&width=686">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641091841-62f1c1dc-45e3-439b-abf6-b695cca86a06.png#align=left&display=inline&height=289&name=image.png&originHeight=578&originWidth=1102&size=164251&status=done&style=none&width=551">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641165020-ea66e050-ecf9-4d05-9180-2a0e75303e65.png#align=left&display=inline&height=178&name=image.png&originHeight=356&originWidth=1108&size=93626&status=done&style=none&width=554">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641252205-9862913d-4283-4806-9838-948fd7ff5553.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=1194&size=29457&status=done&style=none&width=597">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641300236-d9bbbb8d-50ab-4fe0-a717-d87af018940f.png#align=left&display=inline&height=46&name=image.png&originHeight=92&originWidth=1246&size=33495&status=done&style=none&width=623">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641362118-5d7e0d3d-63e4-43b7-b5bf-3553c9cda4c2.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=446&size=16174&status=done&style=none&width=223">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641575844-9a2af26a-7a0c-411b-af0a-8d8b0555e42f.png#align=left&display=inline&height=522&name=image.png&originHeight=1044&originWidth=1462&size=208548&status=done&style=none&width=731">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578656828083-7b19106f-9d92-40c5-964f-c3a150cc94dc.png#align=left&display=inline&height=114&name=image.png&originHeight=228&originWidth=1068&size=100861&status=done&style=none&width=534">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657185207-335c7c30-34ab-40e2-8a81-f1ff147eee70.png#align=left&display=inline&height=546&name=image.png&originHeight=1092&originWidth=800&size=143996&status=done&style=none&width=400">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657323902-3b292677-6631-4819-b59b-92d00c0b8528.png#align=left&display=inline&height=482&name=image.png&originHeight=964&originWidth=1206&size=245597&status=done&style=none&width=603">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657622375-ab244c96-19e1-49e6-bb09-a37ac9f723ec.png#align=left&display=inline&height=48&name=image.png&originHeight=96&originWidth=988&size=28225&status=done&style=none&width=494">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657676918-4824471e-bbc5-4d37-873e-e8d84f254712.png#align=left&display=inline&height=359&name=image.png&originHeight=718&originWidth=1372&size=218953&status=done&style=none&width=686">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657804846-b3b299a9-6cdb-4ce3-992e-b97e62379f73.png#align=left&display=inline&height=235&name=image.png&originHeight=470&originWidth=1374&size=159138&status=done&style=none&width=687">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658011882-2a7d585f-033b-4582-85c3-62bbe27869a5.png#align=left&display=inline&height=259&name=image.png&originHeight=518&originWidth=1202&size=154798&status=done&style=none&width=601">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658764319-32ad18ba-bf5c-44ce-b316-f2adce0ed395.png#align=left&display=inline&height=174&name=image.png&originHeight=348&originWidth=1320&size=137208&status=done&style=none&width=660">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658963968-1af4f514-e441-4103-aa8e-65c47eee86da.png#align=left&display=inline&height=101&name=image.png&originHeight=202&originWidth=932&size=57447&status=done&style=none&width=466">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659337429-4b1a2b62-8af8-4ca8-bf2c-11997b21d549.png#align=left&display=inline&height=685&name=image.png&originHeight=1370&originWidth=868&size=233458&status=done&style=none&width=434">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659491937-cd75fe74-d303-4aa5-bdee-0659324268ba.png#align=left&display=inline&height=52&name=image.png&originHeight=104&originWidth=1208&size=44994&status=done&style=none&width=604">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659689541-3ab78a66-9df4-4822-85fe-5e07fae4105f.png#align=left&display=inline&height=65&name=image.png&originHeight=130&originWidth=1010&size=37801&status=done&style=none&width=505">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659813408-cdef75d4-fb3a-4f3b-88a4-a3bd7ddbca59.png#align=left&display=inline&height=112&name=image.png&originHeight=224&originWidth=1012&size=47697&status=done&style=none&width=506">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578660189728-455df7e6-fa97-43be-b9f1-c6bff1bcb58a.png#align=left&display=inline&height=138&name=image.png&originHeight=276&originWidth=1260&size=101852&status=done&style=none&width=630">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668146104-e44d6291-606b-425f-892e-3eb96fef535f.png#align=left&display=inline&height=40&name=image.png&originHeight=80&originWidth=1200&size=37876&status=done&style=none&width=600">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668156597-fd9d4fa7-5702-4acf-85a6-766580c67cde.png#align=left&display=inline&height=48&name=image.png&originHeight=96&originWidth=1318&size=22281&status=done&style=none&width=659">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668182796-b810bf6c-9768-45a0-b5f2-d15fd5ac462e.png#align=left&display=inline&height=294&name=image.png&originHeight=588&originWidth=1186&size=143089&status=done&style=none&width=593">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578669523547-a2e68448-1194-416a-b97e-6474038c57e7.png#align=left&display=inline&height=340&name=image.png&originHeight=680&originWidth=1816&size=278430&status=done&style=none&width=908">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578670024551-0eed762f-4497-4498-80ee-715640ac2bd9.png#align=left&display=inline&height=499&name=image.png&originHeight=998&originWidth=1276&size=289198&status=done&style=none&width=638">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578670785565-93c7915e-07e5-4a0b-80fc-a7bf9c3ee527.png#align=left&display=inline&height=111&name=image.png&originHeight=222&originWidth=1404&size=89710&status=done&style=none&width=702">
-<meta property="og:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578671153455-444e4023-c8df-48f8-96fc-fe45faf428aa.png#align=left&display=inline&height=82&name=image.png&originHeight=164&originWidth=1300&size=73216&status=done&style=none&width=650">
-<meta property="og:updated_time" content="2020-01-10T16:33:04.371Z">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-0601f4247d547aa3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-981205a71e26885e?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-55c106e38fa26ec3?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-80186eaad9913384?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-cea6ed4960a389c8?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-c580e98600be3b13?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-b7609b4835101fea?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-cf1ea6b8888bc3a1?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-412be1a6f0e3f3b6?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-82c262643d28cb50?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-bbd0116a239403e5?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-ff5e7ee1a5cd7398?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-aa61aee34c49de71?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-b1810b2cceaee7ce?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-835f415edbe97d06?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-eabfe467a2a9a300?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-10c7ee9afa2ae464?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-8185e0a2592d276c?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-356cdd3373503939?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-4b72276f3bdb2bf1?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-e2130a0779baad19?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-5a241e8f4483b77f?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-f8bac5dcb45efc84?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-3b808dcbf9d7df91?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-65898a82fe9b343f?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-e4a735a661f5be9d?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-6b10c3011c2b8db6?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-c3f73f229e877c3a?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-78ea111916757b39?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-06937b9fda50b1a2?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-e0622b4d5148592f?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-0b6764e65a1507bc?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-a43d9650e3692832?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-c67e2c14941e702d?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-494deaf1d4b2bbbe?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-7d36c344b9d2da61?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-861fa86a264a3c92?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-95cb58d66a930380?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-fbd4be98dd9efb57?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-3c15ff25251d5a3e?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-049c90ac66816624?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-dfbb158d30896507?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-452cce6dfdc12ef3?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-9140ea139f7d8e27?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-0dcdff2a026c8309?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-3bf3065bec14e03a?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-e20884b289218ca4?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-dc12ea91e6c7498b?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-951be1b52a42949a?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-48ea99154eb2a0f5?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-77355d306761dab5?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-424091771f516fc4?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-3d3a948bceb5eec4?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-dd62575094d2060e?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-11cae8927cfdf166?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/95471-74f44fde4b425ea7?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2020-01-10T16:34:48.908Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 底层探索 - 类的加载">
-<meta name="twitter:description" content="一、应用加载回顾上一章我们对应用的加载有了初步的认识，我们知道了  系统调用 exec() 会我们的应用映射到新的地址空间 然后通过 dyld 进行加载、链接、初始化主程序和主程序所依赖的各种动态库 最后在 initializeMainExecutable 方法中经过一系列初始化调用 notifySingle 函数，该函数会执行一个 load_images 的回调 然后在 doModinitFun">
-<meta name="twitter:image" content="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625875308-ba370903-0c7b-4fe8-b701-f16b1e83aedf.png#align=left&display=inline&height=642&name=image.png&originHeight=642&originWidth=1064&size=587989&status=done&style=none&width=1064">
+<meta name="twitter:description" content="iOS 底层探索系列  iOS 底层探索- alloc &amp;amp; init iOS 底层探索 - calloc 和 isa iOS 底层探索 - 类 iOS 底层探索 - cache_t iOS 底层探索 - 方法 iOS 底层探索 - 消息查找 iOS 底层探索 - 消息转发 iOS 底层探索 - 应用加载 iOS 底层探索 - 类的加载   一、应用加载回顾上一章我们对应用的加载有了初步">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/95471-0601f4247d547aa3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
 
 
 
@@ -352,7 +353,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-11T00:33:04+08:00" content="2020-01-11">
+            <time itemprop="dateUpdated" datetime="2020-01-11T00:34:48+08:00" content="2020-01-11">
               2020-01-11
             </time>
           </span>
@@ -408,53 +409,62 @@
       
 
       
-        <h1 id="一、应用加载回顾"><a href="#一、应用加载回顾" class="headerlink" title="一、应用加载回顾"></a>一、应用加载回顾</h1><p>上一章我们对应用的加载有了初步的认识，我们知道了</p>
+        <p><img src="https://upload-images.jianshu.io/upload_images/95471-0601f4247d547aa3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="iOS 底层探索 - 类的加载.png"></p>
+<blockquote>
+<p>iOS 底层探索系列</p>
+<ul>
+<li><a href="https://www.jianshu.com/p/6f24a8491635" target="_blank" rel="noopener">iOS 底层探索- alloc &amp; init</a></li>
+<li><a href="https://www.jianshu.com/p/e9a1f89837b5" target="_blank" rel="noopener">iOS 底层探索 - calloc 和 isa</a></li>
+<li><a href="https://www.jianshu.com/p/87cd1ecf102d" target="_blank" rel="noopener">iOS 底层探索 - 类</a></li>
+<li><a href="https://www.jianshu.com/p/ece891450f09" target="_blank" rel="noopener">iOS 底层探索 - cache_t</a></li>
+<li><a href="https://www.jianshu.com/p/1ef4118f41a0" target="_blank" rel="noopener">iOS 底层探索 - 方法</a></li>
+<li><a href="https://www.jianshu.com/p/43612b1539c6" target="_blank" rel="noopener">iOS 底层探索 - 消息查找</a></li>
+<li><a href="https://www.jianshu.com/p/1956a055f68c" target="_blank" rel="noopener">iOS 底层探索 - 消息转发</a></li>
+<li><a href="#">iOS 底层探索 - 应用加载</a></li>
+<li><a href="#">iOS 底层探索 - 类的加载</a></li>
+</ul>
+</blockquote>
+<h1 id="一、应用加载回顾"><a href="#一、应用加载回顾" class="headerlink" title="一、应用加载回顾"></a>一、应用加载回顾</h1><p>上一章我们对应用的加载有了初步的认识，我们知道了</p>
 <ul>
 <li>系统调用 <code>exec()</code> 会我们的应用<strong>映射</strong>到新的地址空间</li>
 <li>然后通过 <code>dyld</code> 进行加载、链接、初始化主程序和主程序所依赖的各种动态库</li>
 <li>最后在 <code>initializeMainExecutable</code> 方法中经过一系列初始化调用 <code>notifySingle</code> 函数，该函数会执行一个 <code>load_images</code> 的回调</li>
 <li>然后在 <code>doModinitFuntions</code> 函数内部会调用 <code>__attribute__((constructor))</code> 的 <code>c</code> 函数</li>
-<li>然后 <code>dyld</code> 返回主程序的入口函数，开始进入主程序的 <code>main</code> 函数<a id="more"></a>
-在 <code>main</code> 函数执行执行，其实 <code>dyld</code> 还会在流程中初始化 <code>libSystem</code>，而 <code>libSystem</code> 又会去初始化 <code>libDispatch</code>，在 <code>libDispatch</code> 初始化方法里面又会有一步 <code>_os_object_init</code>，在 <code>_os_object_init</code> 内部就会调起 <code>_objc_init</code>。而对于 <code>_objc_init</code> 我们还需要继续探索，因为这里面会进行类的加载等一系列重要的工作。</li>
+<li>然后 <code>dyld</code> 返回主程序的入口函数，开始进入主程序的 <code>main</code> 函数</li>
 </ul>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625875308-ba370903-0c7b-4fe8-b701-f16b1e83aedf.png#align=left&display=inline&height=642&name=image.png&originHeight=642&originWidth=1064&size=587989&status=done&style=none&width=1064" alt="image.png"></p>
-<p><a name="054f9d72"></a></p>
+<p>在 <code>main</code> 函数执行执行，其实 <code>dyld</code> 还会在流程中初始化 <code>libSystem</code>，而 <code>libSystem</code> 又会去初始化 <code>libDispatch</code>，在 <code>libDispatch</code> 初始化方法里面又会有一步 <code>_os_object_init</code>，在 <code>_os_object_init</code> 内部就会调起 <code>_objc_init</code>。而对于 <code>_objc_init</code> 我们还需要继续探索，因为这里面会进行类的加载等一系列重要的工作。</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-981205a71e26885e?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <h1 id="二、探索-objc-init"><a href="#二、探索-objc-init" class="headerlink" title="二、探索 _objc_init"></a>二、探索 <code>_objc_init</code></h1><p>首先来到 <code>libObjc</code> 源码的 <code>_objc_init</code> 方法处，你可以直接添加一个符号断点 <code>_objc_init</code> 或者全局搜索关键字来到这里：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> _objc_init(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">bool</span> initialized = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (initialized) <span class="keyword">return</span>;</span><br><span class="line">    initialized = <span class="literal">true</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// fixme defer initialization until an objc-using image is found?</span></span><br><span class="line">    environ_init();</span><br><span class="line">    tls_init();</span><br><span class="line">    static_init();</span><br><span class="line">    lock_init();</span><br><span class="line">    exception_init();</span><br><span class="line"></span><br><span class="line">    _dyld_objc_notify_register(&amp;map_images, load_images, unmap_image);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>我们接着进行分析:</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625882118-7a8746e1-e91c-4301-8870-54303778c399.png#align=left&display=inline&height=128&name=image.png&originHeight=128&originWidth=640&size=62998&status=done&style=none&width=640" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-55c106e38fa26ec3?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <ul>
 <li>判断是否已经初始化了，如果初始化过了，直接返回。</li>
 </ul>
-<p><a name="07f9091b"></a></p>
 <h2 id="2-1-environ-init"><a href="#2-1-environ-init" class="headerlink" title="2.1 environ_init"></a>2.1 environ_init</h2><p>接着来到 <code>environ_init</code> 方法内部:</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625887674-a96d8b90-ddd4-41d0-9cd5-0ecaf4769e46.png#align=left&display=inline&height=1126&name=image.png&originHeight=1126&originWidth=1392&size=1117545&status=done&style=none&width=1392" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-80186eaad9913384?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>我们可以看到，这里主要是读取影响 <code>Runtime</code> 的一些环境变量，如果需要，还可以打印环境变量帮助提示。</p>
 <p>我们可以在终端上测试一下，直接输入 <code>export OBJC_HELP=1</code>:</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625897434-0e6af647-3a6d-4dd5-a5fc-a441f2bd1d4f.png#align=left&display=inline&height=950&name=image.png&originHeight=950&originWidth=2742&size=3488566&status=done&style=none&width=2742" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-cea6ed4960a389c8?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>可以看到不同的环境变量对应的内容都被打印出来了。</p>
-<p><a name="698ca41f"></a></p>
 <h2 id="2-2-tls-init"><a href="#2-2-tls-init" class="headerlink" title="2.2 tls_init"></a>2.2 tls_init</h2><p>接着来到 <code>tls_init</code> 方法内部:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">tls_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> SUPPORT_DIRECT_THREAD_KEYS</span></span><br><span class="line">    _objc_pthread_key = TLS_DIRECT_KEY;</span><br><span class="line">    pthread_key_init_np(TLS_DIRECT_KEY, &amp;_objc_pthread_destroyspecific);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">    _objc_pthread_key = tls_create(&amp;_objc_pthread_destroyspecific);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这里执行的是关于线程 <code>key</code> 的绑定，比如每线程数据的析构函数。</p>
-<p><a name="62cb2c87"></a></p>
 <h2 id="2-3-static-init"><a href="#2-3-static-init" class="headerlink" title="2.3 static_init"></a>2.3 static_init</h2><p>接着来到 <code>static_init</code> 方法内部:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***********************************************************************</span></span><br><span class="line"><span class="comment">* static_init</span></span><br><span class="line"><span class="comment">* Run C++ static constructor functions.</span></span><br><span class="line"><span class="comment">* libc calls _objc_init() before dyld would call our static constructors, </span></span><br><span class="line"><span class="comment">* so we have to do it ourselves.</span></span><br><span class="line"><span class="comment">**********************************************************************/</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">static_init</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">size_t</span> count;</span><br><span class="line">    <span class="keyword">auto</span> inits = getLibobjcInitializers(&amp;_mh_dylib_header, &amp;count);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">        inits[i]();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这里会运行 <code>C++</code> 的静态构造函数，在 <code>dyld</code> 调用我们的静态构造函数之前，<code>libc</code> 会调用 <code>_objc_init</code>，所以这里我们必须自己来做，并且这里只会初始化系统内置的 <code>C++</code> 静态构造函数，我们自己代码里面写的并不会在这里初始化。</p>
-<p><a name="df49e329"></a></p>
 <h2 id="2-4-lock-init"><a href="#2-4-lock-init" class="headerlink" title="2.4 lock_init"></a>2.4 lock_init</h2><p>接着来到 <code>lock_init</code> 方法内部:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">lock_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>我们可以看到，这是一个空的实现。也就是说 <code>objc</code> 的锁是完全采用的 <code>C++</code> 那一套的锁逻辑。</p>
-<p><a name="6f11b680"></a></p>
 <h2 id="2-5-exception-init"><a href="#2-5-exception-init" class="headerlink" title="2.5 exception_init"></a>2.5 exception_init</h2><p>接着来到 <code>exception_init</code> 方法内部:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***********************************************************************</span></span><br><span class="line"><span class="comment">* exception_init</span></span><br><span class="line"><span class="comment">* Initialize libobjc's exception handling system.</span></span><br><span class="line"><span class="comment">* Called by map_images().</span></span><br><span class="line"><span class="comment">**********************************************************************/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">exception_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    old_terminate = <span class="built_in">std</span>::set_terminate(&amp;_objc_terminate);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这里是初始化 <code>libobjc</code> 的异常处理系统，我们程序触发的异常都会来到：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578625912183-d2fcb6d6-5315-4b10-9081-a895403bfe03.png#align=left&display=inline&height=1344&name=image.png&originHeight=1344&originWidth=1436&size=1190411&status=done&style=none&width=1436" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-c580e98600be3b13?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>我们可以看到 <code>_objc_terminate</code> 是未处理异常的回调函数，其内部逻辑如下:</p>
 <ul>
 <li>检查是否是一个活跃的异常</li>
@@ -462,19 +472,18 @@
 <li>如果是 <code>OC</code> 抛出的异常，调用 <code>uncaught_handeler</code> 回调函数指针</li>
 <li>如果不是 <code>OC</code> 抛出的异常，则继续 <code>C++</code> 终止操作</li>
 </ul>
-<p><a name="wC2Z6"></a></p>
 <h2 id="2-6-dyld-objc-notify-register"><a href="#2-6-dyld-objc-notify-register" class="headerlink" title="2.6 _dyld_objc_notify_register"></a>2.6 _dyld_objc_notify_register</h2><p>接下来使我们今天探索的重点了： <code>_dyld_objc_notify_register</code> ，我们先看下它的定义:</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578626217854-4de447ad-c5ec-4bd7-b685-cb84c254fe78.png#align=left&display=inline&height=258&name=image.png&originHeight=516&originWidth=1906&size=270969&status=done&style=none&width=953" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-b7609b4835101fea?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <blockquote>
 <p>注意：仅供 <code>objc</code> 运行时使用<br>当 <code>objc</code> 镜像被<strong>映射（mapped）</strong>、<strong>卸载（unmapped）</strong>和<strong>初始化（initialized）</strong>的时候，注册的回调函数就会被调用。<br>这个方法是 <code>dlyd</code> 中声明的，一旦调用该方法，调用结果会作为该函数的参数回传回来。比如，当所有的 <code>images</code> 以及 <code>section</code> 为 <code>objc-image-info</code> 被加载之后会回调 <code>mapped</code> 方法。<br><code>load</code> 方法也将在这个方法中被调用。</p>
 </blockquote>
 <p><code>_dyld_objc_notify_register</code>  方法的三个参数 <code>map_images</code> 、 <code>load_images</code> 、 <code>unmap_image</code>  其实都是函数指针：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632707400-2ae88c98-1a21-4225-b6fa-e65f3d05559c.png#align=left&display=inline&height=72&name=image.png&originHeight=144&originWidth=2154&size=104541&status=done&style=none&width=1077" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-cf1ea6b8888bc3a1?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>这三个函数指针是在 <code>dyld</code> 中回调的，我们打开 <code>dyld</code> 的源码即可一探究竟，我们直接搜索 <code>_dyld_objc_notify_register</code> :</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632770351-7c4e5d35-cb73-4995-9240-918fea63cff7.png#align=left&display=inline&height=262&name=image.png&originHeight=524&originWidth=1238&size=111955&status=done&style=none&width=619" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-412be1a6f0e3f3b6?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>接着来到 <code>dyld</code> 的 <code>registerObjCNotifiers</code> 方法内部：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578632921014-f6e4616f-4c0e-4d33-9cb9-31cb229d2dec.png#align=left&display=inline&height=488&name=image.png&originHeight=976&originWidth=2040&size=356538&status=done&style=none&width=1020" alt="image.png"></p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578633013620-6831716c-ed53-427a-b7be-b618e148c57d.png#align=left&display=inline&height=64&name=image.png&originHeight=128&originWidth=1034&size=59484&status=done&style=none&width=517" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-82c262643d28cb50?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-bbd0116a239403e5?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>通过上面两张截图的内容说明在 <code>registerObjCNotifiers</code> 内部， <code>libObjc</code> 传过来的这三个函数指针被 <code>dyld</code> 保存在了本地静态变量中。换句话来说，最终函数指针是否能被调用，取决于这三个静态变量：</p>
 <ul>
 <li><code>sNotifyObjCMapped</code> </li>
@@ -486,14 +495,13 @@
 <p>call ‘mapped’ function with all images mapped so far<br>调用 <code>mapped</code> 函数来映射所有的镜像</p>
 </blockquote>
 <p>那么也就是说 <code>notifyBatchPartial</code> 里面会进行真正的函数指针的调用，我们进入这个方法内部：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578633344116-43dec6f0-9989-4b7c-ad0f-75940a20dc2b.png#align=left&display=inline&height=756&name=image.png&originHeight=1512&originWidth=1708&size=484522&status=done&style=none&width=854" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-ff5e7ee1a5cd7398?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>我们可以看到，在 <code>notifyBatchPartial</code> 方法内部，这里的注释:</p>
 <blockquote>
 <p>tell objc about new images 告诉 <code>objc</code> 镜像已经映射完成了</p>
 </blockquote>
 <p>而图中箭头所指的地方正是 <code>sNotifyObjCMapped</code> 函数指针真正调用的地方。</p>
 <p>弄清楚了三个函数指针是怎么调用的还不够，接下来我们要深入各个函数的内部看里面究竟做了什么样的事情。</p>
-<p><a name="GafPW"></a></p>
 <h1 id="三、探索-map-images"><a href="#三、探索-map-images" class="headerlink" title="三、探索 map_images"></a>三、探索 map_images</h1><p>首先是 <code>map_images</code> ，我们来到它的实现:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***********************************************************************</span></span><br><span class="line"><span class="comment">* map_images</span></span><br><span class="line"><span class="comment">* Process the given images which are being mapped in by dyld.</span></span><br><span class="line"><span class="comment">* Calls ABI-agnostic code after taking ABI-specific locks.</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* Locking: write-locks runtimeLock</span></span><br><span class="line"><span class="comment">**********************************************************************/</span></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">map_images(<span class="keyword">unsigned</span> count, <span class="keyword">const</span> <span class="keyword">char</span> * <span class="keyword">const</span> paths[],</span><br><span class="line">           <span class="keyword">const</span> struct mach_header * <span class="keyword">const</span> mhdrs[])</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">mutex_locker_t</span> lock(runtimeLock);</span><br><span class="line">    <span class="keyword">return</span> map_images_nolock(count, paths, mhdrs);</span><br><span class="line">&#125;C</span><br></pre></td></tr></table></figure>
 
@@ -505,25 +513,23 @@
 </blockquote>
 <p>这里会继续往下走到 <code>map_images_nolock</code> </p>
 <p><code>map_images_nolock</code> 内部代码十分冗长，我们经过分析之后，前面的工作基本上都是进行镜像文件信息的提取与统计，所以可以定位到最后的 <code>_read_images</code> ：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634076306-e8b99c13-9c2b-4022-8708-368d83e80038.png#align=left&display=inline&height=67&name=image.png&originHeight=134&originWidth=1254&size=31131&status=done&style=none&width=627" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-aa61aee34c49de71?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <blockquote>
 <p>这里进入 <code>_read_images</code> 的条件是 <code>hCount</code> 大于 0， <code>hCount</code> 表示的是 <code>Mach-O</code> 中 <code>header</code> 的数量</p>
 </blockquote>
 <p>OK，我们的主角登场了， <code>_read_images</code> 和 <code>lookupImpOrForward</code> 可以说是我们学习 <code>Runtime</code> 和 <code>iOS</code> 底层里面非常重要的两个概念了， <code>lookUpImpOrForward</code> 已经探索过了，剩下的 <code>_read_images</code> 我们也不能落下。</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634487119-7b4c65e4-b8af-4017-b8cc-9085e1537104.png#align=left&display=inline&height=233&name=image.png&originHeight=466&originWidth=1834&size=147797&status=done&style=none&width=917" alt="image.png"></p>
-<p><a name="jR2RQ"></a></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-b1810b2cceaee7ce?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <h2 id="3-1-read-images-定义"><a href="#3-1-read-images-定义" class="headerlink" title="3.1 _read_images 定义"></a>3.1 _read_images 定义</h2><blockquote>
 <p>Perform initial processing of the headers in the linked list beginning with headerList.<br>从 <code>headerList</code> 开始，对已经链接了的 <code>Mach-O</code> 镜像表中的头部进行初始化处理</p>
 </blockquote>
 <p>我们可以看到，整个 <code>_read_images</code> 有接近 400 行代码。我们不妨折叠一下里面的分支代码，然后总览一下：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578634983904-0804de6d-2daf-43af-817f-a9260d20278c.png#align=left&display=inline&height=459&name=image.png&originHeight=918&originWidth=1424&size=188162&status=done&style=none&width=712" alt="image.png"></p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635005447-0e4f6af1-11b2-4cea-9bc8-32f011fe3bea.png#align=left&display=inline&height=801&name=image.png&originHeight=1602&originWidth=1360&size=399014&status=done&style=none&width=680" alt="image.png"></p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635019672-021be666-1d9e-46da-8c27-ebb2364ac8fa.png#align=left&display=inline&height=326&name=image.png&originHeight=652&originWidth=1090&size=136253&status=done&style=none&width=545" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-835f415edbe97d06?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-eabfe467a2a9a300?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-10c7ee9afa2ae464?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>通过折叠代码，以及日志打印提示信息，我们大致可以将 <code>_read_images</code> 分为下面几个流程:</p>
-<p><a name="OzBK6"></a></p>
 <h2 id="3-2-read-images-具体流程"><a href="#3-2-read-images-具体流程" class="headerlink" title="3.2 _read_images 具体流程"></a>3.2 _read_images 具体流程</h2><hr>
 <p><strong>doneOnce 流程</strong><br>**<br>我们从第一个分支 <code>doneOnce</code> 开始，这个名词顾名思义，只会执行一次：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578635622502-369db9f7-36fa-4ff9-8b05-96d91e2d1fa3.png#align=left&display=inline&height=372&name=image.png&originHeight=744&originWidth=1474&size=183723&status=done&style=none&width=737" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-8185e0a2592d276c?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <ul>
 <li>通过宏 <code>SUPPORT_NONPOINTER_ISA</code> 判断当前是否支持开启内存优化的 <code>isa</code> <ul>
 <li>如果支持，则在某些条件下需要禁用这个优化</li>
@@ -534,13 +540,13 @@
 </ul>
 </li>
 </ul>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578636061685-96cdf6ce-3904-4d6c-accc-1e98e6ac01f8.png#align=left&display=inline&height=176&name=image.png&originHeight=352&originWidth=1410&size=112739&status=done&style=none&width=705" alt="image.png"><br> </p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-356cdd3373503939?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><br> </p>
 <ul>
 <li>通过宏 <code>TARGET_OS_OSX</code> 判断是否是 <code>macOS</code> 执行环境</li>
 <li>判断 <code>macOS</code> 的系统版本，如果小于 <code>10.11</code> 则说明 <code>app</code> 太陈旧了，需要禁用掉 <code>non-pointer isa</code> </li>
 <li>然后再遍历所有的 <code>Mach-O</code> 的头部，判断如果有 <code>__DATA__,__objc_rawisa</code> 段的存在，则禁用掉 <code>non-pointer isa</code> ，因为很多新的 <code>app</code> 加载老的扩展的时候会需要这样的判断操作。</li>
 </ul>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637133590-604b1099-860d-4e9a-b237-ca23f2ae5d5e.png#align=left&display=inline&height=177&name=image.png&originHeight=354&originWidth=1278&size=120788&status=done&style=none&width=639" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-4b72276f3bdb2bf1?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <blockquote>
 <p>预先优化过的类不会加入到 <code>gdb_objc_realized_classes</code> 这个哈希表中来， <code>gdb_objc_realized_classes</code> 哈希表的装载因子为 0.75，这是一个经过验证的效率很高的扩容临界值。</p>
 </blockquote>
@@ -548,7 +554,7 @@
 <li>加载所有类到类的 <code>gdb_objc_realized_classes</code> 表中来<br></li>
 </ul>
 <p>我们查看这个表的定义：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578636305807-09cf75d6-695a-4f53-af9c-f6374d36e154.png#align=left&display=inline&height=66&name=image.png&originHeight=132&originWidth=1384&size=68340&status=done&style=none&width=692" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-e2130a0779baad19?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <blockquote>
 <p>// This is a misnomer: gdb_objc_realized_classes is actually a list of<br>// named classes not in the dyld shared cache, whether realized or not.</p>
 </blockquote>
@@ -556,20 +562,20 @@
 <p>这是一个误称：gdb_objc_realized_classes 表实际上存储的是不在 <code>dyld</code> 共享缓存里面的命名类，无论这些类是否实现</p>
 </blockquote>
 <p>除了 <code>gdb_objc_realized_classes</code> 表之外，还有一张表 <code>allocatedClasses</code> :</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637192179-f9e22f4f-8bee-4022-986c-cb7146e10db7.png#align=left&display=inline&height=121&name=image.png&originHeight=242&originWidth=1280&size=89887&status=done&style=none&width=640" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-5a241e8f4483b77f?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <ul>
 <li>通过 <code>objc_allocateClassPair</code> 开辟之后的类和元类存储的表（也就是说需要 <code>alloc</code> ）</li>
 </ul>
 <p>其实 <code>gdb_objc_realized_classes</code> 对 <code>allocatedClasses</code> 是一种包含的关系，一张是类的总表，一张是已经开辟了内存的类表，</p>
 <hr>
-<p><strong>Discover classes 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578637945784-4a70d53e-3ff1-4753-97e5-15eadd1c624e.png#align=left&display=inline&height=538&name=image.png&originHeight=1076&originWidth=1332&size=295460&status=done&style=none&width=666" alt="image.png"><strong><br></strong></p>
+<p><strong>Discover classes 流程</strong><br><strong><br></strong><img src="https://upload-images.jianshu.io/upload_images/95471-f8bac5dcb45efc84?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>Discover classes. Fix up unresolved future classes. Mark bundle classes.<br>发现类。修正未解析的 <code>future</code> 类，标记 <code>bundle</code> 类。</p>
 </blockquote>
 <ul>
 <li>先通过 <code>_getObjc2ClassList</code> 来获取到所有的类，我们可以通过 <code>MachOView</code> 来验证：</li>
 </ul>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578638760375-743824ac-c2af-4df2-8159-fda8d87a4591.png#align=left&display=inline&height=809&name=image.png&originHeight=1618&originWidth=2134&size=499905&status=done&style=none&width=1067" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-3b808dcbf9d7df91?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <ul>
 <li>接着还是遍历所有的 <code>Mach-O</code> 的 <code>header</code> 部分，然后通过 <code>mustReadClasses</code> 来判断哪些条件可以跳过读取类这一步骤</li>
 <li>读取 <code>header</code> 是否是 <code>Bundle</code> </li>
@@ -581,7 +587,7 @@
 </li>
 </ul>
 <hr>
-<p><strong>Fix up remapped classes 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639069879-68ee439b-c6b6-4f56-be8a-aa7b5a0a9bfc.png#align=left&display=inline&height=329&name=image.png&originHeight=658&originWidth=1180&size=170983&status=done&style=none&width=590" alt="image.png"><strong><br></strong></p>
+<p><strong>Fix up remapped classes 流程</strong><br><strong><br></strong><img src="https://upload-images.jianshu.io/upload_images/95471-65898a82fe9b343f?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>修复 重映射类<br>类表和非懒加载类表没有被重映射 (也就是 <strong>_objc_classlist</strong>)<br>由于消息转发，类引用和父类引用会被重映射 (也就是 <strong>_objc_classrefs</strong>)</p>
 </blockquote>
@@ -593,9 +599,9 @@
 </ul>
 </li>
 </ul>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639275834-35510283-a0ed-492c-ac7a-45dd2da28114.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=1312&size=41201&status=done&style=none&width=656" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-e4a735a661f5be9d?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <hr>
-<p><strong>Fix up @selector references 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639405625-26db6178-52ee-4555-a34c-6a9663801022.png#align=left&display=inline&height=311&name=image.png&originHeight=622&originWidth=1080&size=143781&status=done&style=none&width=540" alt="image.png"><strong><br></strong></p>
+<p><strong>Fix up @selector references 流程</strong><br><strong><br></strong><img src="https://upload-images.jianshu.io/upload_images/95471-6b10c3011c2b8db6?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>修正 <code>SEL</code> 引用</p>
 </blockquote>
@@ -609,7 +615,7 @@
 </li>
 </ul>
 <p>也就是说这一流程最主要的目的就是注册 <code>SEL</code> ，我们注册真正发生的地方: <code>__sel_registerName</code> ，这个函数如果大家经常玩 <code>Runtime</code> 肯定不会陌生：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578639695744-2e5e52ef-0e81-4577-94c1-2bc3bd90d1cf.png#align=left&display=inline&height=628&name=image.png&originHeight=1256&originWidth=1356&size=282135&status=done&style=none&width=678" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-c3f73f229e877c3a?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>我们简单分析一下 <code>__sel_registerName</code> 方法的流程：</p>
 <ul>
 <li>判断是否要加锁</li>
@@ -620,7 +626,7 @@
 <li>如果上面的流程都没有找到，则需要调用 <code>sel_alloc</code> 来创建一下 <code>SEL</code> ，然后把新创建的 <code>SEL</code> 插入哈希表中进行缓存的填充</li>
 </ul>
 <hr>
-<p><strong>Fix up old objc_msgSend_fixup call sites 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578640160376-c5ab3061-b721-4291-9b4f-9fa79a5c870b.png#align=left&display=inline&height=331&name=image.png&originHeight=662&originWidth=1372&size=161671&status=done&style=none&width=686" alt="image.png"><strong><br></strong></p>
+<p><strong>Fix up old objc_msgSend_fixup call sites 流程</strong><br><strong><br></strong><img src="https://upload-images.jianshu.io/upload_images/95471-78ea111916757b39?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>修正旧的 <code>objc_msgSend_fixup</code> 调用</p>
 </blockquote>
@@ -633,66 +639,65 @@
 </li>
 </ul>
 <hr>
-<p><strong>Discover protocols 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641091841-62f1c1dc-45e3-439b-abf6-b695cca86a06.png#align=left&display=inline&height=289&name=image.png&originHeight=578&originWidth=1102&size=164251&status=done&style=none&width=551" alt="image.png"><strong><br></strong></p>
+<p><strong>Discover protocols 流程</strong><br><strong><br></strong><img src="https://upload-images.jianshu.io/upload_images/95471-06937b9fda50b1a2?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>发现协议，并修正协议引用</p>
 </blockquote>
 <p>**</p>
 <hr>
-<p><strong>Fix up @protocol references 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641165020-ea66e050-ecf9-4d05-9180-2a0e75303e65.png#align=left&display=inline&height=178&name=image.png&originHeight=356&originWidth=1108&size=93626&status=done&style=none&width=554" alt="image.png"><strong><br></strong></p>
+<p><strong>Fix up @protocol references 流程</strong><br><strong><br></strong><img src="https://upload-images.jianshu.io/upload_images/95471-e0622b4d5148592f?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>对所有的协议做重映射</p>
 </blockquote>
 <p>**</p>
 <hr>
-<p><strong>Realize non-lazy classes 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641252205-9862913d-4283-4806-9838-948fd7ff5553.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=1194&size=29457&status=done&style=none&width=597" alt="image.png"><strong><br></strong></p>
+<p><strong>Realize non-lazy classes 流程</strong><br><strong><br></strong><img src="https://upload-images.jianshu.io/upload_images/95471-0b6764e65a1507bc?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>初始化<strong>非懒加载类( **`</strong>+load<strong>` 方法和静态实例</strong>)**</p>
 </blockquote>
 <hr>
-<p><strong>Realize newly-resolved future classes 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641300236-d9bbbb8d-50ab-4fe0-a717-d87af018940f.png#align=left&display=inline&height=46&name=image.png&originHeight=92&originWidth=1246&size=33495&status=done&style=none&width=623" alt="image.png"><strong><br></strong></p>
+<p><strong>Realize newly-resolved future classes 流程</strong><br><strong><br></strong><img src="https://upload-images.jianshu.io/upload_images/95471-a43d9650e3692832?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p>初始化新解析出来的 <code>future</code> 类</p>
 </blockquote>
 <p>**</p>
 <hr>
-<p><strong>Discover categories 流程</strong><br><strong><br></strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641362118-5d7e0d3d-63e4-43b7-b5bf-3553c9cda4c2.png#align=left&display=inline&height=39&name=image.png&originHeight=78&originWidth=446&size=16174&status=done&style=none&width=223" alt="image.png"><strong><br></strong></p>
+<p><strong>Discover categories 流程</strong><br><strong><br></strong><img src="https://upload-images.jianshu.io/upload_images/95471-c67e2c14941e702d?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"><strong><br></strong></p>
 <blockquote>
 <p><strong>处理所有的分类，包括类和元类</strong></p>
 </blockquote>
 <p>**</p>
 <hr>
 <p>到这里， <code>_read_images</code> 的流程就分析完毕，我们可以新建一个文件来去掉一些干扰的信息，只保留核心的逻辑，这样从宏观的角度来分析更直观:</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578641575844-9a2af26a-7a0c-411b-af0a-8d8b0555e42f.png#align=left&display=inline&height=522&name=image.png&originHeight=1044&originWidth=1462&size=208548&status=done&style=none&width=731" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-494deaf1d4b2bbbe?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <blockquote>
 <p>Q &amp; A 环节<br>Q： <code>dyld</code> 主要逻辑是加载库，也就是镜像文件，但是加载完是怎么读取的呢？<br>A： <code>_read_images</code> 是真正读取的地方</p>
 <p>Q: <code>SEL</code> 方法编号何时加载？<br>A: <code>_read_images</code></p>
 </blockquote>
-<p><a name="UTcpB"></a></p>
 <h2 id="3-3-read-class-分析"><a href="#3-3-read-class-分析" class="headerlink" title="3.3 read_class 分析"></a>3.3 read_class 分析</h2><p>我们探索了 <code>_read_images</code> 方法的流程，接下来让我们把目光放到本文的主题 - <strong>类的加载</strong><br>既然是类的加载，那么我们在前面所探索的类的结构中出现的内容都会一一重现。<br>所以我们不妨直接进行断点调试，让我们略过其它干扰信息，聚焦于类的加载。</p>
 <ul>
 <li>根据上一小节我们探索的结果， <code>doneOnce</code> 流程中会创建两个哈希表，并没有涉及到类的加载，所以我们跳过</li>
 <li>我们来到第二个流程 - *<em>类处理 *</em></li>
 </ul>
-<p><strong><br>我们在下图所示的位置处打上断点：<br></strong><br><strong><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578656828083-7b19106f-9d92-40c5-964f-c3a150cc94dc.png#align=left&display=inline&height=114&name=image.png&originHeight=228&originWidth=1068&size=100861&status=done&style=none&width=534" alt="image.png"></strong><br>**<br>如上图所示，从 <code>classList</code> 中取出的 <code>cls</code> 只是一个内存地址，我们尝试通过 <code>LLDB</code> 打印 <code>cls</code> 的 <code>clas_rw_t</code> :</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657185207-335c7c30-34ab-40e2-8a81-f1ff147eee70.png#align=left&display=inline&height=546&name=image.png&originHeight=1092&originWidth=800&size=143996&status=done&style=none&width=400" alt="image.png"></p>
+<p><strong><br>我们在下图所示的位置处打上断点：<br></strong><br><strong><img src="https://upload-images.jianshu.io/upload_images/95471-7d36c344b9d2da61?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></strong><br>**<br>如上图所示，从 <code>classList</code> 中取出的 <code>cls</code> 只是一个内存地址，我们尝试通过 <code>LLDB</code> 打印 <code>cls</code> 的 <code>clas_rw_t</code> :</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-861fa86a264a3c92?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>可以看到 <code>cls</code> 的属性、方法、协议以及类名都为空，说明这里类并没有被真正加载完成，我们接着聚焦到 <code>read_class</code> 函数上面，我们进入其内部实现，我们大致浏览之后会定位到如下图所示的代码：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657323902-3b292677-6631-4819-b59b-92d00c0b8528.png#align=left&display=inline&height=482&name=image.png&originHeight=964&originWidth=1206&size=245597&status=done&style=none&width=603" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-95cb58d66a930380?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>看起来类的信息在这里完成了加载，那么为了验证我们的猜想，直接断点调试一下但发现断点根本走不进来，原因在于这里的判断语句 </p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Class newCls = popFutureNamedClass(mangledName))</span><br></pre></td></tr></table></figure>
 
 <p>判断当前传入的类的类名是否有 <code>future</code> 类的实现，但是我们刚才已经打印了，类名是空的，所以肯定不会执行这里。我们接着往下走：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657622375-ab244c96-19e1-49e6-bb09-a37ac9f723ec.png#align=left&display=inline&height=48&name=image.png&originHeight=96&originWidth=988&size=28225&status=done&style=none&width=494" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-fbd4be98dd9efb57?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <ul>
 <li>addNamedClass 内部其实是将 <code>cls</code>  插入到 <code>gdb_objc_realized_classes</code> 表 </li>
 </ul>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657676918-4824471e-bbc5-4d37-873e-e8d84f254712.png#align=left&display=inline&height=359&name=image.png&originHeight=718&originWidth=1372&size=218953&status=done&style=none&width=686" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-3c15ff25251d5a3e?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <ul>
 <li>addclassTableEntry 内部是将 <code>cls</code> 插入到 <code>allocatedClasses</code> 表</li>
 </ul>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578657804846-b3b299a9-6cdb-4ce3-992e-b97e62379f73.png#align=left&display=inline&height=235&name=image.png&originHeight=470&originWidth=1374&size=159138&status=done&style=none&width=687" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-049c90ac66816624?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>分析完 <code>read_class</code> ，我们回到 <code>_read_images</code> 方法</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658011882-2a7d585f-033b-4582-85c3-62bbe27869a5.png#align=left&display=inline&height=259&name=image.png&originHeight=518&originWidth=1202&size=154798&status=done&style=none&width=601" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-dfbb158d30896507?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>我们可以看到 <code>read_class</code> 返回的 <code>newCls</code> 会进行一个判断，判断与传入 <code>read_class</code> 之前的 <code>cls</code> 是否相等，而在 <code>read_class</code> 内部只有一个地方对类的内容进行了改动，但是我们刚才测试了是进不去的，所以这个 <code>if</code> 里面的内容我们可以略过，也就是说 <code>resolvedFutureClasses</code> 的内容我们都可以暂时略过。</p>
 <p>总结一下 <code>readClass</code> ：</p>
 <ul>
@@ -703,25 +708,24 @@
 <li>addNamedClass 插入总表</li>
 <li>addClassTableEntry 插入已开辟内存的类的表  </li>
 </ul>
-<p><a name="5SkXf"></a></p>
 <h2 id="3-4-realizeClassWithoutSwift-分析"><a href="#3-4-realizeClassWithoutSwift-分析" class="headerlink" title="3.4 realizeClassWithoutSwift 分析"></a>3.4 realizeClassWithoutSwift 分析</h2><p>通过分析 <code>read_class</code> ，我们可以得知，类已经被注册到两个哈希表中去了，那么现在一切时机都已经成熟了。但是我们还是要略过像 <code>Fix up remapped classes</code> 、 <code>Fix up @selector references</code> 、 <code>fix up old objc_msgSend_fixup call sites</code> 、 <code>Discover protocols. Fix up protocol refs</code> 、 <code>Fix up @protocol references</code> ，因为我们的重点是类的加载，我们最终来到了 <code>Realize non-lazy classes (for +load methods and static instances)</code> ，略去无关信息之后，我们可以看到我们的<br>主角 <code>realizeClassWithoutSwift</code> 闪亮登场了：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658764319-32ad18ba-bf5c-44ce-b316-f2adce0ed395.png#align=left&display=inline&height=174&name=image.png&originHeight=348&originWidth=1320&size=137208&status=done&style=none&width=660" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-452cce6dfdc12ef3?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>从方法的名称以及方法注释我们可以知道， <code>realizeClassWithoutSwift</code> 是进行类的第一次初始化操作，包括分配读写数据也就是我们常说的 <code>rw</code> ，但是并不会进行任何的 <code>Swift</code> 端初始化。我们直接聚焦下面的代码：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578658963968-1af4f514-e441-4103-aa8e-65c47eee86da.png#align=left&display=inline&height=101&name=image.png&originHeight=202&originWidth=932&size=57447&status=done&style=none&width=466" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-9140ea139f7d8e27?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <ul>
 <li>通过 <code>calloc</code> 开辟内存空间，返回一个新的 <code>rw</code> </li>
 <li>把 <code>cls</code> 取出来的 <code>ro</code> 赋值给这个 <code>rw</code> </li>
 <li>将 <code>rw</code> 设置到 <code>cls</code> 身上</li>
 </ul>
 <p>那么是不是说在这里 <code>rw</code> 就有值了呢，我们 <code>LLDB</code> 打印大法走起:</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659337429-4b1a2b62-8af8-4ca8-bf2c-11997b21d549.png#align=left&display=inline&height=685&name=image.png&originHeight=1370&originWidth=868&size=233458&status=done&style=none&width=434" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-0dcdff2a026c8309?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>可以清楚地看到，此时 <code>rw</code> 还是为空，说明这里只是对 <code>rw</code> 进行了初始化，但是方法、属性、协议这些都没有被添加上。</p>
 <p>我们接着往下走:</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659491937-cd75fe74-d303-4aa5-bdee-0659324268ba.png#align=left&display=inline&height=52&name=image.png&originHeight=104&originWidth=1208&size=44994&status=done&style=none&width=604" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-3bf3065bec14e03a?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>这里可以看到父类和元类都会递归调用 <code>realizeClassWithoutSwift</code> 来初始化各自的 <code>rw</code> 。为什么在类的加载操作里面要去加载类和元类呢？回忆一下类的结构，答案很简单，要保证 <code>superclass</code> 和 <code>isa</code> 的完整性，也就是保证类的完整性，</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659689541-3ab78a66-9df4-4822-85fe-5e07fae4105f.png#align=left&display=inline&height=65&name=image.png&originHeight=130&originWidth=1010&size=37801&status=done&style=none&width=505" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-e20884b289218ca4?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>上面的截图就是最好的证明，初始化完毕的父类和元类被赋值到了类的 <code>superclass</code> 和 <code>isa</code> 上面。</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578659813408-cdef75d4-fb3a-4f3b-88a4-a3bd7ddbca59.png#align=left&display=inline&height=112&name=image.png&originHeight=224&originWidth=1012&size=47697&status=done&style=none&width=506" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-dc12ea91e6c7498b?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>接着往下走可以看到，不光要把父类关联到类上面，还要让父类知道子类的存在。</p>
 <p>最后一行代码是 <code>methodizeClass(cls)</code> ，注释显示的是 <code>attach categories</code> ，附加分类到类？我们进入其内部实现一探究竟。</p>
 <p>在探索 <code>methodizeClass</code> 前，我们先总结一下 <code>realizeClassWithoutSwift</code> :</p>
@@ -740,8 +744,7 @@
 </li>
 <li>将当前类链接到其父类的子类列表 addSubclass(supercls, cls)</li>
 </ul>
-<p><a name="84DFW"></a></p>
-<h2 id="3-5-methodizeClass-分析"><a href="#3-5-methodizeClass-分析" class="headerlink" title="3.5 methodizeClass 分析"></a>3.5 methodizeClass 分析</h2><p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578660189728-455df7e6-fa97-43be-b9f1-c6bff1bcb58a.png#align=left&display=inline&height=138&name=image.png&originHeight=276&originWidth=1260&size=101852&status=done&style=none&width=630" alt="image.png"></p>
+<h2 id="3-5-methodizeClass-分析"><a href="#3-5-methodizeClass-分析" class="headerlink" title="3.5 methodizeClass 分析"></a>3.5 methodizeClass 分析</h2><p><img src="https://upload-images.jianshu.io/upload_images/95471-951be1b52a42949a?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <blockquote>
 <p>对类的方法列表、协议列表和属性列表进行修正<br>附加 <code>category</code>  到类上面来</p>
 </blockquote>
@@ -767,9 +770,9 @@
 <li>从 <code>cls</code> 中取出未附加的分类进行附加操作</li>
 </ul>
 <p>我们可以看到，这里有一个操作叫 <code>attachLists</code> ，为什么方法、属性、协议都能调用这个方法呢？</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668146104-e44d6291-606b-425f-892e-3eb96fef535f.png#align=left&display=inline&height=40&name=image.png&originHeight=80&originWidth=1200&size=37876&status=done&style=none&width=600" alt="image.png"></p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668156597-fd9d4fa7-5702-4acf-85a6-766580c67cde.png#align=left&display=inline&height=48&name=image.png&originHeight=96&originWidth=1318&size=22281&status=done&style=none&width=659" alt="image.png"></p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578668182796-b810bf6c-9768-45a0-b5f2-d15fd5ac462e.png#align=left&display=inline&height=294&name=image.png&originHeight=588&originWidth=1186&size=143089&status=done&style=none&width=593" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-48ea99154eb2a0f5?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-77355d306761dab5?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-424091771f516fc4?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>我们可以看到，方法、属性、协议的数据结构都是一个二维数组，我们深入 <code>attachLists</code> 方法内部实现:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">attachLists</span><span class="params">(List* <span class="keyword">const</span> * addedLists, <span class="keyword">uint32_t</span> addedCount)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (addedCount == <span class="number">0</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (hasArray()) &#123;</span><br><span class="line">        <span class="comment">// many lists -&gt; many lists</span></span><br><span class="line">        <span class="keyword">uint32_t</span> oldCount = <span class="built_in">array</span>()-&gt;count;<span class="comment">//10</span></span><br><span class="line">        <span class="keyword">uint32_t</span> newCount = oldCount + addedCount;<span class="comment">//4</span></span><br><span class="line">        setArray((<span class="keyword">array_t</span> *)<span class="built_in">realloc</span>(<span class="built_in">array</span>(), <span class="keyword">array_t</span>::byteSize(newCount)));</span><br><span class="line">        <span class="built_in">array</span>()-&gt;count = newCount;<span class="comment">// 10+4</span></span><br><span class="line">   </span><br><span class="line">        memmove(<span class="built_in">array</span>()-&gt;lists + addedCount, <span class="built_in">array</span>()-&gt;lists,</span><br><span class="line">                oldCount * <span class="keyword">sizeof</span>(<span class="built_in">array</span>()-&gt;lists[<span class="number">0</span>]));</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">memcpy</span>(<span class="built_in">array</span>()-&gt;lists, addedLists, </span><br><span class="line">               addedCount * <span class="keyword">sizeof</span>(<span class="built_in">array</span>()-&gt;lists[<span class="number">0</span>]));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (!<span class="built_in">list</span>  &amp;&amp;  addedCount == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">// 0 lists -&gt; 1 list</span></span><br><span class="line">        <span class="built_in">list</span> = addedLists[<span class="number">0</span>];</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 1 list -&gt; many lists</span></span><br><span class="line">        List* oldList = <span class="built_in">list</span>;</span><br><span class="line">        <span class="keyword">uint32_t</span> oldCount = oldList ? <span class="number">1</span> : <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">uint32_t</span> newCount = oldCount + addedCount;</span><br><span class="line">        setArray((<span class="keyword">array_t</span> *)<span class="built_in">malloc</span>(<span class="keyword">array_t</span>::byteSize(newCount)));</span><br><span class="line">        <span class="built_in">array</span>()-&gt;count = newCount;</span><br><span class="line">        <span class="keyword">if</span> (oldList) <span class="built_in">array</span>()-&gt;lists[addedCount] = oldList;</span><br><span class="line">        <span class="built_in">memcpy</span>(<span class="built_in">array</span>()-&gt;lists, addedLists, </span><br><span class="line">               addedCount * <span class="keyword">sizeof</span>(<span class="built_in">array</span>()-&gt;lists[<span class="number">0</span>]));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -787,15 +790,15 @@
 <li>如果是，说明是<strong>一对多</strong>的关系</li>
 <li>这里会通过 <code>realloc</code> 对容器进行重新分配，大小为原来的大小加上新增的大小</li>
 <li>因为原来只有一个一维数组，所以直接赋值到新 <code>Array</code> 的最后一个位置</li>
-<li>然后把新数据拷贝到容器的起始位置<br><a name="E2Yyz"></a><h1 id="四、探索-load-images"><a href="#四、探索-load-images" class="headerlink" title="四、探索 load_images"></a>四、探索 load_images</h1></li>
+<li>然后把新数据拷贝到容器的起始位置</li>
 </ul>
 </li>
 </ul>
-<p>我们接着探索 <code>_dyld_objc_notify_register</code> 的第二个参数 <code>load_images</code> ，这个函数指针是在什么时候调用的呢，同样的，我们接着在 <code>dyld</code> 源码中搜索对应的函数指针 <code>sNotifyObjCInit</code> :</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578669523547-a2e68448-1194-416a-b97e-6474038c57e7.png#align=left&display=inline&height=340&name=image.png&originHeight=680&originWidth=1816&size=278430&status=done&style=none&width=908" alt="image.png"></p>
+<h1 id="四、探索-load-images"><a href="#四、探索-load-images" class="headerlink" title="四、探索 load_images"></a>四、探索 load_images</h1><p>我们接着探索 <code>_dyld_objc_notify_register</code> 的第二个参数 <code>load_images</code> ，这个函数指针是在什么时候调用的呢，同样的，我们接着在 <code>dyld</code> 源码中搜索对应的函数指针 <code>sNotifyObjCInit</code> :</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-3d3a948bceb5eec4?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
 <p>可以看到，在 <code>notifySingle</code> 方法内部， <code>sNotifyObjCInit</code> 函数指针被调用了。根据我们上一篇文章探索 <code>dyld</code> 底层可以知道， <code>_load_images</code> 应该是对于每一个加载进来的 <code>Mach-O</code> 镜像都会递归调用一次。</p>
 <p>我们来到 <code>libObjc</code> 源码中 <code>load_images</code> 的定义处:</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578670024551-0eed762f-4497-4498-80ee-715640ac2bd9.png#align=left&display=inline&height=499&name=image.png&originHeight=998&originWidth=1276&size=289198&status=done&style=none&width=638" alt="image.png"> </p>
+<p><img src="https://upload-images.jianshu.io/upload_images/95471-dd62575094d2060e?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"> </p>
 <blockquote>
 <p>处理由 <code>dyld</code> 映射的给定镜像中的 <code>+load</code>  方法</p>
 </blockquote>
@@ -804,7 +807,6 @@
 <li>搜索 <code>load</code> 方法，具体实现通过 <code>prepare_load_methods</code> </li>
 <li>调用 <code>load</code> 方法，具体实现通过 <code>call_load_methods</code> </li>
 </ul>
-<p><a name="i4gCt"></a></p>
 <h2 id="4-1-prepare-load-methods-分析"><a href="#4-1-prepare-load-methods-分析" class="headerlink" title="4.1 prepare_load_methods 分析"></a>4.1 prepare_load_methods 分析</h2><p>从这个方法名称，我们猜测这里应该做的是 <code>load</code> 方法的一些预处理工作，让我们来到源码进行分析：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">prepare_load_methods</span><span class="params">(<span class="keyword">const</span> headerType *mhdr)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">size_t</span> count, i;</span><br><span class="line"></span><br><span class="line">    runtimeLock.assertLocked();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">classref_t</span> *classlist = </span><br><span class="line">        _getObjc2NonlazyClassList(mhdr, &amp;count);</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">        schedule_class_load(remapClass(classlist[i]));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">category_t</span> **categorylist = _getObjc2NonlazyCategoryList(mhdr, &amp;count);</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">        <span class="keyword">category_t</span> *cat = categorylist[i];</span><br><span class="line">        Class cls = remapClass(cat-&gt;cls);</span><br><span class="line">        <span class="keyword">if</span> (!cls) <span class="keyword">continue</span>;  <span class="comment">// category for ignored weak-linked class</span></span><br><span class="line">        <span class="keyword">if</span> (cls-&gt;isSwiftStable()) &#123;</span><br><span class="line">            _objc_fatal(<span class="string">"Swift class extensions and categories on Swift "</span></span><br><span class="line">                        <span class="string">"classes are not allowed to have +load methods"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        realizeClassWithoutSwift(cls);</span><br><span class="line">        assert(cls-&gt;ISA()-&gt;isRealized());</span><br><span class="line">        add_category_to_loadable_list(cat);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/***********************************************************************</span></span><br><span class="line"><span class="comment">* prepare_load_methods</span></span><br><span class="line"><span class="comment">* Schedule +load for classes in this image, any un-+load-ed </span></span><br><span class="line"><span class="comment">* superclasses in other images, and any categories in this image.</span></span><br><span class="line"><span class="comment">**********************************************************************/</span></span><br><span class="line"><span class="comment">// Recursively schedule +load for cls and any un-+load-ed superclasses.</span></span><br><span class="line"><span class="comment">// cls must already be connected.</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">schedule_class_load</span><span class="params">(Class cls)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!cls) <span class="keyword">return</span>;</span><br><span class="line">    assert(cls-&gt;isRealized());  <span class="comment">// _read_images should realize</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (cls-&gt;data()-&gt;flags &amp; RW_LOADED) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Ensure superclass-first ordering</span></span><br><span class="line">    schedule_class_load(cls-&gt;superclass);</span><br><span class="line"></span><br><span class="line">    add_class_to_loadable_list(cls);</span><br><span class="line">    cls-&gt;setInfo(RW_LOADED); </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/***********************************************************************</span></span><br><span class="line"><span class="comment">* add_class_to_loadable_list</span></span><br><span class="line"><span class="comment">* Class cls has just become connected. Schedule it for +load if</span></span><br><span class="line"><span class="comment">* it implements a +load method.</span></span><br><span class="line"><span class="comment">**********************************************************************/</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">add_class_to_loadable_list</span><span class="params">(Class cls)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    IMP method;</span><br><span class="line"></span><br><span class="line">    loadMethodLock.assertLocked();</span><br><span class="line"></span><br><span class="line">    method = cls-&gt;getLoadMethod();</span><br><span class="line">    <span class="keyword">if</span> (!method) <span class="keyword">return</span>;  <span class="comment">// Don't bother if cls has no +load method</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (PrintLoading) &#123;</span><br><span class="line">        _objc_inform(<span class="string">"LOAD: class '%s' scheduled for +load"</span>, </span><br><span class="line">                     cls-&gt;nameForLogging());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (loadable_classes_used == loadable_classes_allocated) &#123;</span><br><span class="line">        loadable_classes_allocated = loadable_classes_allocated*<span class="number">2</span> + <span class="number">16</span>;</span><br><span class="line">        loadable_classes = (struct loadable_class *)</span><br><span class="line">            <span class="built_in">realloc</span>(loadable_classes,</span><br><span class="line">                              loadable_classes_allocated *</span><br><span class="line">                              <span class="keyword">sizeof</span>(struct loadable_class));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    loadable_classes[loadable_classes_used].cls = cls;</span><br><span class="line">    loadable_classes[loadable_classes_used].method = method;</span><br><span class="line">    loadable_classes_used++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -813,18 +815,17 @@
 <li>然后通过 <code>schedule_class_load</code> 遍历这些类<ul>
 <li>递归调用遍历父类的 <code>load</code> 方法，确保父类的 <code>load</code> 方法顺序排在子类的前面</li>
 <li>通过 <code>add_class_to_loadable_list</code> , 把类的 <code>load</code> 方法存在 <code>loadable_classes</code> 里面</li>
-<li><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578670785565-93c7915e-07e5-4a0b-80fc-a7bf9c3ee527.png#align=left&display=inline&height=111&name=image.png&originHeight=222&originWidth=1404&size=89710&status=done&style=none&width=702" alt="image.png"></li>
+<li><img src="https://upload-images.jianshu.io/upload_images/95471-11cae8927cfdf166?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></li>
 </ul>
 </li>
 <li>完成 <code>schedule_class_load</code> 之后，通过 <code>_getObjc2NonlazyCategoryList</code> 取出所有分类数据</li>
 <li>然后遍历这些分类<ul>
 <li>通过 <code>realizeClassWithoutSwift</code> 来防止类没有初始化，如果已经初始化了则不影响</li>
 <li>通过 <code>add_category_to_loadable_list</code> ，加载分类中的 <code>load</code> 方法到 <code>loadable_categories</code> 里面</li>
-<li><img src="https://cdn.nlark.com/yuque/0/2020/png/225346/1578671153455-444e4023-c8df-48f8-96fc-fe45faf428aa.png#align=left&display=inline&height=82&name=image.png&originHeight=164&originWidth=1300&size=73216&status=done&style=none&width=650" alt="image.png"></li>
+<li><img src="https://upload-images.jianshu.io/upload_images/95471-74f44fde4b425ea7?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></li>
 </ul>
 </li>
 </ul>
-<p><a name="SVsYX"></a></p>
 <h2 id="4-2-call-load-methods-分析"><a href="#4-2-call-load-methods-分析" class="headerlink" title="4.2 call_load_methods 分析"></a>4.2 call_load_methods 分析</h2><p><br>通过名称我们可以知道 <code>call_load_methods</code> 应该就是 <code>load</code> 方法被调用的地方了。我们直接看源码：<br></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">call_load_methods</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">bool</span> loading = NO;</span><br><span class="line">    <span class="keyword">bool</span> more_categories;</span><br><span class="line"></span><br><span class="line">    loadMethodLock.assertLocked();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Re-entrant calls do nothing; the outermost call will finish the job.</span></span><br><span class="line">    <span class="keyword">if</span> (loading) <span class="keyword">return</span>;</span><br><span class="line">    loading = YES;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">void</span> *pool = objc_autoreleasePoolPush();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">        <span class="comment">// 1. Repeatedly call class +loads until there aren't any more</span></span><br><span class="line">        <span class="keyword">while</span> (loadable_classes_used &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            call_class_loads();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. Call category +loads ONCE</span></span><br><span class="line">        more_categories = call_category_loads();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. Run more +loads if there are classes OR more untried categories</span></span><br><span class="line">    &#125; <span class="keyword">while</span> (loadable_classes_used &gt; <span class="number">0</span>  ||  more_categories);</span><br><span class="line"></span><br><span class="line">    objc_autoreleasePoolPop(pool);</span><br><span class="line"></span><br><span class="line">    loading = NO;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -840,7 +841,6 @@
 </li>
 <li>通过 <code>objc_autoreleasePoolPop</code> 出栈一个自动释放池</li>
 </ul>
-<p><a name="seoEo"></a></p>
 <h1 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h1><p>至此， <code>_objc_init</code> 和 <code>_dyld_objc_notify_register</code> 我们就分析完了，我们对类的加载有了更细致的认知。 <code>iOS</code> 底层有时候探索起来确实很枯燥，但是如果能找到高效的方法以及明确自己的所探索的方向，会让自己从宏观上重新审视这门技术。是的，技术只是工具，我们不能被技术所绑架，我们要做到有的放矢的去探索，这样才能事半功倍。</p>
 
       
