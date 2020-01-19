@@ -111,7 +111,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119122014.jpg">
 <meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119122041.jpg">
 <meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119122050.jpg">
-<meta property="og:updated_time" content="2020-01-19T04:21:06.374Z">
+<meta property="og:updated_time" content="2020-01-19T04:28:21.046Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 底层探索 - 分类的加载">
 <meta name="twitter:description" content="一、初探懒加载类上一章我们探索了 iOS 中类的加载，让我们简单回顾一下大概的流程。 1.1 类的加载回顾 libObjc 向 dyld 注册了回调 _dyld_objc_notify_register，当 dyld 把 App 以及 App 所依赖的一系列 Mach-O 镜像加载到当前 App 被分配的内存空间之后，dyld 会通过 _dyld_objc_notify_mapped 也就是 ma">
@@ -319,7 +319,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-19T12:21:06+08:00" content="2020-01-19">
+            <time itemprop="dateUpdated" datetime="2020-01-19T12:28:21+08:00" content="2020-01-19">
               2020-01-19
             </time>
           </span>
@@ -386,11 +386,12 @@
 <li>将所有的 <code>Protocol</code> 插入到 <code>readProtocol</code> 哈希表中(插入方式为：<code>Protocol</code> 名称为 <code>key</code>，<code>Protocol</code> 为 <code>value</code>)</li>
 <li>对所有的 <code>Protocol</code> 做重映射</li>
 <li>初始化所有的<strong>非懒加载类</strong>，包括 <code>rw</code> 和 <code>ro</code> 的初始化操作</li>
-<li>处理所有的分类(包括类的分类和元类的分类)</li>
+<li>处理所有的分类(包括类的分类和元类的分类)<a id="more"></a>
+<h2 id="1-2-验证类的加载流程"><a href="#1-2-验证类的加载流程" class="headerlink" title="1.2 验证类的加载流程"></a>1.2 验证类的加载流程</h2></li>
 </ul>
 </li>
 </ul>
-<h2 id="1-2-验证类的加载流程"><a href="#1-2-验证类的加载流程" class="headerlink" title="1.2 验证类的加载流程"></a>1.2 验证类的加载流程</h2><p>我们大致明白了类的加载流程，接下来，让我们在 <code>_read_images</code> 源码中打印一下类加载之后的结果验证一下是否加载了我们自己创建的类。</p>
+<p>我们大致明白了类的加载流程，接下来，让我们在 <code>_read_images</code> 源码中打印一下类加载之后的结果验证一下是否加载了我们自己创建的类。</p>
 <p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119120206.jpg" alt></p>
 <p>如上图所示，我们增加一行代码:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">printf</span>(<span class="string">"_getObjc2NonlazyClassList Class:%s\n"</span>,cls-&gt;mangledName());</span><br></pre></td></tr></table></figure>
