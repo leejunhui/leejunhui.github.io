@@ -89,15 +89,14 @@
 <meta property="og:site_name" content="leejunhui&#39;s blog">
 <meta property="og:description" content="我们在前面探索了对象和类的底层原理，接下来我们要探索一下方法的本质，而在探索之前，我们先简单过一遍 Runtime 的知识点，如果读者对这块内容已经很熟悉了的话可以直接跳过第一章。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f659892215c705?w=2284&h=360&f=png&s=464846">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6598922f5b9d3?w=2206&h=854&f=png&s=1021476">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f6598952dfc583?w=1082&h=58&f=png&s=15674">
-<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f659895eb1f5e6?w=1110&h=172&f=png&s=86471">
-<meta property="og:updated_time" content="2020-01-07T02:51:23.636Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119095137.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119095253.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119095327.jpg">
+<meta property="og:updated_time" content="2020-01-19T01:53:34.902Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 底层探索 - 方法">
 <meta name="twitter:description" content="我们在前面探索了对象和类的底层原理，接下来我们要探索一下方法的本质，而在探索之前，我们先简单过一遍 Runtime 的知识点，如果读者对这块内容已经很熟悉了的话可以直接跳过第一章。">
-<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/1/2/16f659892215c705?w=2284&h=360&f=png&s=464846">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119095137.jpg">
 
 
 
@@ -301,8 +300,8 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-07T10:51:23+08:00" content="2020-01-07">
-              2020-01-07
+            <time itemprop="dateUpdated" datetime="2020-01-19T09:53:34+08:00" content="2020-01-19">
+              2020-01-19
             </time>
           </span>
           
@@ -362,28 +361,22 @@
 <blockquote>
 <p>PS: 由于笔者对汇编暂时还是摸索的阶段，关于汇编源码的部分如有错误，欢迎指正。</p>
 </blockquote>
-<h1 id="一、Runtime-简介"><a href="#一、Runtime-简介" class="headerlink" title="一、Runtime 简介"></a>一、<code>Runtime</code> 简介</h1><p>众所周知，<code>Objective-C</code> 是一门动态语言，而承载整个 <code>OC</code> 动态特性的就是 <code>Runtime</code>。关于 <code>Runtime</code> 更多内容可以直接进入<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40008048" target="_blank" rel="noopener">官网文档</a>查看。</p>
+<h1 id="Runtime-简介"><a href="#Runtime-简介" class="headerlink" title="Runtime 简介"></a><code>Runtime</code> 简介</h1><p>众所周知，<code>Objective-C</code> 是一门动态语言，而承载整个 <code>OC</code> 动态特性的就是 <code>Runtime</code>。关于 <code>Runtime</code> 更多内容可以直接进入<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40008048" target="_blank" rel="noopener">官网文档</a>查看。</p>
 <p><code>Runtime</code> 是以 <code>C</code>/<code>C++</code>和汇编编写而成的，为什么不用 <code>OC</code> 呢，这是因为对我们编译器来说，<code>OC</code> 属于更高级的语言，相比于 <code>C</code> 和 <code>C++</code> 以及汇编，执行效率更慢，而在运行时系统需要尽可能快的执行效率。</p>
-<p><a name="008c0535"></a></p>
-<h2 id="1-1-Runtime-的前世今生"><a href="#1-1-Runtime-的前世今生" class="headerlink" title="1.1 Runtime 的前世今生"></a>1.1 <code>Runtime</code> 的前世今生</h2><p><code>Runtime</code> 分为两个版本，<code>legacy</code> 和 <code>modern</code>，分别对标 <code>OC 1.0</code> 和 <code>OC 2.0</code>。我们通常只需要专注于 <code>modern</code> 版本即可，在 <code>libObjc</code> 源码中体现在 <code>new</code> 后缀的文件上。</p>
-<p><a name="5d8dc3e6"></a></p>
-<h2 id="1-2-Runtime-三种交互方式"><a href="#1-2-Runtime-三种交互方式" class="headerlink" title="1.2 Runtime 三种交互方式"></a>1.2 <code>Runtime</code> 三种交互方式</h2><p>我们与 <code>Runtime</code> 打交道有三种方式:</p>
+<h2 id="Runtime-的前世今生"><a href="#Runtime-的前世今生" class="headerlink" title="Runtime 的前世今生"></a><code>Runtime</code> 的前世今生</h2><p><code>Runtime</code> 分为两个版本，<code>legacy</code> 和 <code>modern</code>，分别对标 <code>OC 1.0</code> 和 <code>OC 2.0</code>。我们通常只需要专注于 <code>modern</code> 版本即可，在 <code>libObjc</code> 源码中体现在 <code>new</code> 后缀的文件上。</p>
+<h2 id="Runtime-三种交互方式"><a href="#Runtime-三种交互方式" class="headerlink" title="Runtime 三种交互方式"></a><code>Runtime</code> 三种交互方式</h2><p>我们与 <code>Runtime</code> 打交道有三种方式:</p>
 <ul>
 <li>直接在 <code>OC</code> 层进行交互：比如 <code>@selector</code></li>
 <li><code>NSObject</code> 的方法：<code>NSSelectorFromName</code></li>
 <li><code>Runtime</code> 的函数： <code>sel_registerName</code></li>
 </ul>
-<p><a name="7f4a6c7f"></a></p>
-<h1 id="二、方法的本质探索"><a href="#二、方法的本质探索" class="headerlink" title="二、方法的本质探索"></a>二、方法的本质探索</h1><p><a name="33c5cc04"></a></p>
-<h2 id="2-1-方法初探"><a href="#2-1-方法初探" class="headerlink" title="2.1 方法初探"></a>2.1 方法初探</h2><p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f659892215c705?w=2284&h=360&f=png&s=464846" alt="image.png"></p>
+<h1 id="二、方法的本质探索"><a href="#二、方法的本质探索" class="headerlink" title="二、方法的本质探索"></a>二、方法的本质探索</h1><h2 id="2-1-方法初探"><a href="#2-1-方法初探" class="headerlink" title="2.1 方法初探"></a>2.1 方法初探</h2><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119095137.jpg" alt></p>
 <p>我们可以看到，通过 <code>clang</code> 重写之后，<code>sayNB</code> 在底层其实是一个消息的发送。</p>
 <p>我们把右侧的发送消息的代码简化一下:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LGPerson *person = objc_msgSend((id)objc_getClass(<span class="string">"LGPerson"</span>), sel_registerName(<span class="string">"alloc"</span>));</span><br><span class="line">objc_msgSend((id)person, sel_registerName(<span class="string">"sayNB"</span>));</span><br></pre></td></tr></table></figure>
 
 <p>由此可见，真正发送消息的地方是 <code>objc_msgSend</code>，这个方法有两个参数，一个是消息的接受者为 <code>id</code> 类型，第二个个是方法编号 <code>sel</code>。</p>
 <p>作为对比，<code>run</code> 方法就直接执行了，并没有通过 <code>objc_msgSend</code> 进行消息发送:</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6598922f5b9d3?w=2206&h=854&f=png&s=1021476" alt="image.png"></p>
-<p><a name="51a8d7db"></a></p>
 <h2 id="2-2-方法发送的几种情况"><a href="#2-2-方法发送的几种情况" class="headerlink" title="2.2 方法发送的几种情况"></a>2.2 方法发送的几种情况</h2><figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LGStudent *s = [LGStudent new];</span><br><span class="line">[s sayCode];        </span><br><span class="line"></span><br><span class="line">objc_msgSend(s, sel_registerName(<span class="string">"sayCode"</span>));</span><br></pre></td></tr></table></figure>
 
 <p>上述代码表示的是向对象 <code>s</code> 发送 <code>sayCode</code> 消息。</p>
@@ -400,8 +393,7 @@
 
 <p>上述代码表示向父类的类，也就是<strong>元类</strong>发送 <code>sayNB</code> 消息。</p>
 <p>我们在 <code>OC</code> 中使用 <code>objc_msgSend</code> 的时候，要注意需要将 <code>Enbale Strict of Checking of objc_msgSend Calls</code> 设置为 <code>NO</code>。这样才不会报警告。</p>
-<p><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f6598952dfc583?w=1082&h=58&f=png&s=15674" alt="image.png"></p>
-<p><a name="bb427cea"></a></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119095253.jpg" alt></p>
 <h1 id="三、探索-objc-msgSend"><a href="#三、探索-objc-msgSend" class="headerlink" title="三、探索 objc_msgSend"></a>三、探索 <code>objc_msgSend</code></h1><p><code>objc_msgSend</code> 之所以采用汇编来实现，是因为</p>
 <ul>
 <li>汇编更容易能被机器识别</li>
@@ -419,7 +411,6 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ldr	p13, [x0]		// p13 = isa</span><br><span class="line">	GetClassFromIsa_p16 p13		// p16 = class</span><br></pre></td></tr></table></figure>
 
 <p>读取 <code>x0</code> 然后赋值到 <code>p13</code> ，这里 <code>p13</code> 拿到的是 <code>isa</code>。为什么要拿 <code>isa</code> 呢，因为不论是对象方法还是类方法，我们都需要在类或者元类的缓存或方法列表中去查找，所以 <code>isa</code> 是必需的。</p>
-<p><a name="a70ee539"></a></p>
 <h2 id="3-3-GetClassFromIsa-p16"><a href="#3-3-GetClassFromIsa-p16" class="headerlink" title="3.3 GetClassFromIsa_p16"></a>3.3 GetClassFromIsa_p16</h2><p>通过 <code>GetClassFromIsa_p16</code>，将获取到的 <code>class</code> 存在 <code>p16</code> 上面。</p>
 <p><code>GetClassFromIsa_p16</code> 源码如下:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">.macro GetClassFromIsa_p16 <span class="comment">/* src */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> SUPPORT_INDEXED_ISA</span></span><br><span class="line">	<span class="comment">// Indexed isa</span></span><br><span class="line">	mov	p16, $<span class="number">0</span>			<span class="comment">// optimistically set dst = src</span></span><br><span class="line">	tbz	p16, #ISA_INDEX_IS_NPI_BIT, <span class="number">1f</span>	<span class="comment">// done if not non-pointer isa</span></span><br><span class="line">	<span class="comment">// isa in p16 is indexed</span></span><br><span class="line">	adrp	x10, _objc_indexed_classes@PAGE</span><br><span class="line">	add	x10, x10, _objc_indexed_classes@PAGEOFF</span><br><span class="line">	ubfx	p16, p16, #ISA_INDEX_SHIFT, #ISA_INDEX_BITS  <span class="comment">// extract index</span></span><br><span class="line">	ldr	p16, [x10, p16, UXTP #PTRSHIFT]	<span class="comment">// load class from array</span></span><br><span class="line"><span class="number">1</span>:</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">elif</span> __LP64__</span></span><br><span class="line">	<span class="comment">// 64-bit packed isa</span></span><br><span class="line">	<span class="keyword">and</span>	p16, $<span class="number">0</span>, #ISA_MASK</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">	<span class="comment">// 32-bit raw isa</span></span><br><span class="line">	mov	p16, $<span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">.endmacro</span><br></pre></td></tr></table></figure>
@@ -440,7 +431,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">and</span>	w12, w1, w11		<span class="comment">// x12 = _cmd &amp; mask</span></span><br><span class="line">	add	p12, p10, p12, LSL #(<span class="number">1</span>+PTRSHIFT)</span><br><span class="line">		             <span class="comment">// p12 = buckets + ((_cmd &amp; mask) &lt;&lt; (1+PTRSHIFT))</span></span><br><span class="line"></span><br><span class="line">	ldp	p17, p9, [x12]		<span class="comment">// &#123;imp, sel&#125; = *bucket</span></span><br></pre></td></tr></table></figure>
 
 <ul>
-<li>这里是将 <code>w1</code> 和 <code>w11</code> 进行与操作，其实本质就是 <code>_cmd</code> &amp; <code>mask</code>。这一步和我们探索 <code>cache_t</code> 时遇到的<br><img src="https://user-gold-cdn.xitu.io/2020/1/2/16f659895eb1f5e6?w=1110&h=172&f=png&s=86471" alt="image.png"><br>是一模模一样样的道理。目的就是拿到下标。然后经过哈希运算之后，得到了 <code>bucket</code> 结构体指针，然后将这个结构体指针中的 <code>imp</code>，<code>sel</code> 分别存在 <code>p17</code>，<code>p9</code> 中。</li>
+<li>这里是将 <code>w1</code> 和 <code>w11</code> 进行与操作，其实本质就是 <code>_cmd</code> &amp; <code>mask</code>。这一步和我们探索 <code>cache_t</code> 时遇到的<br><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200119095327.jpg" alt><br>是一模模一样样的道理。目的就是拿到下标。然后经过哈希运算之后，得到了 <code>bucket</code> 结构体指针，然后将这个结构体指针中的 <code>imp</code>，<code>sel</code> 分别存在 <code>p17</code>，<code>p9</code> 中。</li>
 </ul>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>:	cmp	p9, p1			<span class="comment">// if (bucket-&gt;sel != _cmd)</span></span><br><span class="line">	b.ne	<span class="number">2f</span>			<span class="comment">//     scan more</span></span><br><span class="line">	CacheHit $<span class="number">0</span>			<span class="comment">// call or return imp</span></span><br></pre></td></tr></table></figure>
 
@@ -676,7 +667,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、Runtime-简介"><span class="nav-number">1.</span> <span class="nav-text">一、Runtime 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-Runtime-的前世今生"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 Runtime 的前世今生</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-Runtime-三种交互方式"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 Runtime 三种交互方式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、方法的本质探索"><span class="nav-number">2.</span> <span class="nav-text">二、方法的本质探索</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-方法初探"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 方法初探</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-方法发送的几种情况"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 方法发送的几种情况</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、探索-objc-msgSend"><span class="nav-number">3.</span> <span class="nav-text">三、探索 objc_msgSend</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-消息查找机制"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 消息查找机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-定位-objc-msgSend-汇编源码"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 定位 objc_msgSend 汇编源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-GetClassFromIsa-p16"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 GetClassFromIsa_p16</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-CacheLookup"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 CacheLookup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-CheckMiss"><span class="nav-number">3.5.</span> <span class="nav-text">3.5 CheckMiss</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-6-MethodTableLookup"><span class="nav-number">3.6.</span> <span class="nav-text">3.6 MethodTableLookup</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、总结"><span class="nav-number">4.</span> <span class="nav-text">四、总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Runtime-简介"><span class="nav-number">1.</span> <span class="nav-text">Runtime 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Runtime-的前世今生"><span class="nav-number">1.1.</span> <span class="nav-text">Runtime 的前世今生</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Runtime-三种交互方式"><span class="nav-number">1.2.</span> <span class="nav-text">Runtime 三种交互方式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、方法的本质探索"><span class="nav-number">2.</span> <span class="nav-text">二、方法的本质探索</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-方法初探"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 方法初探</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-方法发送的几种情况"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 方法发送的几种情况</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、探索-objc-msgSend"><span class="nav-number">3.</span> <span class="nav-text">三、探索 objc_msgSend</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-消息查找机制"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 消息查找机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-定位-objc-msgSend-汇编源码"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 定位 objc_msgSend 汇编源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-GetClassFromIsa-p16"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 GetClassFromIsa_p16</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-CacheLookup"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 CacheLookup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-CheckMiss"><span class="nav-number">3.5.</span> <span class="nav-text">3.5 CheckMiss</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-6-MethodTableLookup"><span class="nav-number">3.6.</span> <span class="nav-text">3.6 MethodTableLookup</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、总结"><span class="nav-number">4.</span> <span class="nav-text">四、总结</span></a></li></ol></div>
             
 
           </div>
