@@ -98,7 +98,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15839897039699.jpg">
 <meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15839898047089.jpg">
 <meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/performSelector.png">
-<meta property="og:updated_time" content="2020-03-13T04:33:18.370Z">
+<meta property="og:updated_time" content="2020-03-13T04:42:43.594Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="iOS 查漏补缺 - performSelector">
 <meta name="twitter:description" content="iOS 查漏补缺 - PerformSelector performSelector 系列的函数我们都不陌生，但是对于它不同的变种以及底层原理在很多时候还是容易分不清楚，所以笔者希望通过 runtime 源码以及 GUNStep 源码来一个个抽丝剥茧，把不同变种的 performSelector 理顺，并搞清楚每个方法的底层实现，如有错误，欢迎指正。 本文的代码已放在 Github ，欢迎自取">
@@ -306,7 +306,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-03-13T12:33:18+08:00" content="2020-03-13">
+            <time itemprop="dateUpdated" datetime="2020-03-13T12:42:43+08:00" content="2020-03-13">
               2020-03-13
             </time>
           </span>
@@ -367,7 +367,8 @@
 <p>本文的代码已放在 <a href="https://github.com/LeeJunhui/PerformSelectorIndepth" target="_blank" rel="noopener">Github</a> ，欢迎自取</p>
 </blockquote>
 <a id="more"></a>
-<h1 id="一、NSObject-下的-PerformSelector"><a href="#一、NSObject-下的-PerformSelector" class="headerlink" title="一、NSObject 下的 PerformSelector"></a>一、NSObject 下的 <code>PerformSelector</code></h1><h2 id="1-1-探索"><a href="#1-1-探索" class="headerlink" title="1.1 探索"></a>1.1 探索</h2><ul>
+
+<h1 id="NSObject-下的-PerformSelector"><a href="#NSObject-下的-PerformSelector" class="headerlink" title="NSObject 下的 PerformSelector"></a>NSObject 下的 <code>PerformSelector</code></h1><ul>
 <li><code>performSelector:(SEL)aSelector</code> </li>
 </ul>
 <p><code>performSelector</code> 方法是最简单的一个 <code>api</code>，使用方法如下</p>
@@ -397,7 +398,7 @@
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">id</span>)performSelector:(SEL)sel withObject:(<span class="keyword">id</span>)obj1 withObject:(<span class="keyword">id</span>)obj2 &#123;</span><br><span class="line">    <span class="keyword">if</span> (!sel) [<span class="keyword">self</span> doesNotRecognizeSelector:sel];</span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">id</span>(*)(<span class="keyword">id</span>, SEL, <span class="keyword">id</span>, <span class="keyword">id</span>))objc_msgSend)(<span class="keyword">self</span>, sel, obj1, obj2);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h2 id="1-2-小结"><a href="#1-2-小结" class="headerlink" title="1.2 小结"></a>1.2 小结</h2><table>
+<table>
 <thead>
 <tr>
 <th>方法</th>
@@ -418,13 +419,14 @@
 </tr>
 </tbody></table>
 <p>这三个方法应该是使用频率很高的 <code>performSelector</code> 系列方法了，我们只需要记住这三个方法在底层都是执行的<strong>消息发送</strong>即可。</p>
-<h1 id="二、Runloop-相关的-PerformSelector"><a href="#二、Runloop-相关的-PerformSelector" class="headerlink" title="二、Runloop 相关的 PerformSelector"></a>二、Runloop 相关的 <code>PerformSelector</code></h1><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200312163817.jpg" alt></p>
+<hr>
+<h1 id="Runloop-相关的-PerformSelector"><a href="#Runloop-相关的-PerformSelector" class="headerlink" title="Runloop 相关的 PerformSelector"></a>Runloop 相关的 <code>PerformSelector</code></h1><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200312163817.jpg" alt></p>
 <p>如上图所示，在 <code>NSRunLoop</code> 头文件中，定义了两个的分类，分别是 </p>
 <ul>
 <li><code>NSDelayedPerforming</code> 对应于 <code>NSObject</code> </li>
 <li><code>NSOrderedPerform</code> 对应于 <code>NSRunLoop</code></li>
 </ul>
-<h2 id="2-1-NSObject-分类-NSDelayedPerforming"><a href="#2-1-NSObject-分类-NSDelayedPerforming" class="headerlink" title="2.1 NSObject 分类 NSDelayedPerforming"></a>2.1 NSObject 分类 NSDelayedPerforming</h2><h3 id="2-1-1-探索"><a href="#2-1-1-探索" class="headerlink" title="2.1.1 探索"></a>2.1.1 探索</h3><ul>
+<h2 id="NSObject-分类-NSDelayedPerforming"><a href="#NSObject-分类-NSDelayedPerforming" class="headerlink" title="NSObject 分类 NSDelayedPerforming"></a>NSObject 分类 NSDelayedPerforming</h2><ul>
 <li><code>performSelector:WithObject:afterDelay:</code></li>
 </ul>
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)jh_performSelectorwithObjectafterDelay</span><br><span class="line">&#123;</span><br><span class="line">    [<span class="keyword">self</span> performSelector:<span class="keyword">@selector</span>(taskWithParam:) withObject:@&#123;<span class="string">@"param"</span>: <span class="string">@"leejunhui"</span>&#125; afterDelay:<span class="number">1.</span>f];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)taskWithParam:(<span class="built_in">NSDictionary</span> *)param</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%s"</span>, __func__);</span><br><span class="line">    <span class="built_in">NSLog</span>(<span class="string">@"%@"</span>, param);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输出</span></span><br><span class="line"><span class="number">2020</span><span class="number">-03</span><span class="number">-12</span> <span class="number">11</span>:<span class="number">25</span>:<span class="number">01.475634</span>+<span class="number">0800</span> PerformSelectorIndepth[<span class="number">61898</span>:<span class="number">838345</span>] -[ViewController taskWithParam:]</span><br><span class="line"><span class="number">2020</span><span class="number">-03</span><span class="number">-12</span> <span class="number">11</span>:<span class="number">25</span>:<span class="number">01.475837</span>+<span class="number">0800</span> PerformSelectorIndepth[<span class="number">61898</span>:<span class="number">838345</span>] &#123;</span><br><span class="line">    param = leejunhui;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -483,7 +485,7 @@
 
 <p>这里的实现不一样的地方就是除了判断 <code>target</code> 是否匹配外，还会判断 <code>SEL</code> 是否匹配，以及参数是否匹配。</p>
 <hr>
-<h3 id="2-1-2-小结"><a href="#2-1-2-小结" class="headerlink" title="2.1.2 小结"></a>2.1.2 小结</h3><ul>
+<ul>
 <li><code>performSelector:WithObject:afterDelay:</code><ul>
 <li>在该方法所在线程的 runloop 处于 default mode 时，根据给定的时间触发给定的任务。底层原理是把一个 timer 对象以 <strong>default mode</strong> 加入到 runloop 对象中，等待唤醒。</li>
 </ul>
@@ -507,7 +509,7 @@
 <p>如上所示的代码，通过 <code>GCD</code> 的异步执行函数在全局并发队列上执行任务，并没有任何打印输出，我们加入 runloop 的启动代码后结果将完全不一样：</p>
 <p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200312163806.jpg" alt></p>
 <p>对于 <code>performSelector:WithObject:afterDelay:inModes</code> 方法，如果遇到这样的情况，也是一样的解决方案。</p>
-<h2 id="2-2-NSRunLoop-的分类-NSOrderedPerform"><a href="#2-2-NSRunLoop-的分类-NSOrderedPerform" class="headerlink" title="2.2 NSRunLoop 的分类 NSOrderedPerform"></a>2.2 NSRunLoop 的分类 NSOrderedPerform</h2><h3 id="2-2-1-小结"><a href="#2-2-1-小结" class="headerlink" title="2.2.1 小结"></a>2.2.1 小结</h3><ul>
+<h2 id="NSRunLoop-的分类-NSOrderedPerform"><a href="#NSRunLoop-的分类-NSOrderedPerform" class="headerlink" title="NSRunLoop 的分类 NSOrderedPerform"></a>NSRunLoop 的分类 NSOrderedPerform</h2><ul>
 <li>performSelector:target:argument:order:modes:</li>
 </ul>
 <p><code>performSelector:target:argument:order:modes:</code> 方法的调用者是 <code>NSRunLoop</code> 实例，然后需要传入要执行的 <code>SEL</code>，以及 <code>SEL</code> 对应的 <code>target</code>，和 <code>SEL</code> 要接收的参数 <code>argument</code>，最后是此次任务的优先级 <code>order</code>，以及一个 <strong>运行模式集合</strong> <code>modes</code>，目的是当 <code>runloop</code> 的 <code>currentMode</code> 处于这个运行模式集合中的其中任意一个 mode 时，就会按照优先级 <code>order</code> 来触发 <code>SEL</code> 的执行。具体使用如下：</p>
@@ -527,7 +529,7 @@
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Cancels any perform operations set up for the specified target</span></span><br><span class="line"><span class="comment"> * in the receiver.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">- (<span class="keyword">void</span>) cancelPerformSelectorsWithTarget: (<span class="keyword">id</span>) target</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">NSMapEnumerator</span>	enumerator;</span><br><span class="line">    GSRunLoopCtxt		*context;</span><br><span class="line">    <span class="keyword">void</span>			*mode;</span><br><span class="line">    </span><br><span class="line">    enumerator = <span class="built_in">NSEnumerateMapTable</span>(_contextMap);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span> (<span class="built_in">NSNextMapEnumeratorPair</span>(&amp;enumerator, &amp;mode, (<span class="keyword">void</span>**)&amp;context))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (context != <span class="literal">nil</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            GSIArray	performers = context-&gt;performers;</span><br><span class="line">            <span class="keyword">unsigned</span>	count = GSIArrayCount(performers);</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">while</span> (count--)</span><br><span class="line">            &#123;</span><br><span class="line">                GSRunLoopPerformer	*p;</span><br><span class="line">                </span><br><span class="line">                p = GSIArrayItemAtIndex(performers, count).obj;</span><br><span class="line">                <span class="keyword">if</span> (p-&gt;target == target)</span><br><span class="line">                &#123;</span><br><span class="line">                    GSIArrayRemoveItemAtIndex(performers, count);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">NSEndMapTableEnumeration</span>(&amp;enumerator);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Cancels any perform operations set up for the specified target</span></span><br><span class="line"><span class="comment"> * in the receiver, but only if the value of aSelector and argument</span></span><br><span class="line"><span class="comment"> * with which the performs were set up match those supplied.&lt;br /&gt;</span></span><br><span class="line"><span class="comment"> * Matching of the argument may be either by pointer equality or by</span></span><br><span class="line"><span class="comment"> * use of the [NSObject-isEqual:] method.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">- (<span class="keyword">void</span>) cancelPerformSelector: (SEL)aSelector</span><br><span class="line">                        target: (<span class="keyword">id</span>) target</span><br><span class="line">                      argument: (<span class="keyword">id</span>) argument</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">NSMapEnumerator</span>	enumerator;</span><br><span class="line">    GSRunLoopCtxt		*context;</span><br><span class="line">    <span class="keyword">void</span>			*mode;</span><br><span class="line">    </span><br><span class="line">    enumerator = <span class="built_in">NSEnumerateMapTable</span>(_contextMap);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span> (<span class="built_in">NSNextMapEnumeratorPair</span>(&amp;enumerator, &amp;mode, (<span class="keyword">void</span>**)&amp;context))</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (context != <span class="literal">nil</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            GSIArray	performers = context-&gt;performers;</span><br><span class="line">            <span class="keyword">unsigned</span>	count = GSIArrayCount(performers);</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">while</span> (count--)</span><br><span class="line">            &#123;</span><br><span class="line">                GSRunLoopPerformer	*p;</span><br><span class="line">                </span><br><span class="line">                p = GSIArrayItemAtIndex(performers, count).obj;</span><br><span class="line">                <span class="keyword">if</span> (p-&gt;target == target &amp;&amp; sel_isEqual(p-&gt;selector, aSelector)</span><br><span class="line">                    &amp;&amp; (p-&gt;argument == argument || [p-&gt;argument isEqual: argument]))</span><br><span class="line">                &#123;</span><br><span class="line">                    GSIArrayRemoveItemAtIndex(performers, count);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">NSEndMapTableEnumeration</span>(&amp;enumerator);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3 id="2-2-2-小结"><a href="#2-2-2-小结" class="headerlink" title="2.2.2 小结"></a>2.2.2 小结</h3><ul>
+<ul>
 <li><code>performSelector:target:argument:order:modes:</code> <ul>
 <li>在该方法所在线程的 runloop 处于给定的任一 mode 时，且处于下一次 runloop 消息循环的开头的时候触发给定的任务。底层原理是循环把一个类似于 timer 的对象加入到 runloop 的上下文的任务队列中，等待唤醒</li>
 </ul>
@@ -542,9 +544,10 @@
 </li>
 </ul>
 <p>这里同样的也需要注意，<strong>如果是在子线程中执行这些方法，则需要开启子线程对应的 runloop 才能保证执行成功</strong>。</p>
-<h1 id="三、Thread-相关的-performSelector"><a href="#三、Thread-相关的-performSelector" class="headerlink" title="三、Thread 相关的 performSelector"></a>三、Thread 相关的 <code>performSelector</code></h1><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200312163811.jpg" alt></p>
+<h1 id="Thread-相关的-performSelector"><a href="#Thread-相关的-performSelector" class="headerlink" title="Thread 相关的 performSelector"></a>Thread 相关的 <code>performSelector</code></h1><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200312163811.jpg" alt></p>
 <p>如上图所示，在 <code>NSThread</code> 中定义了 <code>NSObject</code> 的分类 <code>NSThreadPerformAdditions</code>，其中定义了 5 个 <code>performSelector</code> 的方法。</p>
-<h2 id="3-1-探索"><a href="#3-1-探索" class="headerlink" title="3.1 探索"></a>3.1 探索</h2><ul>
+<hr>
+<ul>
 <li><code>performSelector:onThread:withObject:waitUntilDone:</code> </li>
 <li><code>performSelector:onThread:withObject:waitUntilDone:modes:</code></li>
 </ul>
@@ -620,7 +623,7 @@
 
 <p>可以看到在底层其实是调用的 <code>NSThread</code> 的类方法来执行传入的任务。关于 <code>NSThread</code> 细节我们后面会进行探索。</p>
 <hr>
-<h2 id="3-2-小结"><a href="#3-2-小结" class="headerlink" title="3.2 小结"></a>3.2 小结</h2><ul>
+<ul>
 <li><code>performSelector:onThread:withObject:waitUntilDone:</code> 和 <code>performSelector:onThread:withObject:waitUntilDone:modes:</code><ul>
 <li>在该方法所在线程的 runloop 处于给定的任一 mode 时，判断是否阻塞当前线程，并且处于下一次 runloop 消息循环的开头的时候触发给定的任务。</li>
 </ul>
@@ -634,7 +637,8 @@
 </ul>
 </li>
 </ul>
-<h1 id="四、总结"><a href="#四、总结" class="headerlink" title="四、总结"></a>四、总结</h1><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/performSelector.png" alt></p>
+<hr>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/performSelector.png" alt></p>
 
       
     </div>
@@ -703,8 +707,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2020/03/13/iOS-查漏补缺-线程/" rel="prev" title="iOS 查漏补缺- 线程">
-                iOS 查漏补缺- 线程 <i class="fa fa-chevron-right"></i>
+              <a href="/2020/03/13/iOS-查漏补缺-线程/" rel="prev" title="iOS 查漏补缺 - 线程">
+                iOS 查漏补缺 - 线程 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -846,7 +850,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#iOS-查漏补缺-PerformSelector"><span class="nav-number">1.</span> <span class="nav-text">iOS 查漏补缺 - PerformSelector</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#一、NSObject-下的-PerformSelector"><span class="nav-number">2.</span> <span class="nav-text">一、NSObject 下的 PerformSelector</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-探索"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 探索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-小结"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、Runloop-相关的-PerformSelector"><span class="nav-number">3.</span> <span class="nav-text">二、Runloop 相关的 PerformSelector</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-NSObject-分类-NSDelayedPerforming"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 NSObject 分类 NSDelayedPerforming</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-探索"><span class="nav-number">3.1.1.</span> <span class="nav-text">2.1.1 探索</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-2-小结"><span class="nav-number">3.1.2.</span> <span class="nav-text">2.1.2 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-NSRunLoop-的分类-NSOrderedPerform"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 NSRunLoop 的分类 NSOrderedPerform</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-小结"><span class="nav-number">3.2.1.</span> <span class="nav-text">2.2.1 小结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-小结"><span class="nav-number">3.2.2.</span> <span class="nav-text">2.2.2 小结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、Thread-相关的-performSelector"><span class="nav-number">4.</span> <span class="nav-text">三、Thread 相关的 performSelector</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-探索"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 探索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-小结"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、总结"><span class="nav-number">5.</span> <span class="nav-text">四、总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#iOS-查漏补缺-PerformSelector"><span class="nav-number">1.</span> <span class="nav-text">iOS 查漏补缺 - PerformSelector</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#NSObject-下的-PerformSelector"><span class="nav-number">2.</span> <span class="nav-text">NSObject 下的 PerformSelector</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Runloop-相关的-PerformSelector"><span class="nav-number">3.</span> <span class="nav-text">Runloop 相关的 PerformSelector</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NSObject-分类-NSDelayedPerforming"><span class="nav-number">3.1.</span> <span class="nav-text">NSObject 分类 NSDelayedPerforming</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NSRunLoop-的分类-NSOrderedPerform"><span class="nav-number">3.2.</span> <span class="nav-text">NSRunLoop 的分类 NSOrderedPerform</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Thread-相关的-performSelector"><span class="nav-number">4.</span> <span class="nav-text">Thread 相关的 performSelector</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>

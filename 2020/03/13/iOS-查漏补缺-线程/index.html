@@ -84,7 +84,7 @@
 <meta name="description" content="iOS 查漏补缺 - 线程多线程是我们开发和面试中都会遇到的一个重要概念，相比于其他编程语言和平台，iOS 的多线程使用起来要比较友好和易用一些。但是对于多线程的基本概念，我们还是需要重视起来，这对于我们探索 pthread、NSThread、GCD 以及 RunLoop 都大有裨益。  本节的大部分内容基于苹果官方文档。文档地址: About Threaded Programming">
 <meta name="keywords" content="iOS,Objective-C,多线程">
 <meta property="og:type" content="article">
-<meta property="og:title" content="iOS 查漏补缺- 线程">
+<meta property="og:title" content="iOS 查漏补缺 - 线程">
 <meta property="og:url" content="http://leejunhui.com/2020/03/13/iOS-查漏补缺-线程/index.html">
 <meta property="og:site_name" content="leejunhui&#39;s blog">
 <meta property="og:description" content="iOS 查漏补缺 - 线程多线程是我们开发和面试中都会遇到的一个重要概念，相比于其他编程语言和平台，iOS 的多线程使用起来要比较友好和易用一些。但是对于多线程的基本概念，我们还是需要重视起来，这对于我们探索 pthread、NSThread、GCD 以及 RunLoop 都大有裨益。  本节的大部分内容基于苹果官方文档。文档地址: About Threaded Programming">
@@ -94,9 +94,9 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15839085538498.jpg">
 <meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15840203905223.jpg">
 <meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/iOS%20Thread.png">
-<meta property="og:updated_time" content="2020-03-13T04:33:18.786Z">
+<meta property="og:updated_time" content="2020-03-13T04:45:19.529Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="iOS 查漏补缺- 线程">
+<meta name="twitter:title" content="iOS 查漏补缺 - 线程">
 <meta name="twitter:description" content="iOS 查漏补缺 - 线程多线程是我们开发和面试中都会遇到的一个重要概念，相比于其他编程语言和平台，iOS 的多线程使用起来要比较友好和易用一些。但是对于多线程的基本概念，我们还是需要重视起来，这对于我们探索 pthread、NSThread、GCD 以及 RunLoop 都大有裨益。  本节的大部分内容基于苹果官方文档。文档地址: About Threaded Programming">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15840724400661.jpg">
 
@@ -134,7 +134,7 @@
 
 
 
-  <title>iOS 查漏补缺- 线程 | leejunhui's blog</title>
+  <title>iOS 查漏补缺 - 线程 | leejunhui's blog</title>
   
 
 
@@ -278,7 +278,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">iOS 查漏补缺- 线程</h1>
+          <h1 class="post-title" itemprop="name headline">iOS 查漏补缺 - 线程</h1>
         
 
         <div class="post-meta">
@@ -302,7 +302,7 @@
           
           <span class="post-updated">
             &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-03-13T12:33:18+08:00" content="2020-03-13">
+            <time itemprop="dateUpdated" datetime="2020-03-13T12:45:19+08:00" content="2020-03-13">
               2020-03-13
             </time>
           </span>
@@ -400,7 +400,7 @@
 <p>线程的分离状态决定一个线程以什么样的方式来终止自己，在默认的情况下，线程是非分离状态的，这种情况下，原有的线程等待创建的线程结束，只有当pthread_join函数返回时，创建的线程才算终止，释放自己占用的系统资源，而分离线程没有被其他的线程所等待，自己运行结束了，线程也就终止了，马上释放系统资源。</p>
 </blockquote>
 <p>joinable 和 detaced 其实是主线程与子线程之间的一种关系。app 退出后，detached 线程直接进入终止态，其栈空间资源被系统回收，但是 joinable 线程资源不会被回收，所以可以在 app 退出的时候使用 joinable 线程也就是 pthread 来做一些保存资源到磁盘的操作。也就是说在主线程执行完毕要退出之前，会去处理joinable的线程。</p>
-<h1 id="一、线程初探"><a href="#一、线程初探" class="headerlink" title="一、线程初探"></a>一、线程初探</h1><h2 id="1-1-线程定义"><a href="#1-1-线程定义" class="headerlink" title="1.1 线程定义"></a>1.1 线程定义</h2><p>要先了解什么是线程，我们需要先了解什么是进程。对于 iOS 来说，每一个 <code>app</code> 其实就是一个进程，这一点和 <code>Android</code> 有很大的区别。除了单进程之外，在未越狱之前，每个 <code>app</code> 只能访问每个 <code>app</code> 自身的沙盒环境，不能访问之外的内容。得益于这样的设计，<code>iOS</code> 成为了世界上最安全的操作系统（苹果是这么的说的🐶）。</p>
+<h1 id="线程初探"><a href="#线程初探" class="headerlink" title="线程初探"></a>线程初探</h1><h2 id="线程定义"><a href="#线程定义" class="headerlink" title="线程定义"></a>线程定义</h2><p>要先了解什么是线程，我们需要先了解什么是进程。对于 iOS 来说，每一个 <code>app</code> 其实就是一个进程，这一点和 <code>Android</code> 有很大的区别。除了单进程之外，在未越狱之前，每个 <code>app</code> 只能访问每个 <code>app</code> 自身的沙盒环境，不能访问之外的内容。得益于这样的设计，<code>iOS</code> 成为了世界上最安全的操作系统（苹果是这么的说的🐶）。</p>
 <p>下面给出苹果官方对于线程的定义</p>
 <blockquote>
 <p>Threads are a relatively lightweight way to implement multiple paths of execution inside of an application.</p>
@@ -431,7 +431,7 @@
 <li>执行过程：每个独立的进程有一个程序运行的入口、顺序执行序列和程序入口。但是线程不能独立执行，必须依存于应用程序中，由应用程序提供多个线程执行控制。</li>
 <li>线程是 CPU 调度的基本单位，进程不是。</li>
 </ul>
-<h2 id="1-2-线程相关的术语"><a href="#1-2-线程相关的术语" class="headerlink" title="1.2 线程相关的术语"></a>1.2 线程相关的术语</h2><p>在深入讨论线程及其支持技术之前，有必要弄清楚一些基本术语。</p>
+<h2 id="线程相关的术语"><a href="#线程相关的术语" class="headerlink" title="线程相关的术语"></a>线程相关的术语</h2><p>在深入讨论线程及其支持技术之前，有必要弄清楚一些基本术语。</p>
 <p>如果你熟悉 <code>UNIX</code> 系统，术语 <code>任务</code> 于表示正在运行的进程，但在本文中并不是这样定义的。</p>
 <p>本文采用的术语如下:</p>
 <ul>
@@ -439,7 +439,7 @@
 <li>术语 <code>进程</code> 用于指代一个正在运行的可执行文件，它可以包含多个线程。</li>
 <li>术语 <code>任务</code> 用于指代需要执行的工作的抽象概念。</li>
 </ul>
-<h2 id="1-3-线程的替代方案"><a href="#1-3-线程的替代方案" class="headerlink" title="1.3 线程的替代方案"></a>1.3 线程的替代方案</h2><p>手动创建线程会给我们的代码带来一定的<strong>不确定性</strong>。相对来说线程属于<strong>抽象层次比较低</strong>且使用起来比较麻烦的一种让应用程序支持并发的方案。如果你对于直接使用线程不熟悉的话，那么很容易遇到线程同步和时序问题，其严重性可能从细微的问题到应用程序崩溃和用户数据损坏。</p>
+<h2 id="线程的替代方案"><a href="#线程的替代方案" class="headerlink" title="线程的替代方案"></a>线程的替代方案</h2><p>手动创建线程会给我们的代码带来一定的<strong>不确定性</strong>。相对来说线程属于<strong>抽象层次比较低</strong>且使用起来比较麻烦的一种让应用程序支持并发的方案。如果你对于直接使用线程不熟悉的话，那么很容易遇到线程同步和时序问题，其严重性可能从细微的问题到应用程序崩溃和用户数据损坏。</p>
 <p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15840724400661.jpg" alt></p>
 <p>所以如上图所示，苹果官方给出了以下几种线程的替代方案:</p>
 <ul>
@@ -464,7 +464,7 @@
 <li><code>Timers</code>: 定时器。你可以在应用程序的主线程上使用定时器来执行周期性的任务，这些任务虽然琐碎而无法使用线程，但仍需要定期进行维护。</li>
 <li><code>Separate processes</code>: 尽管比线程更重，但是在任务仅与应用程序有切线关系的情况下，创建单独的进程可能会很有用。 如果任务需要大量内存或必须使用 root 特权执行，则可以使用进程。 例如，当 32 位应用程序将结果显示给用户时，你可以使用 64 位服务器进程来计算大型数据集。</li>
 </ul>
-<h2 id="1-4-线程支持"><a href="#1-4-线程支持" class="headerlink" title="1.4 线程支持"></a>1.4 线程支持</h2><h3 id="1-4-1-Cocoa-中线程相关的技术"><a href="#1-4-1-Cocoa-中线程相关的技术" class="headerlink" title="1.4.1 Cocoa 中线程相关的技术"></a>1.4.1 <code>Cocoa</code> 中线程相关的技术</h3><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15839064594884.jpg" alt></p>
+<h2 id="线程支持"><a href="#线程支持" class="headerlink" title="线程支持"></a>线程支持</h2><h3 id="Cocoa-中线程相关的技术"><a href="#Cocoa-中线程相关的技术" class="headerlink" title="Cocoa 中线程相关的技术"></a><code>Cocoa</code> 中线程相关的技术</h3><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15839064594884.jpg" alt></p>
 <p>如上图所示，这是苹果官网对于在 <code>Cocoa</code> 框架下能使用的线程技术。</p>
 <p>简单翻译过来就是:</p>
 <ul>
@@ -479,7 +479,7 @@
 <li>阻塞态</li>
 </ul>
 <p>如果线程当前未在运行态，则它要么被阻塞并等待输入，要么准备运行，但尚未计划这样做。线程继续在这些状态之间来回移动，直到最终退出并进入终止状态。</p>
-<h3 id="1-4-2-Runloop"><a href="#1-4-2-Runloop" class="headerlink" title="1.4.2 Runloop"></a>1.4.2 Runloop</h3><blockquote>
+<h3 id="Runloop"><a href="#Runloop" class="headerlink" title="Runloop"></a>Runloop</h3><blockquote>
 <p>A run loop is a piece of infrastructure used to manage events arriving asynchronously on a thread. A run loop works by monitoring one or more event sources for the thread. As events arrive, the system wakes up the thread and dispatches the events to the run loop, which then dispatches them to the handlers you specify. If no events are present and ready to be handled, the run loop puts the thread to sleep.</p>
 <p>【译】一个运行循环是一个处理线程上所接收到的异步的事件的结构。运行循环管理线程上的一个或多个事件源。当事件到达时，系统将唤醒线程并将事件分配给运行循环，然后运行循环将其分配给你指定的处理程序。如果不存在任何事件或有待处理的事件，则运行循环会将线程置于睡眠状态。</p>
 </blockquote>
@@ -492,8 +492,8 @@
 <p>【译】要配置运行循环，你要做的就是启动线程，获取运行循环对象的引用，安装事件处理程序，并告诉运行循环运行。 OS X 提供的基础结构会自动为你处理主线程运行循环的。但是，如果计划创建寿命长的辅助线程，则必须自己为这些线程配置运行循环。</p>
 </blockquote>
 <p>通过上面官方文档的描述，runloop 其实和线程是紧密关联的，通过 runloop 可以让子线程一直存活而不被系统回收。同时，runloop 还能提升用户体验，可以重复的在子线程工作而无需为了执行任务多次开同样工作内容的线程。</p>
-<h3 id="1-4-3-线程同步"><a href="#1-4-3-线程同步" class="headerlink" title="1.4.3 线程同步"></a>1.4.3 线程同步</h3><p>使用多线程技术会遇到多个线程同时访问同一份资源的情况，而如果这些线程同时尝试使用或修改资源，则会出现严重的问题。解决此问题的办法通常来说有两种，一种是消除共享资源，让每个线程独享其特有的资源进行操作。第二种就是通过 locks(锁), conditions(条件), atomic operations(原子操作)等其它技术。显然第二种方案使用频率更高。</p>
-<h3 id="1-4-4-线程间通信"><a href="#1-4-4-线程间通信" class="headerlink" title="1.4.4 线程间通信"></a>1.4.4 线程间通信</h3><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15839085538498.jpg" alt></p>
+<h3 id="线程同步"><a href="#线程同步" class="headerlink" title="线程同步"></a>线程同步</h3><p>使用多线程技术会遇到多个线程同时访问同一份资源的情况，而如果这些线程同时尝试使用或修改资源，则会出现严重的问题。解决此问题的办法通常来说有两种，一种是消除共享资源，让每个线程独享其特有的资源进行操作。第二种就是通过 locks(锁), conditions(条件), atomic operations(原子操作)等其它技术。显然第二种方案使用频率更高。</p>
+<h3 id="线程间通信"><a href="#线程间通信" class="headerlink" title="线程间通信"></a>线程间通信</h3><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15839085538498.jpg" alt></p>
 <p>如上图所示，苹果官方给出了几种线程间通信的方式，简单总结一下如下：</p>
 <ul>
 <li><strong>直接消息传递</strong>: 通过 <code>performSelector</code> 的一系列方法，可以实现由某一线程指定在另外的线程上执行任务。因为任务的执行上下文是目标线程，这种方式发送的消息将会自动的被序列化。</li>
@@ -504,7 +504,7 @@
 <li><strong>消息队列</strong>: 传统的多处理服务定义了先进先出（<code>FIFO</code>）队列抽象，用于管理传入和传出数据。尽管消息队列既简单又方便，但是它们不如其他一些通信技术高效。</li>
 <li><strong><code>Cocoa</code> 分布式对象</strong>: 分布式对象是一种 <code>Cocoa</code> 技术，可提供基于端口的通信的高级实现。尽管可以将这种技术用于线程间通信，但是强烈建议不要这样做，因为它会产生大量开销。分布式对象更适合与其他进程进行通信，尽管在这些进程之间进行事务的开销也很高</li>
 </ul>
-<h2 id="1-5-使用线程的注意点"><a href="#1-5-使用线程的注意点" class="headerlink" title="1.5 使用线程的注意点"></a>1.5 使用线程的注意点</h2><ul>
+<h2 id="使用线程的注意点"><a href="#使用线程的注意点" class="headerlink" title="使用线程的注意点"></a>使用线程的注意点</h2><ul>
 <li>避免显式的创建线程</li>
 </ul>
 <blockquote>
@@ -582,7 +582,7 @@
 <p>始终记住在库中平衡互斥锁的加锁和解锁。你还应该记住对库中的数据结构加锁，而不是依赖调用代码来提供线程安全的环境。</p>
 <p>如果你正在开发 <code>Cocoa</code> 库，那么如果你希望在应用程序变为多线程时得到通知，则可以注册为 <code>NSWillBecomeMultiThreadedNotification</code> 的观察者。但是，你不应该依赖于接收此通知，因为它可能在调用库代码之前被发送。</p>
 </blockquote>
-<h1 id="二、线程管理"><a href="#二、线程管理" class="headerlink" title="二、线程管理"></a>二、线程管理</h1><h2 id="2-1-线程开销"><a href="#2-1-线程开销" class="headerlink" title="2.1 线程开销"></a>2.1 线程开销</h2><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15840203905223.jpg" alt></p>
+<h1 id="线程管理"><a href="#线程管理" class="headerlink" title="线程管理"></a>线程管理</h1><h2 id="线程开销"><a href="#线程开销" class="headerlink" title="线程开销"></a>线程开销</h2><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15840203905223.jpg" alt></p>
 <p>如上图所示:</p>
 <ul>
 <li>内核层的数据结构：开销为 1KB。这部分用于存储线程数据结构和属性，其中大部分是作为有线内存分配的，因此无法分页到磁盘。</li>
@@ -592,8 +592,8 @@
 <blockquote>
 <p>由于其底层内核支持，<code>Operation</code> 对象通常可以更快地创建线程。它们不是每次都从头开始创建线程，而是使用已经驻留在内核中的线程池来节省分配时间。</p>
 </blockquote>
-<h2 id="2-2-创建线程"><a href="#2-2-创建线程" class="headerlink" title="2.2 创建线程"></a>2.2 创建线程</h2><p>线程创建出来后必须要执行任务才有意义，下面介绍几种创建线程的方式。</p>
-<h3 id="2-2-1-使用-NSThread-创建线程"><a href="#2-2-1-使用-NSThread-创建线程" class="headerlink" title="2.2.1 使用 NSThread 创建线程"></a>2.2.1 使用 NSThread 创建线程</h3><p>通过 <code>NSThread</code> 创建线程有两种方式：</p>
+<h2 id="创建线程"><a href="#创建线程" class="headerlink" title="创建线程"></a>创建线程</h2><p>线程创建出来后必须要执行任务才有意义，下面介绍几种创建线程的方式。</p>
+<h3 id="使用-NSThread-创建线程"><a href="#使用-NSThread-创建线程" class="headerlink" title="使用 NSThread 创建线程"></a>使用 NSThread 创建线程</h3><p>通过 <code>NSThread</code> 创建线程有两种方式：</p>
 <ul>
 <li>使用 <code>detachNewThreadSelector:toTarget:withObject:</code> 类方法来派生新的线程。</li>
 <li>创建一个 <code>NSThread</code> 实例对象，然后调用 <code>start</code> 方法。</li>
@@ -610,16 +610,16 @@
 </blockquote>
 <p>如果你有一个已经创建好并且在运行中的 <code>NSThread</code> 线程对象，你可以通过 <code>performSelector:onThread:withObject:waitUntilDone:</code> 方法来向这个线程发送消息。这个方法是 <code>NSObject</code> 的分类中的方法，也就意味着几乎任何对象都能适用。使用这个方法发送的消息将由另一个线程直接执行，作为其正常运行循环处理的一部分。当然，这意味着目标线程必须在其运行循环中运行）。在这过程中你可能还需要适用锁来进行线程同步，当然，这比适用基于 port 的线程间同信要简单一些。</p>
 <p>虽然 <code>performSelector:onThread:withObject:waitUntilDone:</code> 方法用起来很简单，但是对于频繁间的线程通信或时间敏感类的任务执行，请不要使用这个方法。</p>
-<h3 id="2-2-2-使用-POSIX-创建线程"><a href="#2-2-2-使用-POSIX-创建线程" class="headerlink" title="2.2.2 使用 POSIX 创建线程"></a>2.2.2 使用 POSIX 创建线程</h3><blockquote>
+<h3 id="使用-POSIX-创建线程"><a href="#使用-POSIX-创建线程" class="headerlink" title="使用 POSIX 创建线程"></a>使用 POSIX 创建线程</h3><blockquote>
 <p>OS X 和 iOS 为使用 POSIX 线程 API 创建线程提供了基于 C 的支持。这种技术实际上可以用于任何类型的应用程序（包括 Cocoa 和 Cocoa Touch 应用程序），如果您为多个平台编写软件，则可能更方便。用于创建线程的 <code>POSIX</code> 例程被适当地调用为 <code>pthread_create</code>。</p>
 </blockquote>
 <p>下面是对于 <code>pthread_create</code> 的简单使用示例:</p>
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#include <span class="meta-string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#include <span class="meta-string">&lt;pthread.h&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="comment">// 线程要执行的任务 </span></span><br><span class="line"><span class="keyword">void</span>* PosixThreadMainRoutine(<span class="keyword">void</span>* data)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// Do some work here.</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// 启动线程 </span></span><br><span class="line"><span class="keyword">void</span> LaunchThread()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 线程属性</span></span><br><span class="line">    pthread_attr_t  attr;</span><br><span class="line">    <span class="comment">// 线程对象</span></span><br><span class="line">    pthread_t       posixThreadID;</span><br><span class="line">    <span class="comment">// 返回值</span></span><br><span class="line">    <span class="keyword">int</span>             returnVal;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 初始化线程属性</span></span><br><span class="line">    returnVal = pthread_attr_init(&amp;attr);</span><br><span class="line">    assert(!returnVal);</span><br><span class="line">    <span class="comment">// 设置线程为 detach 状态</span></span><br><span class="line">    returnVal = pthread_attr_setdetachstate(&amp;attr, PTHREAD_CREATE_DETACHED);</span><br><span class="line">    assert(!returnVal);</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 创建线程，传入属性和要执行的任务</span></span><br><span class="line">    <span class="keyword">int</span>     threadError = pthread_create(&amp;posixThreadID, &amp;attr, &amp;PosixThreadMainRoutine, <span class="literal">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 销毁属性</span></span><br><span class="line">    returnVal = pthread_attr_destroy(&amp;attr);</span><br><span class="line">    assert(!returnVal);</span><br><span class="line">    <span class="keyword">if</span> (threadError != <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">         <span class="comment">// Report an error.</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>关于 <code>pthread</code> 详细的使用请参考这篇文章 <a href="https://kingcos.me/posts/2019/multithreading_techs_in_ios-1/" target="_blank" rel="noopener">iOS 多线程技术实践之 pthreads（一)</a></p>
-<h3 id="2-2-3-使用-NSObject-派生线程"><a href="#2-2-3-使用-NSObject-派生线程" class="headerlink" title="2.2.3 使用 NSObject 派生线程"></a>2.2.3 使用 NSObject 派生线程</h3><p>所有继承于 <code>NSObject</code> 的对象都可以通过 <code>performSelectorInBackground:withObject:</code> 来在子线程上执行任务。</p>
+<h3 id="使用-NSObject-派生线程"><a href="#使用-NSObject-派生线程" class="headerlink" title="使用 NSObject 派生线程"></a>使用 NSObject 派生线程</h3><p>所有继承于 <code>NSObject</code> 的对象都可以通过 <code>performSelectorInBackground:withObject:</code> 来在子线程上执行任务。</p>
 <p>这个方法底层实际上是调用的 <code>NSThread</code> 类方法 <code>detachNewThreadSelector:toTarget:withObject:</code> 来创建线程并执行任务。</p>
-<h3 id="2-2-4-在-Cocoa-应用程序中使用-POSIX-线程"><a href="#2-2-4-在-Cocoa-应用程序中使用-POSIX-线程" class="headerlink" title="2.2.4 在 Cocoa 应用程序中使用 POSIX 线程"></a>2.2.4 在 <code>Cocoa</code> 应用程序中使用 <code>POSIX</code> 线程</h3><p>虽然在 <code>Cocoa</code> 中使用 <code>NSThread</code> 是创建线程的主要方式，但是当需要的时候，还是可以使用 <code>POSIX</code> 线程的。但是需要遵守以下几点:</p>
+<h3 id="在-Cocoa-应用程序中使用-POSIX-线程"><a href="#在-Cocoa-应用程序中使用-POSIX-线程" class="headerlink" title="在 Cocoa 应用程序中使用 POSIX 线程"></a>在 <code>Cocoa</code> 应用程序中使用 <code>POSIX</code> 线程</h3><p>虽然在 <code>Cocoa</code> 中使用 <code>NSThread</code> 是创建线程的主要方式，但是当需要的时候，还是可以使用 <code>POSIX</code> 线程的。但是需要遵守以下几点:</p>
 <ul>
 <li><p><code>Protecting the Cocoa Frameworks</code>: 保护 <code>Cocoa</code> 中的框架</p>
 <ul>
@@ -634,8 +634,8 @@
 </ul>
 </li>
 </ul>
-<h2 id="2-3-配置线程属性"><a href="#2-3-配置线程属性" class="headerlink" title="2.3 配置线程属性"></a>2.3 配置线程属性</h2><p>在线程创建之前或者之后，你可能想要配置一些线程相关的属性，具体内容如下:</p>
-<h3 id="2-3-1-配置线程所占栈空间大小"><a href="#2-3-1-配置线程所占栈空间大小" class="headerlink" title="2.3.1 配置线程所占栈空间大小"></a>2.3.1 配置线程所占栈空间大小</h3><blockquote>
+<h2 id="配置线程属性"><a href="#配置线程属性" class="headerlink" title="配置线程属性"></a>配置线程属性</h2><p>在线程创建之前或者之后，你可能想要配置一些线程相关的属性，具体内容如下:</p>
+<h3 id="配置线程所占栈空间大小"><a href="#配置线程所占栈空间大小" class="headerlink" title="配置线程所占栈空间大小"></a>配置线程所占栈空间大小</h3><blockquote>
 <p>对于你创建的每个新线程，系统都会在进程空间中分配特定数量的内存，以充当该线程的堆栈。</p>
 <p>堆栈管理堆栈帧，线程内部声明的局部变量就会存于此处。</p>
 </blockquote>
@@ -648,17 +648,17 @@
 <li>POSIX</li>
 </ul>
 <p>创建 <code>pthread_attr_t</code> 结构体对象，然后将其传入 <code>pthread_attr_setstacksize</code> 方法来设置栈大小，然后将 <code>pthread_attr_t</code> 传入 <code>pthread_create</code> 函数来创建 POSIX 线程。</p>
-<h3 id="2-3-2-配置-TLS"><a href="#2-3-2-配置-TLS" class="headerlink" title="2.3.2 配置 TLS"></a>2.3.2 配置 TLS</h3><p>每个线程会维护一个键值对的字典，用来在线程执行过程中存储一些内容，这个字典</p>
+<h3 id="配置-TLS"><a href="#配置-TLS" class="headerlink" title="配置 TLS"></a>配置 TLS</h3><p>每个线程会维护一个键值对的字典，用来在线程执行过程中存储一些内容，这个字典</p>
 <p><code>Cocoa</code> 和 <code>POSIX</code> 以不同的方式存储线程字典，因此你不能混合和匹配对这两种技术的调用。 但是，只要您在线程代码中坚持使用一种技术，最终结果应该是相似的。在 <code>Cocoa</code> 中，你可以使用 <code>NSThread</code> 对象的 <code>threadDictionary</code> 方法来获取 <code>TLS</code>，你可以在该对象中添加线程所需的任何键。在 <code>POSIX</code> 中，使用 <code>pthread_setspecific</code> 和<code>pthread_getspecific</code> 函数来设置和获取 <code>TLS</code>。</p>
-<h3 id="2-3-3-设置线程的分离状态"><a href="#2-3-3-设置线程的分离状态" class="headerlink" title="2.3.3 设置线程的分离状态"></a>2.3.3 设置线程的分离状态</h3><p>通过 <code>NSThread</code> 创建的线程默认是分离式的，当应用程序退出时，这种类型的线程也将退出，所以为了执行诸如在应用程序退出时保存数据的任务，需要创建 <code>joinable</code> 类型的线程。而目前的方案只有通过 <code>POSIX</code> 来实现，通过 <code>pthread_attr_setdetachstate</code> 方法来设置 <code>pthread_t</code> 的属性来达到非分离式的效果。当然，如果想改变线程的状态，可以通过 <code>pthread_attr_setdetachstate</code> 来将线程设置为分离式的。</p>
-<h3 id="2-3-4-设置线程优先级"><a href="#2-3-4-设置线程优先级" class="headerlink" title="2.3.4 设置线程优先级"></a>2.3.4 设置线程优先级</h3><p>你所创建的线程都有与之关联默认的优先级，内核在调度线程的时候，优先级高的线程相比于优先级低的线程更有可能性执行。但是优先级高的线程并不能保证有固定的运行时间，只是更可能被调度而已。</p>
+<h3 id="设置线程的分离状态"><a href="#设置线程的分离状态" class="headerlink" title="设置线程的分离状态"></a>设置线程的分离状态</h3><p>通过 <code>NSThread</code> 创建的线程默认是分离式的，当应用程序退出时，这种类型的线程也将退出，所以为了执行诸如在应用程序退出时保存数据的任务，需要创建 <code>joinable</code> 类型的线程。而目前的方案只有通过 <code>POSIX</code> 来实现，通过 <code>pthread_attr_setdetachstate</code> 方法来设置 <code>pthread_t</code> 的属性来达到非分离式的效果。当然，如果想改变线程的状态，可以通过 <code>pthread_attr_setdetachstate</code> 来将线程设置为分离式的。</p>
+<h3 id="设置线程优先级"><a href="#设置线程优先级" class="headerlink" title="设置线程优先级"></a>设置线程优先级</h3><p>你所创建的线程都有与之关联默认的优先级，内核在调度线程的时候，优先级高的线程相比于优先级低的线程更有可能性执行。但是优先级高的线程并不能保证有固定的运行时间，只是更可能被调度而已。</p>
 <blockquote>
 <p>It is generally a good idea to leave the priorities of your threads at their default values. Increasing the priorities of some threads also increases the likelihood of starvation among lower-priority threads. If your application contains high-priority and low-priority threads that must interact with each other, the starvation of lower-priority threads may block other threads and create performance bottlenecks</p>
 <p>【译】 通常最好将线程的优先级保留为默认值。增加某些线程的优先级也增加了低优先级线程之间出现饥饿的可能性。如果你的应用程序包含必须相互交互的高优先级和低优先级线程，则低优先级线程的饥饿可能会阻塞其他线程并造成性能瓶颈。</p>
 <p>这里可以联想到已经不再安全的自旋锁 OSSpinLock，具体内容参见 YYKit 作者的博文 <a href="https://blog.ibireme.com/2016/01/16/spinlock_is_unsafe_in_ios/" target="_blank" rel="noopener">不再安全的 OSSpinLock</a></p>
 </blockquote>
 <p>如果你确实想修改线程优先级，对于 <code>Cocoa</code> 线程，可以使用 <code>NSThread</code> 的<code>setThreadPriority</code> 类方法设置当前正在运行的线程的优先级。对于 <code>POSIX</code> 线程，使用 <code>pthread_setschedparam</code> 函数。</p>
-<h2 id="2-4-编写线程入口方法"><a href="#2-4-编写线程入口方法" class="headerlink" title="2.4 编写线程入口方法"></a>2.4 编写线程入口方法</h2><blockquote>
+<h2 id="编写线程入口方法"><a href="#编写线程入口方法" class="headerlink" title="编写线程入口方法"></a>编写线程入口方法</h2><blockquote>
 <p>在大多数情况下，OS X 中线程的入口点例程的结构与其他平台上的相同。你可以初始化数据结构，进行一些工作或有选择地设置运行循环，并在线程代码完成后进行清理。根据你的设计，编写输入例程时可能需要采取一些其他步骤。</p>
 </blockquote>
 <ul>
@@ -677,12 +677,12 @@
 <li>设置 RunLoop</li>
 </ul>
 <p>在子线程上执行任务的时候，有两种选择，一种是执行完之后线程会自动退出，一种是希望线程可以一直存活来处理任务。第一种方式不需要额外的操作，而第二种方式则需要 runloop 的配合。而 <code>iOS</code> 和 <code>macOS</code> 中的每个线程都有对应的 runloop 对象，<code>app</code> 的主线程启动之后，其对应的主运行循环也会自动开启，但是对于子线程来说，则需要手动开启。</p>
-<h2 id="2-5-终止线程"><a href="#2-5-终止线程" class="headerlink" title="2.5 终止线程"></a>2.5 终止线程</h2><p>退出线程的建议方法是让其正常退出其入口方法。尽管 <code>Cocoa</code>，<code>POSIX</code> 和<code>Multiprocessing Services</code> 提供了直接杀死线程的例程，但是强烈建议不要使用此类例程。直接杀死线程会防止它自己清理掉从而导致线程分配的内存可能会泄漏，线程当前使用的任何其他资源可能无法正确清理，从而在以后产生潜在问题。</p>
+<h2 id="终止线程"><a href="#终止线程" class="headerlink" title="终止线程"></a>终止线程</h2><p>退出线程的建议方法是让其正常退出其入口方法。尽管 <code>Cocoa</code>，<code>POSIX</code> 和<code>Multiprocessing Services</code> 提供了直接杀死线程的例程，但是强烈建议不要使用此类例程。直接杀死线程会防止它自己清理掉从而导致线程分配的内存可能会泄漏，线程当前使用的任何其他资源可能无法正确清理，从而在以后产生潜在问题。</p>
 <p>如果你预计需要在操作过程中终止线程，则应从一开始就设计线程以响应取消或退出消息。对于长时间运行的操作，这可能意味着要定期停止工作并检查是否收到此消息。如果确实有消息要求线程退出，则该线程将有机会执行所需的清理并正常退出；否则，它可以简单地返回工作并处理下一个数据块。</p>
 <p>下面是通过 runloop 以及 threadDictionary 来实现定时检查是否要退出线程的代码：</p>
 <figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)threadMainRoutine</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 是否还有更多工作要做</span></span><br><span class="line">    <span class="built_in">BOOL</span> moreWorkToDo = <span class="literal">YES</span>;</span><br><span class="line">    <span class="comment">// 是否要退出线程</span></span><br><span class="line">    <span class="built_in">BOOL</span> exitNow = <span class="literal">NO</span>;</span><br><span class="line">    <span class="comment">// 获取当前线程对应的 runloop 对象</span></span><br><span class="line">    <span class="built_in">NSRunLoop</span>* runLoop = [<span class="built_in">NSRunLoop</span> currentRunLoop];</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 将 exitNow 存入 threadDictionary 中</span></span><br><span class="line">    <span class="built_in">NSMutableDictionary</span>* threadDict = [[<span class="built_in">NSThread</span> currentThread] threadDictionary];</span><br><span class="line">    [threadDict setValue:[<span class="built_in">NSNumber</span> numberWithBool:exitNow] forKey:<span class="string">@"ThreadShouldExitNow"</span>];</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// 设置 runloop 的输入源</span></span><br><span class="line">    [<span class="keyword">self</span> myInstallCustomInputSource];</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">while</span> (moreWorkToDo &amp;&amp; !exitNow)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 具体要做的工作</span></span><br><span class="line">        <span class="comment">// 完成时改变 moreWorkToDo 的值</span></span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 让 runloop 跑起来，但如果没有要触发的输入源，则立即超时。</span></span><br><span class="line">        [runLoop runUntilDate:[<span class="built_in">NSDate</span> date]];</span><br><span class="line"> </span><br><span class="line">        <span class="comment">// 检查输入源处理程序是否更改了 exitNow 值</span></span><br><span class="line">        exitNow = [[threadDict valueForKey:<span class="string">@"ThreadShouldExitNow"</span>] boolValue];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="三、总结"><a href="#三、总结" class="headerlink" title="三、总结"></a>三、总结</h2><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/iOS%20Thread.png" alt></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/iOS%20Thread.png" alt></p>
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/Introduction/Introduction.html#//apple_ref/doc/uid/10000057i-CH1-SW1" target="_blank" rel="noopener">Threading Programming Guide - Apple</a></p>
 <p><a href="https://stackoverflow.com/questions/3756882/detached-vs-joinable-posix-threads" target="_blank" rel="noopener">Detached vs. Joinable POSIX threads - StackOverflow</a></p>
 <p><a href="https://blog.csdn.net/c_base_jin/article/details/79233705" target="_blank" rel="noopener">c++11中thread join和detach的区别</a></p>
@@ -714,7 +714,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://leejunhui.com/2020/03/13/iOS-查漏补缺-线程/" title="iOS 查漏补缺- 线程">http://leejunhui.com/2020/03/13/iOS-查漏补缺-线程/</a>
+    <a href="http://leejunhui.com/2020/03/13/iOS-查漏补缺-线程/" title="iOS 查漏补缺 - 线程">http://leejunhui.com/2020/03/13/iOS-查漏补缺-线程/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -895,7 +895,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#iOS-查漏补缺-线程"><span class="nav-number">1.</span> <span class="nav-text">iOS 查漏补缺 - 线程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#前导知识"><span class="nav-number">2.</span> <span class="nav-text">前导知识</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#一、线程初探"><span class="nav-number">3.</span> <span class="nav-text">一、线程初探</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-线程定义"><span class="nav-number">3.1.</span> <span class="nav-text">1.1 线程定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-线程相关的术语"><span class="nav-number">3.2.</span> <span class="nav-text">1.2 线程相关的术语</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-线程的替代方案"><span class="nav-number">3.3.</span> <span class="nav-text">1.3 线程的替代方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-线程支持"><span class="nav-number">3.4.</span> <span class="nav-text">1.4 线程支持</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-1-Cocoa-中线程相关的技术"><span class="nav-number">3.4.1.</span> <span class="nav-text">1.4.1 Cocoa 中线程相关的技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-2-Runloop"><span class="nav-number">3.4.2.</span> <span class="nav-text">1.4.2 Runloop</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-3-线程同步"><span class="nav-number">3.4.3.</span> <span class="nav-text">1.4.3 线程同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-4-线程间通信"><span class="nav-number">3.4.4.</span> <span class="nav-text">1.4.4 线程间通信</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-使用线程的注意点"><span class="nav-number">3.5.</span> <span class="nav-text">1.5 使用线程的注意点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、线程管理"><span class="nav-number">4.</span> <span class="nav-text">二、线程管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-线程开销"><span class="nav-number">4.1.</span> <span class="nav-text">2.1 线程开销</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-创建线程"><span class="nav-number">4.2.</span> <span class="nav-text">2.2 创建线程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-使用-NSThread-创建线程"><span class="nav-number">4.2.1.</span> <span class="nav-text">2.2.1 使用 NSThread 创建线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-使用-POSIX-创建线程"><span class="nav-number">4.2.2.</span> <span class="nav-text">2.2.2 使用 POSIX 创建线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-3-使用-NSObject-派生线程"><span class="nav-number">4.2.3.</span> <span class="nav-text">2.2.3 使用 NSObject 派生线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-4-在-Cocoa-应用程序中使用-POSIX-线程"><span class="nav-number">4.2.4.</span> <span class="nav-text">2.2.4 在 Cocoa 应用程序中使用 POSIX 线程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-配置线程属性"><span class="nav-number">4.3.</span> <span class="nav-text">2.3 配置线程属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-1-配置线程所占栈空间大小"><span class="nav-number">4.3.1.</span> <span class="nav-text">2.3.1 配置线程所占栈空间大小</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-2-配置-TLS"><span class="nav-number">4.3.2.</span> <span class="nav-text">2.3.2 配置 TLS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-3-设置线程的分离状态"><span class="nav-number">4.3.3.</span> <span class="nav-text">2.3.3 设置线程的分离状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-4-设置线程优先级"><span class="nav-number">4.3.4.</span> <span class="nav-text">2.3.4 设置线程优先级</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-编写线程入口方法"><span class="nav-number">4.4.</span> <span class="nav-text">2.4 编写线程入口方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-终止线程"><span class="nav-number">4.5.</span> <span class="nav-text">2.5 终止线程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、总结"><span class="nav-number">4.6.</span> <span class="nav-text">三、总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#iOS-查漏补缺-线程"><span class="nav-number">1.</span> <span class="nav-text">iOS 查漏补缺 - 线程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#前导知识"><span class="nav-number">2.</span> <span class="nav-text">前导知识</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#线程初探"><span class="nav-number">3.</span> <span class="nav-text">线程初探</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#线程定义"><span class="nav-number">3.1.</span> <span class="nav-text">线程定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程相关的术语"><span class="nav-number">3.2.</span> <span class="nav-text">线程相关的术语</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程的替代方案"><span class="nav-number">3.3.</span> <span class="nav-text">线程的替代方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线程支持"><span class="nav-number">3.4.</span> <span class="nav-text">线程支持</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Cocoa-中线程相关的技术"><span class="nav-number">3.4.1.</span> <span class="nav-text">Cocoa 中线程相关的技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Runloop"><span class="nav-number">3.4.2.</span> <span class="nav-text">Runloop</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程同步"><span class="nav-number">3.4.3.</span> <span class="nav-text">线程同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程间通信"><span class="nav-number">3.4.4.</span> <span class="nav-text">线程间通信</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用线程的注意点"><span class="nav-number">3.5.</span> <span class="nav-text">使用线程的注意点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#线程管理"><span class="nav-number">4.</span> <span class="nav-text">线程管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#线程开销"><span class="nav-number">4.1.</span> <span class="nav-text">线程开销</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建线程"><span class="nav-number">4.2.</span> <span class="nav-text">创建线程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-NSThread-创建线程"><span class="nav-number">4.2.1.</span> <span class="nav-text">使用 NSThread 创建线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-POSIX-创建线程"><span class="nav-number">4.2.2.</span> <span class="nav-text">使用 POSIX 创建线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用-NSObject-派生线程"><span class="nav-number">4.2.3.</span> <span class="nav-text">使用 NSObject 派生线程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在-Cocoa-应用程序中使用-POSIX-线程"><span class="nav-number">4.2.4.</span> <span class="nav-text">在 Cocoa 应用程序中使用 POSIX 线程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置线程属性"><span class="nav-number">4.3.</span> <span class="nav-text">配置线程属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置线程所占栈空间大小"><span class="nav-number">4.3.1.</span> <span class="nav-text">配置线程所占栈空间大小</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-TLS"><span class="nav-number">4.3.2.</span> <span class="nav-text">配置 TLS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置线程的分离状态"><span class="nav-number">4.3.3.</span> <span class="nav-text">设置线程的分离状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置线程优先级"><span class="nav-number">4.3.4.</span> <span class="nav-text">设置线程优先级</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编写线程入口方法"><span class="nav-number">4.4.</span> <span class="nav-text">编写线程入口方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#终止线程"><span class="nav-number">4.5.</span> <span class="nav-text">终止线程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
 
           </div>
