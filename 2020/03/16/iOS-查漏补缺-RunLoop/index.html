@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="iOS,Objective-C,RunLoop,">
 
 
 
@@ -81,13 +81,26 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="leejunhui&#39;s blog">
-<meta property="og:url" content="http://leejunhui.com/index.html">
+<meta name="description" content="iOS 查漏补缺 - RunLoopRunLoop 在 0202 年的今天其实已经不是个新鲜的话题了，关于这方面的文章网上有很多大神总结得非常精辟。 作为 iOS 查漏补缺系列，这篇文章是笔者探索 RunLoop 底层的一些知识点总结，同时也借鉴了网上一些优秀的 RunLoop 技术文章的内容。 本文内容如有错误，欢迎指正。 RunLoop 前导知识iOS/OS X 系统架构iOS 进化史  Ma">
+<meta name="keywords" content="iOS,Objective-C,RunLoop">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 查漏补缺 - RunLoop">
+<meta property="og:url" content="http://leejunhui.com/2020/03/16/iOS-查漏补缺-RunLoop/index.html">
 <meta property="og:site_name" content="leejunhui&#39;s blog">
+<meta property="og:description" content="iOS 查漏补缺 - RunLoopRunLoop 在 0202 年的今天其实已经不是个新鲜的话题了，关于这方面的文章网上有很多大神总结得非常精辟。 作为 iOS 查漏补缺系列，这篇文章是笔者探索 RunLoop 底层的一些知识点总结，同时也借鉴了网上一些优秀的 RunLoop 技术文章的内容。 本文内容如有错误，欢迎指正。 RunLoop 前导知识iOS/OS X 系统架构iOS 进化史  Ma">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200316102159.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200316102205.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200316102208.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200316102155.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200316102211.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200316102217.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200316102221.jpg">
+<meta property="og:updated_time" content="2020-03-16T02:24:22.977Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="leejunhui&#39;s blog">
+<meta name="twitter:title" content="iOS 查漏补缺 - RunLoop">
+<meta name="twitter:description" content="iOS 查漏补缺 - RunLoopRunLoop 在 0202 年的今天其实已经不是个新鲜的话题了，关于这方面的文章网上有很多大神总结得非常精辟。 作为 iOS 查漏补缺系列，这篇文章是笔者探索 RunLoop 底层的一些知识点总结，同时也借鉴了网上一些优秀的 RunLoop 技术文章的内容。 本文内容如有错误，欢迎指正。 RunLoop 前导知识iOS/OS X 系统架构iOS 进化史  Ma">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200316102159.jpg">
 
 
 
@@ -117,13 +130,13 @@
 
 
 
-  <link rel="canonical" href="http://leejunhui.com/">
+  <link rel="canonical" href="http://leejunhui.com/2020/03/16/iOS-查漏补缺-RunLoop/">
 
 
 
 
 
-  <title>leejunhui's blog</title>
+  <title>iOS 查漏补缺 - RunLoop | leejunhui's blog</title>
   
 
 
@@ -142,8 +155,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -236,9 +248,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -268,9 +280,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/03/16/iOS-查漏补缺-RunLoop/" itemprop="url">iOS 查漏补缺 - RunLoop</a></h1>
+          <h1 class="post-title" itemprop="name headline">iOS 查漏补缺 - RunLoop</h1>
         
 
         <div class="post-meta">
@@ -350,9 +360,7 @@
       
 
       
-        
-          
-            <h1 id="iOS-查漏补缺-RunLoop"><a href="#iOS-查漏补缺-RunLoop" class="headerlink" title="iOS 查漏补缺 - RunLoop"></a>iOS 查漏补缺 - RunLoop</h1><p><code>RunLoop</code> 在 0202 年的今天其实已经不是个新鲜的话题了，关于这方面的文章网上有很多大神总结得非常精辟。</p>
+        <h1 id="iOS-查漏补缺-RunLoop"><a href="#iOS-查漏补缺-RunLoop" class="headerlink" title="iOS 查漏补缺 - RunLoop"></a>iOS 查漏补缺 - RunLoop</h1><p><code>RunLoop</code> 在 0202 年的今天其实已经不是个新鲜的话题了，关于这方面的文章网上有很多大神总结得非常精辟。</p>
 <p>作为 <code>iOS</code> 查漏补缺系列，这篇文章是笔者探索 <code>RunLoop</code> 底层的一些知识点总结，同时也借鉴了网上一些优秀的 <code>RunLoop</code> 技术文章的内容。</p>
 <p>本文内容如有错误，欢迎指正。</p>
 <h1 id="RunLoop-前导知识"><a href="#RunLoop-前导知识" class="headerlink" title="RunLoop 前导知识"></a>RunLoop 前导知识</h1><h2 id="iOS-OS-X-系统架构"><a href="#iOS-OS-X-系统架构" class="headerlink" title="iOS/OS X 系统架构"></a>iOS/OS X 系统架构</h2><h3 id="iOS-进化史"><a href="#iOS-进化史" class="headerlink" title="iOS 进化史"></a>iOS 进化史</h3><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/20200316102159.jpg" alt="iOS Evolutionary history "></p>
@@ -621,8 +629,6 @@
 <p><a href="http://mrpeak.cn/blog/ios-runloop/" target="_blank" rel="noopener">解密 RunLoop - MrPeak</a></p>
 <p><a href="https://www.jianshu.com/p/5c98ac2dab58" target="_blank" rel="noopener">Core Foundation 详解</a></p>
 
-          
-        
       
     </div>
     
@@ -630,21 +636,73 @@
     
 
     
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode3.jpg" alt="leejunhui wechat" style="width: 200px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的微信公众号，订阅我的博客！</div>
+</div>
+
+      </div>
+    
 
     
 
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    leejunhui
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://leejunhui.com/2020/03/16/iOS-查漏补缺-RunLoop/" title="iOS 查漏补缺 - RunLoop">http://leejunhui.com/2020/03/16/iOS-查漏补缺-RunLoop/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
     
 
     <footer class="post-footer">
       
-
+        <div class="post-tags">
+          
+            <a href="/tags/iOS/" rel="tag"># iOS</a>
+          
+            <a href="/tags/Objective-C/" rel="tag"># Objective-C</a>
+          
+            <a href="/tags/RunLoop/" rel="tag"># RunLoop</a>
+          
+        </div>
       
 
       
+      
+      
 
       
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/13/iOS-查漏补缺-线程/" rel="next" title="iOS 查漏补缺 - 线程">
+                <i class="fa fa-chevron-left"></i> iOS 查漏补缺 - 线程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
       
-        <div class="post-eof"></div>
+
+      
       
     </footer>
   </div>
@@ -654,1429 +712,11 @@
   </article>
 
 
-    
-      
 
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/03/13/iOS-查漏补缺-线程/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/03/13/iOS-查漏补缺-线程/" itemprop="url">iOS 查漏补缺 - 线程</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-13T12:28:25+08:00">
-                2020-03-13
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-03-13T12:47:21+08:00" content="2020-03-13">
-              2020-03-13
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-查漏补缺/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 查漏补缺</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>多线程是我们开发和面试中都会遇到的一个重要概念，相比于其他编程语言和平台，iOS 的多线程使用起来要比较友好和易用一些。但是对于多线程的基本概念，我们还是需要重视起来，这对于我们探索 <code>pthread</code>、<code>NSThread</code>、<code>GCD</code> 以及 <code>RunLoop</code> 都大有裨益。</p>
-<blockquote>
-<p>本节的大部分内容基于苹果官方文档。文档地址: <a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/AboutThreads/AboutThreads.html#//apple_ref/doc/uid/10000057i-CH6-SW2" target="_blank" rel="noopener">About Threaded Programming</a></p>
-</blockquote>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/03/13/iOS-查漏补缺-线程/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
+    <div class="post-spread">
       
     </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
   </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/03/12/iOS-查漏补缺-performSelector/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/03/12/iOS-查漏补缺-performSelector/" itemprop="url">iOS 查漏补缺 - performSelector</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-12T17:28:13+08:00">
-                2020-03-12
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-03-13T12:42:43+08:00" content="2020-03-13">
-              2020-03-13
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-查漏补缺/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 查漏补缺</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="iOS-查漏补缺-PerformSelector"><a href="#iOS-查漏补缺-PerformSelector" class="headerlink" title="iOS 查漏补缺 - PerformSelector"></a>iOS 查漏补缺 - PerformSelector</h1><blockquote>
-<p><code>performSelector</code> 系列的函数我们都不陌生，但是对于它不同的变种以及底层原理在很多时候还是容易分不清楚，所以笔者希望通过 <code>runtime</code> 源码以及 <code>GUNStep</code> 源码来一个个抽丝剥茧，把不同变种的 <code>performSelector</code> 理顺，并搞清楚每个方法的底层实现，如有错误，欢迎指正。</p>
-<p>本文的代码已放在 <a href="https://github.com/LeeJunhui/PerformSelectorIndepth" target="_blank" rel="noopener">Github</a> ，欢迎自取</p>
-</blockquote>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/03/12/iOS-查漏补缺-performSelector/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/02/19/iOS-底层探索-KVO/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/02/19/iOS-底层探索-KVO/" itemprop="url">iOS 底层探索 - KVO</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-19T15:38:09+08:00">
-                2020-02-19
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-02-19T15:40:40+08:00" content="2020-02-19">
-              2020-02-19
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <blockquote>
-<p>在 <code>Objective-C</code> 和 <code>Cocoa</code> 中，有许多事件之间进行通信的方式，并且每个都有不同程度的形式和耦合:<br><code>NSNotification</code> &amp; <code>NSNotificationCenter</code> 提供了一个中央枢纽，一个应用的任何部分都可能通知或者被通知应用的其他部分的变化。唯一需要做的是要知道在寻找什么，主要是通知的名字。例如，<code>UIApplicationDidReceiveMemoryWarningNotification</code> 是给应用发了一个内存不足的信号。<br><code>Key-Value Observing</code> 键值观察通过侦听特定键路径上的更改，可以在特定对象实例之间进行特殊的事件自省。例如：一个 <code>ProgressView</code> 可以观察 网络请求的 <code>numberOfBytesRead</code> 来更新它自己的 <code>progress</code> 属性。<br><code>Delegate</code> 是一个流行的传递事件的设计模式，通过定义一系列的方法来传递给指定的处理对象。例如：<code>UIScrollView</code> 每次它的 <code>scroll offset</code> 改变的时候都会发送 <code>scrollViewDidScroll:</code> 到它的代理<br><code>Callbacks</code> 不管是像 <code>NSOperation</code> 里的 <code>completionBlock</code>（当 <code>isFinished==YES</code> 的时候会触发），还是 <code>C</code> 里边的函数指针，传递一个函数钩子比如 <code>SCNetworkReachabilitySetCallback(3)</code>。</p>
-</blockquote>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/02/19/iOS-底层探索-KVO/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/02/15/iOS-底层探索-KVC/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/02/15/iOS-底层探索-KVC/" itemprop="url">iOS 底层探索 - KVC</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-15T02:34:44+08:00">
-                2020-02-15
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-02-15T02:37:00+08:00" content="2020-02-15">
-              2020-02-15
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="一、KVC-初探"><a href="#一、KVC-初探" class="headerlink" title="一、KVC 初探"></a>一、KVC 初探</h1><p><code>Key Value Coding</code> 也即 <code>KVC</code> 是 <code>iOS</code> 开发中一个很重要的概念，中文翻译过来是 <code>键值编码</code> ，关于这个概念的具体定义可以在 <code>Apple</code> 的<a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueCoding/index.html#//apple_ref/doc/uid/10000107-SW1" target="_blank" rel="noopener">官方文档</a>处找到。</p>
-<blockquote>
-<p>Key-value coding is a mechanism enabled by the NSKeyValueCoding informal protocol that objects adopt to provide indirect access to their properties.<br>【译】<code>KVC</code> 是通过 <code>NSKeyValueCoding</code> 这个非正式协议启用的一种机制，而遵循了这个协议的对象就提供了对其属性的间接访问。</p>
-</blockquote>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/02/15/iOS-底层探索-KVC/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/21/iOS-底层探索-类拓展和关联对象/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/21/iOS-底层探索-类拓展和关联对象/" itemprop="url">iOS 底层探索 - 类拓展和关联对象</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-21T14:27:27+08:00">
-                2020-01-21
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-21T14:37:31+08:00" content="2020-01-21">
-              2020-01-21
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="2020年1月13日-类拓展、关联对象"><a href="#2020年1月13日-类拓展、关联对象" class="headerlink" title="2020年1月13日 类拓展、关联对象"></a>2020年1月13日 类拓展、关联对象</h1><p>前面我们探索了 <code>iOS</code> 中类和分类的加载，关于类这一块的内容，我们还有一些坑没有填，比如类拓展和关联对象，今天让我们一起填下这块的坑。</p>
-<h1 id="一、类拓展"><a href="#一、类拓展" class="headerlink" title="一、类拓展"></a>一、类拓展</h1><h2 id="1-1-什么是类拓展"><a href="#1-1-什么是类拓展" class="headerlink" title="1.1 什么是类拓展?"></a>1.1 什么是类拓展?</h2><p>关于类拓展的具体定义，大家可以直接参考 <a href="https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/CustomizingExistingClasses/CustomizingExistingClasses.html" target="_blank" rel="noopener">Apple 对于类拓展的说明</a>。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/21/iOS-底层探索-类拓展和关联对象/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/19/iOS-底层探索-分类的加载/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/19/iOS-底层探索-分类的加载/" itemprop="url">iOS 底层探索 - 分类的加载</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-19T11:59:18+08:00">
-                2020-01-19
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-19T12:28:21+08:00" content="2020-01-19">
-              2020-01-19
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="一、初探懒加载类"><a href="#一、初探懒加载类" class="headerlink" title="一、初探懒加载类"></a>一、初探懒加载类</h1><p>上一章我们探索了 <code>iOS</code> 中类的加载，让我们简单回顾一下大概的流程。</p>
-<h2 id="1-1-类的加载回顾"><a href="#1-1-类的加载回顾" class="headerlink" title="1.1 类的加载回顾"></a>1.1 类的加载回顾</h2><ul>
-<li><code>libObjc</code> 向 <code>dyld</code> 注册了回调 <code>_dyld_objc_notify_register</code>，当 <code>dyld</code> 把 <code>App</code> 以及 <code>App</code> 所依赖的一系列 <code>Mach-O</code> 镜像加载到当前 <code>App</code> 被分配的内存空间之后，<code>dyld</code> 会通过 <code>_dyld_objc_notify_mapped</code> 也就是 <code>map_images</code> 来通知 <code>libObjc</code> 来完成具体的加载工作，<code>map_images</code> 被调用之后会来到 <code>_read_images</code></li>
-<li><code>_read_images</code><ul>
-<li>主要会进行类的加载工作，会插入 <strong>所有的类</strong> 到 <code>gdb_objc_realized_classes</code> 哈希表中（插入方式为 类名为 <code>key</code>，类对象为<code>value</code>, 不包括通过 <em>共享缓存</em> 里面的类），同时还会把类插入到 <code>allocatedClasses</code> 这个集合里面，注意，<code>allocatedClasses</code> 的类型为 <code>NXHashTable</code>，可以类比为 <code>NSSet</code>，而 <code>gdb_objc_realized_classes</code> 的类型为 <code>NXMapTable</code>，可以类比为 <code>NSDictionary</code></li>
-<li>对所有的类进行重映射</li>
-<li>将所有的 <code>SEL</code> 插入到 <code>namedSelectors</code> 哈希表中(插入方式为：<code>SEL</code> 名称为 <code>key</code>，<code>SEL</code> 为<code>value</code>)</li>
-<li>修复函数指针遗留</li>
-<li>将所有的 <code>Protocol</code> 插入到 <code>readProtocol</code> 哈希表中(插入方式为：<code>Protocol</code> 名称为 <code>key</code>，<code>Protocol</code> 为 <code>value</code>)</li>
-<li>对所有的 <code>Protocol</code> 做重映射</li>
-<li>初始化所有的<strong>非懒加载类</strong>，包括 <code>rw</code> 和 <code>ro</code> 的初始化操作</li>
-<li>处理所有的分类(包括类的分类和元类的分类)
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/19/iOS-底层探索-分类的加载/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </li></ul></li></ul></div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/11/iOS-底层探索-类的加载/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/11/iOS-底层探索-类的加载/" itemprop="url">iOS 底层探索 - 类的加载</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-11T00:20:05+08:00">
-                2020-01-11
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-19T11:54:55+08:00" content="2020-01-19">
-              2020-01-19
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="一、应用加载回顾"><a href="#一、应用加载回顾" class="headerlink" title="一、应用加载回顾"></a>一、应用加载回顾</h1><p>上一章我们对应用的加载有了初步的认识，我们知道了</p>
-<ul>
-<li>系统调用 <code>exec()</code> 会我们的应用<strong>映射</strong>到新的地址空间</li>
-<li>然后通过 <code>dyld</code> 进行加载、链接、初始化主程序和主程序所依赖的各种动态库</li>
-<li>最后在 <code>initializeMainExecutable</code> 方法中经过一系列初始化调用 <code>notifySingle</code> 函数，该函数会执行一个 <code>load_images</code> 的回调</li>
-<li>然后在 <code>doModinitFuntions</code> 函数内部会调用 <code>__attribute__((constructor))</code> 的 <code>c</code> 函数</li>
-<li>然后 <code>dyld</code> 返回主程序的入口函数，开始进入主程序的 <code>main</code> 函数
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/11/iOS-底层探索-类的加载/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </li></ul></div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/10/iOS-底层探索-应用加载/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/10/iOS-底层探索-应用加载/" itemprop="url">iOS 底层探索 - 应用加载</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-10T00:45:45+08:00">
-                2020-01-10
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-19T11:30:43+08:00" content="2020-01-19">
-              2020-01-19
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p><code>App</code> 从被用户在主屏幕上点击之后就开启了它的生命周期，那么在这之中，究竟发生了什么呢?让我们从 <code>App</code> 启动开始探索。在探索之前，我们需要熟悉一些前导知识点。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/10/iOS-底层探索-应用加载/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/08/iOS-底层探索-消息转发/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/08/iOS-底层探索-消息转发/" itemprop="url">iOS 底层探索 - 消息转发</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-08T15:33:00+08:00">
-                2020-01-08
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-19T10:35:44+08:00" content="2020-01-19">
-              2020-01-19
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="动态方法解析流程分析"><a href="#动态方法解析流程分析" class="headerlink" title="动态方法解析流程分析"></a>动态方法解析流程分析</h1><p>我们在上一章《消息查找》分析到了<strong>动态方法解析</strong>，为了更好的掌握具体的流程，我们接下来直接进行源码追踪。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/08/iOS-底层探索-消息转发/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-  </section>
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
-  </nav>
-
 
 
           </div>
@@ -2084,6 +724,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -2104,8 +748,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -2174,6 +827,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#iOS-查漏补缺-RunLoop"><span class="nav-number">1.</span> <span class="nav-text">iOS 查漏补缺 - RunLoop</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RunLoop-前导知识"><span class="nav-number">2.</span> <span class="nav-text">RunLoop 前导知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#iOS-OS-X-系统架构"><span class="nav-number">2.1.</span> <span class="nav-text">iOS/OS X 系统架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#iOS-进化史"><span class="nav-number">2.1.1.</span> <span class="nav-text">iOS 进化史</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iOS-系统架构"><span class="nav-number">2.1.2.</span> <span class="nav-text">iOS 系统架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Darwin-架构"><span class="nav-number">2.1.3.</span> <span class="nav-text">Darwin 架构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mach-msg-函数"><span class="nav-number">2.2.</span> <span class="nav-text">mach_msg 函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CoreFoundation-基础"><span class="nav-number">2.3.</span> <span class="nav-text">CoreFoundation 基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#bridge"><span class="nav-number">2.3.1.</span> <span class="nav-text">__bridge</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bridge-retained"><span class="nav-number">2.3.2.</span> <span class="nav-text">__bridge_retained</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bridge-transfer"><span class="nav-number">2.3.3.</span> <span class="nav-text">__bridge_transfer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Toll-Free-bridged"><span class="nav-number">2.3.4.</span> <span class="nav-text">Toll-Free bridged</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RunLoop-初探"><span class="nav-number">3.</span> <span class="nav-text">RunLoop 初探</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是-RunLoop"><span class="nav-number">3.1.</span> <span class="nav-text">什么是 RunLoop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop-底层数据结构"><span class="nav-number">3.2.</span> <span class="nav-text">RunLoop 底层数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopRef"><span class="nav-number">3.2.1.</span> <span class="nav-text">CFRunLoopRef</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopModeRef"><span class="nav-number">3.2.2.</span> <span class="nav-text">CFRunLoopModeRef</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopSourceRef"><span class="nav-number">3.2.3.</span> <span class="nav-text">CFRunLoopSourceRef</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopTimerRef"><span class="nav-number">3.2.4.</span> <span class="nav-text">CFRunLoopTimerRef</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopObserverRef"><span class="nav-number">3.2.5.</span> <span class="nav-text">CFRunLoopObserverRef</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopActivity"><span class="nav-number">3.2.6.</span> <span class="nav-text">CFRunLoopActivity</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop-与线程关系"><span class="nav-number">3.3.</span> <span class="nav-text">RunLoop 与线程关系</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Runloop-底层"><span class="nav-number">4.</span> <span class="nav-text">Runloop 底层</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop-启动方式"><span class="nav-number">4.1.</span> <span class="nav-text">RunLoop 启动方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop-核心逻辑"><span class="nav-number">4.2.</span> <span class="nav-text">RunLoop 核心逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CFRunLoopRun-完整代码"><span class="nav-number">4.3.</span> <span class="nav-text">__CFRunLoopRun 完整代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CFRunLoopRun-精简代码"><span class="nav-number">4.4.</span> <span class="nav-text">__CFRunLoopRun 精简代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RunLoop-执行的任务"><span class="nav-number">4.5.</span> <span class="nav-text">RunLoop 执行的任务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopDoObservers"><span class="nav-number">4.5.1.</span> <span class="nav-text">__CFRunLoopDoObservers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopDoBlocks"><span class="nav-number">4.5.2.</span> <span class="nav-text">__CFRunLoopDoBlocks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopDoSources0"><span class="nav-number">4.5.3.</span> <span class="nav-text">__CFRunLoopDoSources0</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopDoSource1"><span class="nav-number">4.5.4.</span> <span class="nav-text">__CFRunLoopDoSource1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRunLoopDoTimers"><span class="nav-number">4.5.5.</span> <span class="nav-text">__CFRunLoopDoTimers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CFRUNLOOP-IS-SERVICING-THE-MAIN-DISPATCH-QUEUE"><span class="nav-number">4.5.6.</span> <span class="nav-text">CFRUNLOOP_IS_SERVICING_THE_MAIN_DISPATCH_QUEUE</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -2330,6 +999,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
