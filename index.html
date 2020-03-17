@@ -251,6 +251,166 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/03/18/iOS-查漏补缺-LLVM-Clang/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="leejunhui">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="leejunhui's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/03/18/iOS-查漏补缺-LLVM-Clang/" itemprop="url">iOS 查漏补缺 - LLVM&Clang</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-18T00:11:48+08:00">
+                2020-03-18
+              </time>
+            
+
+            
+
+            
+          </span>
+          
+          <span class="post-updated">
+            &nbsp; | &nbsp; 更新于
+            <time itemprop="dateUpdated" datetime="2020-03-18T00:12:48+08:00" content="2020-03-18">
+              2020-03-18
+            </time>
+          </span>
+          
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-查漏补缺/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS 查漏补缺</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="iOS-查漏补缺-LLVM-amp-Clang"><a href="#iOS-查漏补缺-LLVM-amp-Clang" class="headerlink" title="iOS 查漏补缺 - LLVM &amp; Clang"></a>iOS 查漏补缺 - LLVM &amp; Clang</h1><blockquote>
+<p>LLVM 是一个自由软件项目，它是一种编译器基础设施，以 C++ 写成，包含一系列模块化的编译器组件和工具链，用来开发编译器前端和后端。它是为了任意一种编程语言而写成的程序，利用虚拟技术创造出编译时期、链接时期、运行时期以及“闲置时期”的最优化。它最早以 C/C++ 为实现对象，而当前它已支持包括 ActionScript、Ada、D语言、Fortran、GLSL、Haskell、Java字节码、Objective-C、Swift、Python、Ruby、Crystal、Rust、Scala 以及 C# 等语言。</p>
+<p>– 维基百科 </p>
+<p>2000年，伊利诺伊大学厄巴纳－香槟分校（University of Illinois at Urbana-Champaign 简称UIUC）这所享有世界声望的一流公立研究型大学的 Chris Lattner（他的 twitter @clattner_llvm ） 开发了一个叫作 Low Level Virtual Machine 的编译器开发工具套件，后来涉及范围越来越大，可以用于常规编译器，JIT编译器，汇编器，调试器，静态分析工具等一系列跟编程语言相关的工作，于是就把简称 LLVM 这个简称作为了正式的名字。Chris Lattner 后来又开发了 Clang，使得 LLVM 直接挑战 GCC 的地位。2012年，LLVM 获得美国计算机学会 ACM 的软件系统大奖，和 UNIX，WWW，TCP/IP，Tex，JAVA 等齐名。</p>
+<p>– 深入剖析 iOS 编译 Clang / LLVM</p>
+</blockquote>
+<p>对于 iOS 开发者来说，<code>Swift</code> 之父 Chris Lattner 的大名应该都会有所耳闻。他和他的团队所开发的 LLVM 已经成为 <code>iOS</code> 乃至 <code>macOS</code> 整个生态中至关重要的底层基础设施。虽然 Lattner 本人已经去 Google 做人工智能了，但是对于 <code>iOS</code> 开发者了解并掌握一些关于 LLVM 的基本知识还是很有必要的。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/03/18/iOS-查漏补缺-LLVM-Clang/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/03/16/iOS-查漏补缺-RunLoop/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1655,160 +1815,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/01/08/iOS-底层探索-消息转发/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="leejunhui">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/uploads/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="leejunhui's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/01/08/iOS-底层探索-消息转发/" itemprop="url">iOS 底层探索 - 消息转发</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-08T15:33:00+08:00">
-                2020-01-08
-              </time>
-            
-
-            
-
-            
-          </span>
-          
-          <span class="post-updated">
-            &nbsp; | &nbsp; 更新于
-            <time itemprop="dateUpdated" datetime="2020-01-19T10:35:44+08:00" content="2020-01-19">
-              2020-01-19
-            </time>
-          </span>
-          
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/iOS-底层原理/" itemprop="url" rel="index">
-                    <span itemprop="name">iOS 底层原理</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="动态方法解析流程分析"><a href="#动态方法解析流程分析" class="headerlink" title="动态方法解析流程分析"></a>动态方法解析流程分析</h1><p>我们在上一章《消息查找》分析到了<strong>动态方法解析</strong>，为了更好的掌握具体的流程，我们接下来直接进行源码追踪。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/01/08/iOS-底层探索-消息转发/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1861,7 +1867,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">20</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1883,7 +1889,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

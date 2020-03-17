@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="iOS,Objective-C,LLVM,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="leejunhui's blog" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="iOS 查漏补缺 - LLVM &amp;amp; Clang LLVM 是一个自由软件项目，它是一种编译器基础设施，以 C++ 写成，包含一系列模块化的编译器组件和工具链，用来开发编译器前端和后端。它是为了任意一种编程语言而写成的程序，利用虚拟技术创造出编译时期、链接时期、运行时期以及“闲置时期”的最优化。它最早以 C/C++ 为实现对象，而当前它已支持包括 ActionScript、Ada、D语言、F">
+<meta name="keywords" content="iOS,Objective-C,LLVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS 查漏补缺 - LLVM&amp;Clang">
+<meta property="og:url" content="http://leejunhui.com/2020/03/18/iOS-查漏补缺-LLVM-Clang/index.html">
+<meta property="og:site_name" content="leejunhui&#39;s blog">
+<meta property="og:description" content="iOS 查漏补缺 - LLVM &amp;amp; Clang LLVM 是一个自由软件项目，它是一种编译器基础设施，以 C++ 写成，包含一系列模块化的编译器组件和工具链，用来开发编译器前端和后端。它是为了任意一种编程语言而写成的程序，利用虚拟技术创造出编译时期、链接时期、运行时期以及“闲置时期”的最优化。它最早以 C/C++ 为实现对象，而当前它已支持包括 ActionScript、Ada、D语言、F">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/Traditional%20Compiler%20Design.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/LLVM%20Design.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844219358426.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844237147862.jpg">
+<meta property="og:image" content="https://github.com/LeeJunhui/blog_images/blob/master/15844244409882.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844315579562.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844357823231.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844376744895.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844359384047.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844359928854.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844361146347.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844362229791.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844586858697.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844587953304.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844588646197.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844589529081.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844590285698.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844591561692.jpg">
+<meta property="og:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/LLVM.png">
+<meta property="og:updated_time" content="2020-03-17T16:12:48.135Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS 查漏补缺 - LLVM&amp;Clang">
+<meta name="twitter:description" content="iOS 查漏补缺 - LLVM &amp;amp; Clang LLVM 是一个自由软件项目，它是一种编译器基础设施，以 C++ 写成，包含一系列模块化的编译器组件和工具链，用来开发编译器前端和后端。它是为了任意一种编程语言而写成的程序，利用虚拟技术创造出编译时期、链接时期、运行时期以及“闲置时期”的最优化。它最早以 C/C++ 为实现对象，而当前它已支持包括 ActionScript、Ada、D语言、F">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/Traditional%20Compiler%20Design.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://leejunhui.com/2020/03/18/iOS-查漏补缺-LLVM-Clang/">
+
+
+
+
+
+  <title>iOS 查漏补缺 - LLVM&Clang | leejunhui's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">leejunhui's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://leejunhui.com/2020/03/18/iOS-查漏补缺-LLVM-Clang/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="leejunhui">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="leejunhui's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">iOS 查漏补缺 - LLVM&Clang</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-18T00:11:48+08:00">
+                2020-03-18
+              </time>
+            
+
+            
+
+            
+          </span>
+          
+          <span class="post-updated">
+            &nbsp; | &nbsp; 更新于
+            <time itemprop="dateUpdated" datetime="2020-03-18T00:12:48+08:00" content="2020-03-18">
+              2020-03-18
+            </time>
+          </span>
+          
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/iOS-查漏补缺/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS 查漏补缺</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="iOS-查漏补缺-LLVM-amp-Clang"><a href="#iOS-查漏补缺-LLVM-amp-Clang" class="headerlink" title="iOS 查漏补缺 - LLVM &amp; Clang"></a>iOS 查漏补缺 - LLVM &amp; Clang</h1><blockquote>
+<p>LLVM 是一个自由软件项目，它是一种编译器基础设施，以 C++ 写成，包含一系列模块化的编译器组件和工具链，用来开发编译器前端和后端。它是为了任意一种编程语言而写成的程序，利用虚拟技术创造出编译时期、链接时期、运行时期以及“闲置时期”的最优化。它最早以 C/C++ 为实现对象，而当前它已支持包括 ActionScript、Ada、D语言、Fortran、GLSL、Haskell、Java字节码、Objective-C、Swift、Python、Ruby、Crystal、Rust、Scala 以及 C# 等语言。</p>
+<p>– 维基百科 </p>
+<p>2000年，伊利诺伊大学厄巴纳－香槟分校（University of Illinois at Urbana-Champaign 简称UIUC）这所享有世界声望的一流公立研究型大学的 Chris Lattner（他的 twitter @clattner_llvm ） 开发了一个叫作 Low Level Virtual Machine 的编译器开发工具套件，后来涉及范围越来越大，可以用于常规编译器，JIT编译器，汇编器，调试器，静态分析工具等一系列跟编程语言相关的工作，于是就把简称 LLVM 这个简称作为了正式的名字。Chris Lattner 后来又开发了 Clang，使得 LLVM 直接挑战 GCC 的地位。2012年，LLVM 获得美国计算机学会 ACM 的软件系统大奖，和 UNIX，WWW，TCP/IP，Tex，JAVA 等齐名。</p>
+<p>– 深入剖析 iOS 编译 Clang / LLVM</p>
+</blockquote>
+<p>对于 iOS 开发者来说，<code>Swift</code> 之父 Chris Lattner 的大名应该都会有所耳闻。他和他的团队所开发的 LLVM 已经成为 <code>iOS</code> 乃至 <code>macOS</code> 整个生态中至关重要的底层基础设施。虽然 Lattner 本人已经去 Google 做人工智能了，但是对于 <code>iOS</code> 开发者了解并掌握一些关于 LLVM 的基本知识还是很有必要的。</p>
+<a id="more"></a>
+<h1 id="LLVM-初探"><a href="#LLVM-初探" class="headerlink" title="LLVM 初探"></a>LLVM 初探</h1><p>LLVM 的官网是 <a href="http://llvm.org/" target="_blank" rel="noopener">http://llvm.org/</a>。通过官网我们可以看到，LLVM 其实是一系列的编译组件的集合。而 Clang (标准读法是 <code>克朗</code>) 是作为其中的前端。这里的前端并不是 <code>HTML5</code> 这样的前端概念。说到这里，我们来简单回顾下传统编译器的设计吧。</p>
+<h2 id="传统编译器"><a href="#传统编译器" class="headerlink" title="传统编译器"></a>传统编译器</h2><p>在 LLVM 诞生之前，使用最广泛的应该是 GCC 编译器了，当然，GCC 在当下仍然扮演着很重要的角色。</p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/Traditional%20Compiler%20Design.png" alt="Traditional Compiler Design"></p>
+<h3 id="编译器前端-Front-End"><a href="#编译器前端-Front-End" class="headerlink" title="编译器前端 Front End"></a>编译器前端 Front End</h3><p>编译器前端的任务是解析源代码，具体工作内容包括下列三个流程</p>
+<ul>
+<li>词法分析</li>
+<li>语法分析</li>
+<li>语义分析</li>
+</ul>
+<p>检查源代码是否存在错误，然后构建<strong>抽象语法树</strong>(Abstract Syntax Tree, AST)。<br>LLVM的前端还会生成<strong>中间代码</strong>(intermediate representation, IR)。</p>
+<h3 id="优化器-Optimizer"><a href="#优化器-Optimizer" class="headerlink" title="优化器 Optimizer"></a>优化器 Optimizer</h3><p>优化器负责进行各种优化。改善代码的运行时间，例如消除冗余计算等。</p>
+<h3 id="编译器后端-Back-End"><a href="#编译器后端-Back-End" class="headerlink" title="编译器后端 Back End"></a>编译器后端 Back End</h3><p>将代码映射到目标指令集。生成机器语言，并且进行机器相关的代码优化。<br>有些资料也会把编译器后端成为 代码生成器 Code Generator。</p>
+<p>从上面的内容可以看到，传统的编译器架构前端和后端之间耦合度太高，如果要支持一门新的编程语言，或者一个新的目标平台，工作量会非常大。</p>
+<h2 id="LLVM-架构"><a href="#LLVM-架构" class="headerlink" title="LLVM 架构"></a>LLVM 架构</h2><p>LLVM 之所以能够成为编译器中的中流砥柱，最重要的就是使用了通用的代码表现形式，也就是 IR。有了 IR，LLVM 就可以为任何编程语言独立编写前端，并且可以为任意硬件架构独立编写后端。</p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/LLVM%20Design.png" alt="LLVM Design"></p>
+<p><a href="http://www.aosabook.org/en/llvm.html" target="_blank" rel="noopener">LLVM 架构概述</a></p>
+<h2 id="Clang"><a href="#Clang" class="headerlink" title="Clang"></a>Clang</h2><p>Clang 是 LLVM 项目中的一个子项目。它是基于 LLVM 架构的轻量级编译器，诞生之初是为了替代 GCC，提供更快的编译速度。它是负责编译 C、C++、Objective-C 语言的编译器，它属于整个 LLVM 架构中的编译器前端。对于我们来说，研究 Clang 可以让我们更深刻的理解从源码到汇编再到机器码的这一过程。</p>
+<p>Clang 的官网地址是 <a href="http://clang.llvm.org/" target="_blank" rel="noopener">http://clang.llvm.org/</a></p>
+<blockquote>
+<p>相比于 GCC，Clang 具有以下优点</p>
+<ul>
+<li>编译速度快：在某些平台上，Clang的编译速度显著的快过GCC（Debug模式下编译OC速度比GGC快3倍）</li>
+<li>占用内存小：Clang生成的AST所占用的内存是GCC的五分之一左右</li>
+<li>模块化设计：Clang采用基于库的模块化设计，易于 IDE 集成及其他用途的重用</li>
+<li>诊断信息可读性强：在编译过程中，Clang 创建并保留了大量详细的元数据 (metadata)，有利于调试和错误报告</li>
+<li>设计清晰简单，容易理解，易于扩展增强</li>
+</ul>
+</blockquote>
+<p>也就是说，广义上的 LLVM 指的是整个 LLVM 架构，而狭义上的 LLVM 是指的 LLVM 后端。<br>而 LLVM 后端包括代码优化(优化器)和目标代码生成(后端)两个部分。</p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844219358426.jpg" alt></p>
+<h1 id="iOS-中的编译过程"><a href="#iOS-中的编译过程" class="headerlink" title="iOS 中的编译过程"></a>iOS 中的编译过程</h1><p>在探索编译过程之前，我们先通过一个命令来打印出源码的编译阶段</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -ccc-print-phases 文件名</span><br></pre></td></tr></table></figure>
+
+<p>打印输出如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">0: input, <span class="string">"main.m"</span>, objective-c</span><br><span class="line">1: preprocessor, &#123;0&#125;, objective-c-cpp-output</span><br><span class="line">2: compiler, &#123;1&#125;, ir</span><br><span class="line">3: backend, &#123;2&#125;, assembler</span><br><span class="line">4: assembler, &#123;3&#125;, object</span><br><span class="line">5: linker, &#123;4&#125;, image</span><br><span class="line">6: <span class="built_in">bind</span>-arch, <span class="string">"x86_64"</span>, &#123;5&#125;, image</span><br></pre></td></tr></table></figure>
+
+<p>从结果可以看到，一共分为 7 大阶段。</p>
+<ul>
+<li>input: <strong>输入阶段</strong>，表示将 main.m 文件输入，文件格式是 OC</li>
+<li>preprocessor: <strong>预处理阶段</strong>，这个过程包括宏的替换，头文件的导入</li>
+<li>compiler：<strong>编译阶段</strong>，进行词法分析、语法分析、语义分析，最终生成 IR</li>
+<li>backend: <strong>后端</strong>，LLVM 会通过一个一个的 Pass 去优化，最终生成汇编代码。</li>
+<li>assembler: <strong>汇编</strong>，生成目标文件</li>
+<li>linker: <strong>链接</strong>，链接需要的动态库和静态库，生成可执行文件</li>
+<li>bind-arch: <strong>架构绑定</strong>，通过不同的架构，生成对应的可执行文件</li>
+</ul>
+<h2 id="预处理阶段"><a href="#预处理阶段" class="headerlink" title="预处理阶段"></a>预处理阶段</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -E 文件名 -o 输出文件名</span><br></pre></td></tr></table></figure>
+
+<p>我们可以通过上面的 clang 命令来执行预处理阶段并输出到一个文件中。</p>
+<p>我们可以测试一下，在 <code>main.m</code> 中代码如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main.m</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> C 30</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> * argv[])</span> </span>&#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        <span class="keyword">int</span> a = <span class="number">10</span>;</span><br><span class="line">        <span class="keyword">int</span> b = <span class="number">20</span>;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"%d"</span>, a + b + C);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -E main.m -i main2.m</span><br></pre></td></tr></table></figure>
+
+<p>可以查看一下 <code>main2.m</code> 文件的内容:</p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844237147862.jpg" alt></p>
+<p>可以看到，宏已经被替换了，并且 <code>stdio.h</code> 头文件也被导入进来了。</p>
+<p>那像 <code>typedef</code> 这样的命令是否也会在预处理阶段被替换了，我们可以测试一下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> C 30</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">int</span> JH_INT_64;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span> * argv[])</span> </span>&#123;</span><br><span class="line">    @autoreleasepool &#123;</span><br><span class="line">        JH_INT_64 a = <span class="number">10</span>;</span><br><span class="line">        JH_INT_64 b = <span class="number">20</span>;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"%d"</span>, a + b + C);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还是执行同样的命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -E main.m -o main3.m</span><br></pre></td></tr></table></figure>
+
+<p>结果如下</p>
+<p><img src="https://github.com/LeeJunhui/blog_images/blob/master/15844244409882.jpg" alt></p>
+<p>可以看到，<code>typedef</code> 并没有被替换掉，原因在于 <code>typedef</code> 只是一个别名，并不属于宏定义的范畴。</p>
+<h2 id="编译阶段"><a href="#编译阶段" class="headerlink" title="编译阶段"></a>编译阶段</h2><p>经过预处理阶段之后，源文件需要被编译生成相应的中间代码 IR。<br>但我们知道其实整个编译阶段是分为 <strong>词法分析</strong>、<strong>语法分析</strong> 两个阶段。</p>
+<h3 id="词法分析"><a href="#词法分析" class="headerlink" title="词法分析"></a>词法分析</h3><p>预处理完成后就会进行<strong>词法分析</strong>，代码会被切成一个个 <strong>Token</strong>，比如大小括号，等于号和字符串。</p>
+<p>词法分析命令如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -fmodules -fsyntax-only -Xclang -dump-tokens 文件名</span><br></pre></td></tr></table></figure>
+
+<p>我们测试一下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -fmodules -fsyntax-only -Xclang -dump-tokens main.m</span><br></pre></td></tr></table></figure>
+
+<p>终端输出结果如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line">annot_module_include <span class="string">'#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#define C 30</span></span><br><span class="line"><span class="string">typedef int JH_INT_64;</span></span><br><span class="line"><span class="string">int main(int argc, const char * argv[]) &#123;</span></span><br><span class="line"><span class="string">    @autoreleasepool &#123;</span></span><br><span class="line"><span class="string">        JH_INT_64 a '</span>		Loc=&lt;main.m:9:1&gt;</span><br><span class="line">typedef <span class="string">'typedef'</span>	 [StartOfLine]	Loc=&lt;main.m:12:1&gt;</span><br><span class="line">int <span class="string">'int'</span>	 [LeadingSpace]	Loc=&lt;main.m:12:9&gt;</span><br><span class="line">identifier <span class="string">'JH_INT_64'</span>	 [LeadingSpace]	Loc=&lt;main.m:12:13&gt;</span><br><span class="line">semi <span class="string">';'</span>		Loc=&lt;main.m:12:22&gt;</span><br><span class="line">int <span class="string">'int'</span>	 [StartOfLine]	Loc=&lt;main.m:13:1&gt;</span><br><span class="line">identifier <span class="string">'main'</span>	 [LeadingSpace]	Loc=&lt;main.m:13:5&gt;</span><br><span class="line">l_paren <span class="string">'('</span>		Loc=&lt;main.m:13:9&gt;</span><br><span class="line">int <span class="string">'int'</span>		Loc=&lt;main.m:13:10&gt;</span><br><span class="line">identifier <span class="string">'argc'</span>	 [LeadingSpace]	Loc=&lt;main.m:13:14&gt;</span><br><span class="line">comma <span class="string">','</span>		Loc=&lt;main.m:13:18&gt;</span><br><span class="line">const <span class="string">'const'</span>	 [LeadingSpace]	Loc=&lt;main.m:13:20&gt;</span><br><span class="line">char <span class="string">'char'</span>	 [LeadingSpace]	Loc=&lt;main.m:13:26&gt;</span><br><span class="line">star <span class="string">'*'</span>	 [LeadingSpace]	Loc=&lt;main.m:13:31&gt;</span><br><span class="line">identifier <span class="string">'argv'</span>	 [LeadingSpace]	Loc=&lt;main.m:13:33&gt;</span><br><span class="line">l_square <span class="string">'['</span>		Loc=&lt;main.m:13:37&gt;</span><br><span class="line">r_square <span class="string">']'</span>		Loc=&lt;main.m:13:38&gt;</span><br><span class="line">r_paren <span class="string">')'</span>		Loc=&lt;main.m:13:39&gt;</span><br><span class="line">l_brace <span class="string">'&#123;'</span>	 [LeadingSpace]	Loc=&lt;main.m:13:41&gt;</span><br><span class="line">at <span class="string">'@'</span>	 [StartOfLine] [LeadingSpace]	Loc=&lt;main.m:14:5&gt;</span><br><span class="line">identifier <span class="string">'autoreleasepool'</span>		Loc=&lt;main.m:14:6&gt;</span><br><span class="line">l_brace <span class="string">'&#123;'</span>	 [LeadingSpace]	Loc=&lt;main.m:14:22&gt;</span><br><span class="line">identifier <span class="string">'JH_INT_64'</span>	 [StartOfLine] [LeadingSpace]	Loc=&lt;main.m:15:9&gt;</span><br><span class="line">identifier <span class="string">'a'</span>	 [LeadingSpace]	Loc=&lt;main.m:15:19&gt;</span><br><span class="line">equal <span class="string">'='</span>	 [LeadingSpace]	Loc=&lt;main.m:15:21&gt;</span><br><span class="line">numeric_constant <span class="string">'10'</span>	 [LeadingSpace]	Loc=&lt;main.m:15:23&gt;</span><br><span class="line">semi <span class="string">';'</span>		Loc=&lt;main.m:15:25&gt;</span><br><span class="line">identifier <span class="string">'JH_INT_64'</span>	 [StartOfLine] [LeadingSpace]	Loc=&lt;main.m:16:9&gt;</span><br><span class="line">identifier <span class="string">'b'</span>	 [LeadingSpace]	Loc=&lt;main.m:16:19&gt;</span><br><span class="line">equal <span class="string">'='</span>	 [LeadingSpace]	Loc=&lt;main.m:16:21&gt;</span><br><span class="line">numeric_constant <span class="string">'20'</span>	 [LeadingSpace]	Loc=&lt;main.m:16:23&gt;</span><br><span class="line">semi <span class="string">';'</span>		Loc=&lt;main.m:16:25&gt;</span><br><span class="line">identifier <span class="string">'printf'</span>	 [StartOfLine] [LeadingSpace]	Loc=&lt;main.m:17:9&gt;</span><br><span class="line">l_paren <span class="string">'('</span>		Loc=&lt;main.m:17:15&gt;</span><br><span class="line">string_literal <span class="string">'"%d"'</span>		Loc=&lt;main.m:17:16&gt;</span><br><span class="line">comma <span class="string">','</span>		Loc=&lt;main.m:17:20&gt;</span><br><span class="line">identifier <span class="string">'a'</span>	 [LeadingSpace]	Loc=&lt;main.m:17:22&gt;</span><br><span class="line">plus <span class="string">'+'</span>	 [LeadingSpace]	Loc=&lt;main.m:17:24&gt;</span><br><span class="line">identifier <span class="string">'b'</span>	 [LeadingSpace]	Loc=&lt;main.m:17:26&gt;</span><br><span class="line">plus <span class="string">'+'</span>	 [LeadingSpace]	Loc=&lt;main.m:17:28&gt;</span><br><span class="line">numeric_constant <span class="string">'30'</span>	 [LeadingSpace]	Loc=&lt;main.m:17:30 &lt;Spelling=main.m:11:11&gt;&gt;</span><br><span class="line">r_paren <span class="string">')'</span>		Loc=&lt;main.m:17:31&gt;</span><br><span class="line">semi <span class="string">';'</span>		Loc=&lt;main.m:17:32&gt;</span><br><span class="line">r_brace <span class="string">'&#125;'</span>	 [StartOfLine] [LeadingSpace]	Loc=&lt;main.m:18:5&gt;</span><br><span class="line"><span class="built_in">return</span> <span class="string">'return'</span>	 [StartOfLine] [LeadingSpace]	Loc=&lt;main.m:19:5&gt;</span><br><span class="line">numeric_constant <span class="string">'0'</span>	 [LeadingSpace]	Loc=&lt;main.m:19:12&gt;</span><br><span class="line">semi <span class="string">';'</span>		Loc=&lt;main.m:19:13&gt;</span><br><span class="line">r_brace <span class="string">'&#125;'</span>	 [StartOfLine]	Loc=&lt;main.m:20:1&gt;</span><br><span class="line">eof <span class="string">''</span>		Loc=&lt;main.m:20:2&gt;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，main.m 中的代码都被拆解成了一个一个 token。</p>
+<h3 id="语法分析"><a href="#语法分析" class="headerlink" title="语法分析"></a>语法分析</h3><p>词法分析完成之后就是语法分析。它的任务是验证语法是否正确。在词法分析的基础上将单词序列组合成各类词法短语。如 程序、语句、表达式等，然后将所有的节点组成<strong>抽象语法树</strong>(Abstract Syntax Tree, AST)。</p>
+<p>语法分析命名如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -fmodules -fsyntax-only -Xclang -ast-dump 文件名</span><br></pre></td></tr></table></figure>
+
+<p>我们测试一下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -fmodules -fsyntax-only -Xclang -ast-dump main.m</span><br></pre></td></tr></table></figure>
+
+<p>终端打印结果如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">TranslationUnitDecl 0x7fa0aa017408 &lt;&lt;invalid sloc&gt;&gt; &lt;invalid sloc&gt;</span><br><span class="line">|-TypedefDecl 0x7fa0aa017ca0 &lt;&lt;invalid sloc&gt;&gt; &lt;invalid sloc&gt; implicit __int128_t <span class="string">'__int128'</span></span><br><span class="line">| `-BuiltinType 0x7fa0aa0179a0 <span class="string">'__int128'</span></span><br><span class="line">|-TypedefDecl 0x7fa0aa017d08 &lt;&lt;invalid sloc&gt;&gt; &lt;invalid sloc&gt; implicit __uint128_t <span class="string">'unsigned __int128'</span></span><br><span class="line">| `-BuiltinType 0x7fa0aa0179c0 <span class="string">'unsigned __int128'</span></span><br><span class="line">|-TypedefDecl 0x7fa0aa017da0 &lt;&lt;invalid sloc&gt;&gt; &lt;invalid sloc&gt; implicit SEL <span class="string">'SEL *'</span></span><br><span class="line">| `-PointerType 0x7fa0aa017d60 <span class="string">'SEL *'</span></span><br><span class="line">|   `-BuiltinType 0x7fa0aa017c00 <span class="string">'SEL'</span></span><br><span class="line">|-TypedefDecl 0x7fa0aa017e78 &lt;&lt;invalid sloc&gt;&gt; &lt;invalid sloc&gt; implicit id <span class="string">'id'</span></span><br><span class="line">| `-ObjCObjectPointerType 0x7fa0aa017e20 <span class="string">'id'</span></span><br><span class="line">|   `-ObjCObjectType 0x7fa0aa017df0 <span class="string">'id'</span></span><br><span class="line">|-TypedefDecl 0x7fa0aa017f58 &lt;&lt;invalid sloc&gt;&gt; &lt;invalid sloc&gt; implicit Class <span class="string">'Class'</span></span><br><span class="line">| `-ObjCObjectPointerType 0x7fa0aa017f00 <span class="string">'Class'</span></span><br><span class="line">|   `-ObjCObjectType 0x7fa0aa017ed0 <span class="string">'Class'</span></span><br><span class="line">|-ObjCInterfaceDecl 0x7fa0aa017fa8 &lt;&lt;invalid sloc&gt;&gt; &lt;invalid sloc&gt; implicit Protocol</span><br><span class="line">|-TypedefDecl 0x7fa0aa0182e8 &lt;&lt;invalid sloc&gt;&gt; &lt;invalid sloc&gt; implicit __NSConstantString <span class="string">'struct __NSConstantString_tag'</span></span><br><span class="line">| `-RecordType 0x7fa0aa018100 <span class="string">'struct __NSConstantString_tag'</span></span><br><span class="line">|   `-Record 0x7fa0aa018070 <span class="string">'__NSConstantString_tag'</span></span><br><span class="line">|-TypedefDecl 0x7fa0aa018380 &lt;&lt;invalid sloc&gt;&gt; &lt;invalid sloc&gt; implicit __builtin_ms_va_list <span class="string">'char *'</span></span><br><span class="line">| `-PointerType 0x7fa0aa018340 <span class="string">'char *'</span></span><br><span class="line">|   `-BuiltinType 0x7fa0aa0174a0 <span class="string">'char'</span></span><br><span class="line">|-TypedefDecl 0x7fa0aa054e68 &lt;&lt;invalid sloc&gt;&gt; &lt;invalid sloc&gt; implicit __builtin_va_list <span class="string">'struct __va_list_tag [1]'</span></span><br><span class="line">| `-ConstantArrayType 0x7fa0aa054e10 <span class="string">'struct __va_list_tag [1]'</span> 1</span><br><span class="line">|   `-RecordType 0x7fa0aa054c90 <span class="string">'struct __va_list_tag'</span></span><br><span class="line">|     `-Record 0x7fa0aa054c00 <span class="string">'__va_list_tag'</span></span><br><span class="line">|-ImportDecl 0x7fa0aa055670 &lt;main.m:9:1&gt; col:1 implicit Darwin.C.stdio</span><br><span class="line">|-TypedefDecl 0x7fa0aa0556c0 &lt;line:12:1, col:13&gt; col:13 referenced JH_INT_64 <span class="string">'int'</span></span><br><span class="line">| `-BuiltinType 0x7fa0aa017500 <span class="string">'int'</span></span><br><span class="line">|-FunctionDecl 0x7fa0aa055980 &lt;line:13:1, line:20:1&gt; line:13:5 main <span class="string">'int (int, const char **)'</span></span><br><span class="line">| |-ParmVarDecl 0x7fa0aa055728 &lt;col:10, col:14&gt; col:14 argc <span class="string">'int'</span></span><br><span class="line">| |-ParmVarDecl 0x7fa0aa055840 &lt;col:20, col:38&gt; col:33 argv <span class="string">'const char **'</span>:<span class="string">'const char **'</span></span><br><span class="line">| `-CompoundStmt 0x7fa0aa1dc880 &lt;col:41, line:20:1&gt;</span><br><span class="line">|   |-ObjCAutoreleasePoolStmt 0x7fa0aa1dc838 &lt;line:14:5, line:18:5&gt;</span><br><span class="line">|   | `-CompoundStmt 0x7fa0aa1dc810 &lt;line:14:22, line:18:5&gt;</span><br><span class="line">|   |   |-DeclStmt 0x7fa0aa055b60 &lt;line:15:9, col:25&gt;</span><br><span class="line">|   |   | `-VarDecl 0x7fa0aa055ae0 &lt;col:9, col:23&gt; col:19 used a <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> cinit</span><br><span class="line">|   |   |   `-IntegerLiteral 0x7fa0aa055b40 &lt;col:23&gt; <span class="string">'int'</span> 10</span><br><span class="line">|   |   |-DeclStmt 0x7fa0aa1dc5d0 &lt;line:16:9, col:25&gt;</span><br><span class="line">|   |   | `-VarDecl 0x7fa0aa055b88 &lt;col:9, col:23&gt; col:19 used b <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> cinit</span><br><span class="line">|   |   |   `-IntegerLiteral 0x7fa0aa1dc200 &lt;col:23&gt; <span class="string">'int'</span> 20</span><br><span class="line">|   |   `-CallExpr 0x7fa0aa1dc7b0 &lt;line:17:9, col:31&gt; <span class="string">'int'</span></span><br><span class="line">|   |     |-ImplicitCastExpr 0x7fa0aa1dc798 &lt;col:9&gt; <span class="string">'int (*)(const char *, ...)'</span> &lt;FunctionToPointerDecay&gt;</span><br><span class="line">|   |     | `-DeclRefExpr 0x7fa0aa1dc5e8 &lt;col:9&gt; <span class="string">'int (const char *, ...)'</span> Function 0x7fa0aa1dc228 <span class="string">'printf'</span> <span class="string">'int (const char *, ...)'</span></span><br><span class="line">|   |     |-ImplicitCastExpr 0x7fa0aa1dc7f8 &lt;col:16&gt; <span class="string">'const char *'</span> &lt;NoOp&gt;</span><br><span class="line">|   |     | `-ImplicitCastExpr 0x7fa0aa1dc7e0 &lt;col:16&gt; <span class="string">'char *'</span> &lt;ArrayToPointerDecay&gt;</span><br><span class="line">|   |     |   `-StringLiteral 0x7fa0aa1dc648 &lt;col:16&gt; <span class="string">'char [3]'</span> lvalue <span class="string">"%d"</span></span><br><span class="line">|   |     `-BinaryOperator 0x7fa0aa1dc748 &lt;col:22, line:11:11&gt; <span class="string">'int'</span> <span class="string">'+'</span></span><br><span class="line">|   |       |-BinaryOperator 0x7fa0aa1dc708 &lt;line:17:22, col:26&gt; <span class="string">'int'</span> <span class="string">'+'</span></span><br><span class="line">|   |       | |-ImplicitCastExpr 0x7fa0aa1dc6d8 &lt;col:22&gt; <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> &lt;LValueToRValue&gt;</span><br><span class="line">|   |       | | `-DeclRefExpr 0x7fa0aa1dc668 &lt;col:22&gt; <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> lvalue Var 0x7fa0aa055ae0 <span class="string">'a'</span> <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span></span><br><span class="line">|   |       | `-ImplicitCastExpr 0x7fa0aa1dc6f0 &lt;col:26&gt; <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> &lt;LValueToRValue&gt;</span><br><span class="line">|   |       |   `-DeclRefExpr 0x7fa0aa1dc6a0 &lt;col:26&gt; <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> lvalue Var 0x7fa0aa055b88 <span class="string">'b'</span> <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span></span><br><span class="line">|   |       `-IntegerLiteral 0x7fa0aa1dc728 &lt;line:11:11&gt; <span class="string">'int'</span> 30</span><br><span class="line">|   `-ReturnStmt 0x7fa0aa1dc870 &lt;line:19:5, col:12&gt;</span><br><span class="line">|     `-IntegerLiteral 0x7fa0aa1dc850 &lt;col:12&gt; <span class="string">'int'</span> 0</span><br><span class="line">`-&lt;undeserialized declarations&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>在执行语法分析命令的时候，如果有引入 iOS 相关的头文件，则需要加入指定的 SDK 路径来避免执行失败</p>
+<p>如下面的命令所示，指定了 iOS 13.2 模拟器的 SDK的路径。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; clang -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk -fmodules -fsyntax-only -Xclang -ast-dump main.m</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>AST 抽象语法树输出之后是一个很明显的树状结构，阅读起来其实并不困难。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">|-FunctionDecl 0x7fa0aa055980 &lt;line:13:1, line:20:1&gt; line:13:5 main <span class="string">'int (int, const char **)'</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>开头的 <code>FunctionDecl</code> 表示是一个函数声明节点。后面跟了一个内存地址，就其实是栈空间内的函数的地址。尖括号里面的内容表示是 main 函数的起始范围，从第 13 行的第 1 个字符开始，到第 20 行的第 1 个字符结束。然后后面的 <code>line:13:5</code> 表示从第 13 行的第 5 个字符开始是函数的参数声明区域。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">| |-ParmVarDecl 0x7fa0aa055728 &lt;col:10, col:14&gt; col:14 argc <span class="string">'int'</span></span><br><span class="line">| |-ParmVarDecl 0x7fa0aa055840 &lt;col:20, col:38&gt; col:33 argv <span class="string">'const char **'</span>:<span class="string">'const char **'</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这两个节点类型为 <code>ParmVarDecl</code>，表示的是参数节点，其中第一个参数 argc 是 int 类型，第二个参数 argv 是 const char** 类型。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">|   `-CallExpr 0x7fa0aa1dc7b0 &lt;line:17:9, col:31&gt; <span class="string">'int'</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>CallExpr</code> 表示的是调用某个函数。后面的 <code>int</code> 表示调用函数的返回值。这里其实就是源码中 <code>printf</code> 函数的位置。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">|   |   |-DeclStmt 0x7fa0aa055b60 &lt;line:15:9, col:25&gt;</span><br><span class="line">|   |   | `-VarDecl 0x7fa0aa055ae0 &lt;col:9, col:23&gt; col:19 used a <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> cinit</span><br><span class="line">|   |   |   `-IntegerLiteral 0x7fa0aa055b40 &lt;col:23&gt; <span class="string">'int'</span> 10</span><br><span class="line">|   |   |-DeclStmt 0x7fa0aa1dc5d0 &lt;line:16:9, col:25&gt;</span><br><span class="line">|   |   | `-VarDecl 0x7fa0aa055b88 &lt;col:9, col:23&gt; col:19 used b <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> cinit</span><br><span class="line">|   |   |   `-IntegerLiteral 0x7fa0aa1dc200 &lt;col:23&gt; <span class="string">'int'</span> 20</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>DeclStmt</code> 表示的是声明语句节点，这里很容易就能看出声明了两个 int 类型的变量，一个值为 10，一个值为 20。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">|   |     |-ImplicitCastExpr 0x7fa0aa1dc798 &lt;col:9&gt; <span class="string">'int (*)(const char *, ...)'</span> &lt;FunctionToPointerDecay&gt;</span><br><span class="line">|   |     | `-DeclRefExpr 0x7fa0aa1dc5e8 &lt;col:9&gt; <span class="string">'int (const char *, ...)'</span> Function 0x7fa0aa1dc228 <span class="string">'printf'</span> <span class="string">'int (const char *, ...)'</span></span><br><span class="line">|   |     |-ImplicitCastExpr 0x7fa0aa1dc7f8 &lt;col:16&gt; <span class="string">'const char *'</span> &lt;NoOp&gt;</span><br><span class="line">|   |     | `-ImplicitCastExpr 0x7fa0aa1dc7e0 &lt;col:16&gt; <span class="string">'char *'</span> &lt;ArrayToPointerDecay&gt;</span><br><span class="line">|   |     |   `-StringLiteral 0x7fa0aa1dc648 &lt;col:16&gt; <span class="string">'char [3]'</span> lvalue <span class="string">"%d"</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>ImplicitCastExpr</code> 表示隐式转换表达式节点，说明 printf 函数其实前面还有隐式转换的操作： <code>int (*)(const char *, ...)</code>。</li>
+<li>最后一行显然就是 printf 函数的开头位置的 <code>%d</code>，表示接收一个 int 类型的值。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">|   |     `-BinaryOperator 0x7fa0aa1dc748 &lt;col:22, line:11:11&gt; <span class="string">'int'</span> <span class="string">'+'</span></span><br><span class="line">|   |       |-BinaryOperator 0x7fa0aa1dc708 &lt;line:17:22, col:26&gt; <span class="string">'int'</span> <span class="string">'+'</span></span><br><span class="line">|   |       | |-ImplicitCastExpr 0x7fa0aa1dc6d8 &lt;col:22&gt; <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> &lt;LValueToRValue&gt;</span><br><span class="line">|   |       | | `-DeclRefExpr 0x7fa0aa1dc668 &lt;col:22&gt; <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> lvalue Var 0x7fa0aa055ae0 <span class="string">'a'</span> <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span></span><br><span class="line">|   |       | `-ImplicitCastExpr 0x7fa0aa1dc6f0 &lt;col:26&gt; <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> &lt;LValueToRValue&gt;</span><br><span class="line">|   |       |   `-DeclRefExpr 0x7fa0aa1dc6a0 &lt;col:26&gt; <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span> lvalue Var 0x7fa0aa055b88 <span class="string">'b'</span> <span class="string">'JH_INT_64'</span>:<span class="string">'int'</span></span><br><span class="line">|   |       `-IntegerLiteral 0x7fa0aa1dc728 &lt;line:11:11&gt; <span class="string">'int'</span> 30</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>BinaryOperator</code> 表示的是二元运算符。这里阅读的方式应该是先看叶子节点，所以翻译过来就是 (a + b) + 30 的结果作为 printf 函数的入参。 </li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">|   `-ReturnStmt 0x7fa0aa1dc870 &lt;line:19:5, col:12&gt;</span><br><span class="line">|     `-IntegerLiteral 0x7fa0aa1dc850 &lt;col:12&gt; <span class="string">'int'</span> 0</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>ReturnStmt</code> 表示的是函数返回声明节点。显示返回的结果是 int 类型 0。</li>
+</ul>
+<h3 id="生成中间代码-IR"><a href="#生成中间代码-IR" class="headerlink" title="生成中间代码 IR"></a>生成中间代码 IR</h3><p>完成上面的步骤之后就可以生成中间代码 IR 了，代码生成器会将语法树自顶向下遍历逐步翻译成 LLVM IR。</p>
+<p>LLVM IR 有三种表现形式，但本质上是等价的，就好比水可以有气体、液体、固体 3 种形态。</p>
+<ul>
+<li>text ：便于阅读的文本格式，类似于汇编语言，拓展名为 ll。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 生成 text 格式的 IR</span><br><span class="line">clang -S -fobjc-arc -emit-llvm 文件名</span><br><span class="line">```    </span><br><span class="line">    </span><br><span class="line">* memory ：内存格式</span><br><span class="line">* bitcode ：二进制格式，拓展名为 .bc</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line">// 生成 bitcode 格式的 IR</span><br><span class="line">clang -c -fobjc-arc -emit-llvm 文件名</span><br></pre></td></tr></table></figure>
+
+<p>IR 基本语法:</p>
+<blockquote>
+<p>@ 全局标识<br>% 局部标识<br>alloca 开辟空间<br>align 内存对齐<br>i32 32 bit, 即 4 个字节<br>store 写入内存<br>load 读取数据<br>call 调用函数<br>ret 返回</p>
+</blockquote>
+<p>下面我们实际测试一下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// main.m</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">test</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b + <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">const</span> <span class="keyword">char</span>* argv[])</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a = test(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"%d"</span>, a);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>main.m 文件内容如上，接着我们在终端执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -S -fobjc-arc -emit-llvm main.m</span><br></pre></td></tr></table></figure>
+
+<p>然后会生成一个 main.ll 文件，截取部分代码如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">; Function Attrs: noinline nounwind optnone ssp uwtable</span><br><span class="line">define i32 @test(i32, i32) #<span class="number">0</span> &#123;</span><br><span class="line">  %<span class="number">3</span> = alloca i32, align <span class="number">4</span></span><br><span class="line">  %<span class="number">4</span> = alloca i32, align <span class="number">4</span></span><br><span class="line">  store i32 %<span class="number">0</span>, i32* %<span class="number">3</span>, align <span class="number">4</span></span><br><span class="line">  store i32 %<span class="number">1</span>, i32* %<span class="number">4</span>, align <span class="number">4</span></span><br><span class="line">  %<span class="number">5</span> = load i32, i32* %<span class="number">3</span>, align <span class="number">4</span></span><br><span class="line">  %<span class="number">6</span> = load i32, i32* %<span class="number">4</span>, align <span class="number">4</span></span><br><span class="line">  %<span class="number">7</span> = add nsw i32 %<span class="number">5</span>, %<span class="number">6</span></span><br><span class="line">  %<span class="number">8</span> = add nsw i32 %<span class="number">7</span>, <span class="number">3</span></span><br><span class="line">  ret i32 %<span class="number">8</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">; Function Attrs: noinline optnone ssp uwtable</span><br><span class="line">define i32 @main(i32, i8**) #<span class="number">1</span> &#123;</span><br><span class="line">  %<span class="number">3</span> = alloca i32, align <span class="number">4</span></span><br><span class="line">  %<span class="number">4</span> = alloca i32, align <span class="number">4</span></span><br><span class="line">  %<span class="number">5</span> = alloca i8**, align <span class="number">8</span></span><br><span class="line">  %<span class="number">6</span> = alloca i32, align <span class="number">4</span></span><br><span class="line">  store i32 <span class="number">0</span>, i32* %<span class="number">3</span>, align <span class="number">4</span></span><br><span class="line">  store i32 %<span class="number">0</span>, i32* %<span class="number">4</span>, align <span class="number">4</span></span><br><span class="line">  store i8** %<span class="number">1</span>, i8*** %<span class="number">5</span>, align <span class="number">8</span></span><br><span class="line">  %<span class="number">7</span> = call i32 @test(i32 <span class="number">1</span>, i32 <span class="number">2</span>)</span><br><span class="line">  store i32 %<span class="number">7</span>, i32* %<span class="number">6</span>, align <span class="number">4</span></span><br><span class="line">  %<span class="number">8</span> = load i32, i32* %<span class="number">6</span>, align <span class="number">4</span></span><br><span class="line">  %<span class="number">9</span> = call i32 (i8*, ...) @<span class="built_in">printf</span>(i8* getelementptr inbounds ([<span class="number">3</span> x i8], [<span class="number">3</span> x i8]* @.str, i32 <span class="number">0</span>, i32 <span class="number">0</span>), i32 %<span class="number">8</span>)</span><br><span class="line">  ret i32 <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们先看 main 方法，可以看到 main 方法里面有两处 call 的使用，分别对应了 main.m 中对 test() 方法和 print 方法的调用。接着我们看 test 方法在 IR 中的表现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// IR</span></span><br><span class="line">define i32 @test(i32, i32)</span><br><span class="line"></span><br><span class="line"><span class="comment">// main.m</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">test</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span></span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这一行等价于 <code>int test(int a, int b)</code>。第一个 i32 表示函数的返回值，第二个和第三个 i32 表示函数参数。这里其实有两个隐藏的标识 %0 和 %1 ，分别表示参数 a 和 b。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%<span class="number">3</span> = alloca i32, align <span class="number">4</span></span><br><span class="line">%<span class="number">4</span> = alloca i32, align <span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>分配 4 个字节内存空间，并以 4 字节对齐，返回给 %3 标识</li>
+<li>分配 4 个字节内存空间，并以 4 字节对齐，返回给 %4 标识</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">store i32 %<span class="number">0</span>, i32* %<span class="number">3</span>, align <span class="number">4</span></span><br><span class="line">store i32 %<span class="number">1</span>, i32* %<span class="number">4</span>, align <span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>将 %0 标识中内容取出，存入 %3 标识的内存空间，并以 4 字节对齐</li>
+<li>将 %1 标识中内容取出，存入 %4 标识的内存空间，并以 4 字节对齐</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%<span class="number">5</span> = load i32, i32* %<span class="number">3</span>, align <span class="number">4</span></span><br><span class="line">%<span class="number">6</span> = load i32, i32* %<span class="number">4</span>, align <span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>将 %3 标识中内容取出，存入 %5 标识的内存空间，并以 4 字节对齐</li>
+<li>将 %4 标识中内容取出，存入 %6 标识的内存空间，并以 4 字节对齐</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%<span class="number">7</span> = add nsw i32 %<span class="number">5</span>, %<span class="number">6</span></span><br><span class="line">%<span class="number">8</span> = add nsw i32 %<span class="number">7</span>, <span class="number">3</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>将 %5 和 %6 标识相加，结果赋值给 %7 标识</li>
+<li>将 %7 标识和 3 相加，结果赋值给 %8 标识</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ret i32 %<span class="number">8</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>返回 %8 标识的内容</li>
+</ul>
+<p>上面这一系列操作其实等价于 main.m 中 test 函数的内容: <code>return a + b + 3;</code><br>但是在 IR 中间代码中，这一行代码被转换成了更多的步骤，其实，这里是因为执行生成 IR 代码的命令默认是没有开启优化的，我们可以在 XCode 中查看在 Debug 和 Release 模式下对应的优化级别:</p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844315579562.jpg" alt></p>
+<p>优化级别从低到高分为:</p>
+<ul>
+<li>None: Debug 模式的默认选项，没有优化。标识符为 <code>-O0</code>。</li>
+<li>Fast: 标识符为 <code>-O, O1</code>。</li>
+<li>Faster: 标识符为 <code>-O2</code>。</li>
+<li>Fastest: 标识符为 <code>-O3</code>。</li>
+<li>Fastest, Smallest: 标识符为 <code>-Os</code>。</li>
+<li>Fastest, Aggressive Optimizations: 标识符为 <code>-Ofast</code>。</li>
+<li>Smallest, Aggressive Size Optimizations: 标识符为 <code>-Oz</code>。</li>
+</ul>
+<p>比如，我们采取 Fastest, Smallest 优化策略，在终端可以这样输入</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -Os -S -fobjc-arc -emit-llvm main.m -o main1.ll</span><br></pre></td></tr></table></figure>
+
+<p>截取 main1.ll 部分内容如下</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">; Function Attrs: norecurse nounwind optsize readnone ssp uwtable</span><br><span class="line">define i32 @test(i32, i32) local_unnamed_addr #<span class="number">0</span> &#123;</span><br><span class="line">  %<span class="number">3</span> = add i32 %<span class="number">0</span>, <span class="number">3</span></span><br><span class="line">  %<span class="number">4</span> = add i32 %<span class="number">3</span>, %<span class="number">1</span></span><br><span class="line">  ret i32 %<span class="number">4</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">; Function Attrs: nounwind optsize ssp uwtable</span><br><span class="line">define i32 @main(i32, i8** nocapture readnone) local_unnamed_addr #<span class="number">1</span> &#123;</span><br><span class="line">  %<span class="number">3</span> = tail call i32 (i8*, ...) @<span class="built_in">printf</span>(i8* getelementptr inbounds ([<span class="number">3</span> x i8], [<span class="number">3</span> x i8]* @.str, i64 <span class="number">0</span>, i64 <span class="number">0</span>), i32 <span class="number">6</span>) #<span class="number">3</span>, !clang.arc.no_objc_arc_exceptions !<span class="number">9</span></span><br><span class="line">  ret i32 <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 IR 的代码行数被大大压缩了。并且在 main 方法里面，直接算出了 test 函数的执行结果为 6，而省略了对 test 函数的调用。</p>
+<h2 id="生成汇编代码"><a href="#生成汇编代码" class="headerlink" title="生成汇编代码"></a>生成汇编代码</h2><p>通过最终的 bc 或者 ll 中间代码生成汇编代码</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// ll 生成汇编</span><br><span class="line">clang -S -fobjc-arc main.ll -o main.s</span><br><span class="line"></span><br><span class="line">// bc 生成汇编</span><br><span class="line">clang -S -fobjc-arc main.bc -o main.s</span><br></pre></td></tr></table></figure>
+
+<p>生成汇编代码也可以采用优化策略</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -Os -S -fobjc-arc 中间代码IR -o 汇编源文件</span><br></pre></td></tr></table></figure>
+
+<p>我们测试一下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -Os -S -fobjc-arc main.ll -o main.s</span><br></pre></td></tr></table></figure>
+
+<p>输出的汇编源文件 main.s 内容如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">	.section	__TEXT,__text,regular,pure_instructions</span><br><span class="line">	.build_version macos, 10, 15	sdk_version 10, 15</span><br><span class="line">	.globl	_test                   ## -- Begin function test</span><br><span class="line">	.p2align	4, 0x90</span><br><span class="line">_test:                                  ## @test</span><br><span class="line">	.cfi_startproc</span><br><span class="line">## %bb.0:</span><br><span class="line">	pushq	%rbp</span><br><span class="line">	.cfi_def_cfa_offset 16</span><br><span class="line">	.cfi_offset %rbp, -16</span><br><span class="line">	movq	%rsp, %rbp</span><br><span class="line">	.cfi_def_cfa_register %rbp</span><br><span class="line">	movl	%edi, -4(%rbp)</span><br><span class="line">	movl	%esi, -8(%rbp)</span><br><span class="line">	movl	-4(%rbp), %esi</span><br><span class="line">	addl	-8(%rbp), %esi</span><br><span class="line">	addl	$3, %esi</span><br><span class="line">	movl	%esi, %eax</span><br><span class="line">	popq	%rbp</span><br><span class="line">	retq</span><br><span class="line">	.cfi_endproc</span><br><span class="line">                                        ## -- End function</span><br><span class="line">	.globl	_main                   ## -- Begin function main</span><br><span class="line">	.p2align	4, 0x90</span><br><span class="line">_main:                                  ## @main</span><br><span class="line">	.cfi_startproc</span><br><span class="line">## %bb.0:</span><br><span class="line">	pushq	%rbp</span><br><span class="line">	.cfi_def_cfa_offset 16</span><br><span class="line">	.cfi_offset %rbp, -16</span><br><span class="line">	movq	%rsp, %rbp</span><br><span class="line">	.cfi_def_cfa_register %rbp</span><br><span class="line">	subq	$32, %rsp</span><br><span class="line">	movl	$0, -4(%rbp)</span><br><span class="line">	movl	%edi, -8(%rbp)</span><br><span class="line">	movq	%rsi, -16(%rbp)</span><br><span class="line">	movl	$1, %edi</span><br><span class="line">	movl	$2, %esi</span><br><span class="line">	callq	_test</span><br><span class="line">	movl	%eax, -20(%rbp)</span><br><span class="line">	movl	-20(%rbp), %esi</span><br><span class="line">	leaq	L_.str(%rip), %rdi</span><br><span class="line">	movb	$0, %al</span><br><span class="line">	callq	_printf</span><br><span class="line">	xorl	%esi, %esi</span><br><span class="line">	movl	%eax, -24(%rbp)         ## 4-byte Spill</span><br><span class="line">	movl	%esi, %eax</span><br><span class="line">	addq	$32, %rsp</span><br><span class="line">	popq	%rbp</span><br><span class="line">	retq</span><br><span class="line">	.cfi_endproc</span><br><span class="line">                                        ## -- End function</span><br><span class="line">	.section	__TEXT,__cstring,cstring_literals</span><br><span class="line">L_.str:                                 ## @.str</span><br><span class="line">	.asciz	&quot;%d&quot;</span><br><span class="line"></span><br><span class="line">	.section	__DATA,__objc_imageinfo,regular,no_dead_strip</span><br><span class="line">L_OBJC_IMAGE_INFO:</span><br><span class="line">	.long	0</span><br><span class="line">	.long	64</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.subsections_via_symbols</span><br></pre></td></tr></table></figure>
+
+<h2 id="生成目标文件"><a href="#生成目标文件" class="headerlink" title="生成目标文件"></a>生成目标文件</h2><p>目标文件的生成，是汇编器以汇编代码作为输入，将汇编代码转换为机器代码, 最后输出目标文件。命令如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -fmodules -c 汇编源文件 -o 目标文件</span><br></pre></td></tr></table></figure>
+
+<p>我们测试一下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang -fmodules -c main.s -o main.o</span><br></pre></td></tr></table></figure>
+
+<p>生成完目标文件之后，我们可以通过 nm 命令来查看符号情况</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">nm -nm main.o</span><br><span class="line"></span><br><span class="line">// 输出</span><br><span class="line">                 (undefined) external _printf</span><br><span class="line">0000000000000000 (__TEXT,__text) external _test</span><br><span class="line">0000000000000020 (__TEXT,__text) external _main</span><br></pre></td></tr></table></figure>
+
+<p>_prinf 是一个 undefined external 符号，其中 undefined 表示在当前文件暂时找不到符号 _prinf，而 external 表示这个符号是外部可以访问的。</p>
+<h2 id="生成可执行文件"><a href="#生成可执行文件" class="headerlink" title="生成可执行文件"></a>生成可执行文件</h2><p>链接器把编译产生的 .o 文件和库文件(动态库 .dylib, 静态库 .a)文件链接起来，生成了一个 Mach-O 可执行文件。</p>
+<p>命令如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang 目标文件名 -o 可执行文件名</span><br></pre></td></tr></table></figure>
+
+<p>我们测试一下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clang main.o -o main</span><br></pre></td></tr></table></figure>
+
+<p>接着查看可执行文件中的符号情况</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">xcrun nm -nm main</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                 (undefined) external _printf (from libSystem)</span><br><span class="line">                 (undefined) external dyld_stub_binder (from libSystem)</span><br><span class="line">0000000100000000 (__TEXT,__text) [referenced dynamically] external __mh_execute_header</span><br><span class="line">0000000100000f20 (__TEXT,__text) external _test</span><br><span class="line">0000000100000f40 (__TEXT,__text) external _main</span><br><span class="line">0000000100002008 (__DATA,__data) non-external __dyld_private</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 printf 函数的符号是从 libSystem 库中加载而来，说明系统函数是在运行时通过 dyld 去做符号绑定的。</p>
+<h1 id="编译-LLVM-工程"><a href="#编译-LLVM-工程" class="headerlink" title="编译 LLVM 工程"></a>编译 LLVM 工程</h1><h2 id="LLVM-下载"><a href="#LLVM-下载" class="headerlink" title="LLVM 下载"></a>LLVM 下载</h2><blockquote>
+<p>由于国内的网络限制，最好借助下面的镜像下载 LLVM 的源码<br><a href="https://mirrors.tuna.tsinghua.edu.cn/help/llvm/" target="_blank" rel="noopener">https://mirrors.tuna.tsinghua.edu.cn/help/llvm/</a></p>
+</blockquote>
+<ul>
+<li>下载 LLVM 项目</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://mirrors.tuna.tsinghua.edu.cn/git/llvm/llvm.git</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在 LLVM 的 tools 目录下下载 Clang</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> llvm/tools</span><br><span class="line">git <span class="built_in">clone</span> https://mirrors.tuna.tsinghua.edu.cn/git/llvm/clang.git</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在 LLVM 的 projects目录下下载 compiler-rt, libcxx, libcxxabi</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span>	 ../projects</span><br><span class="line">git <span class="built_in">clone</span> https://mirrors.tuna.tsinghua.edu.cn/git/llvm/compiler-rt.g</span><br><span class="line">it</span><br><span class="line">git <span class="built_in">clone</span> https://mirrors.tuna.tsinghua.edu.cn/git/llvm/libcxx.git</span><br><span class="line">git <span class="built_in">clone</span> https://mirrors.tuna.tsinghua.edu.cn/git/llvm/libcxxabi.git</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在 Clang 的 tools 下安装 extra 工具</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ../tools/clang/tools</span><br><span class="line">git <span class="built_in">clone</span> https://mirrors.tuna.tsinghua.edu.cn/git/llvm/clang-tools<span class="_">-e</span></span><br><span class="line">xtra.git</span><br></pre></td></tr></table></figure>
+
+<h2 id="LLVM-编译"><a href="#LLVM-编译" class="headerlink" title="LLVM 编译"></a>LLVM 编译</h2><blockquote>
+<p>由于最新的 LLVM 只支持 cmake 编译，我们还需要安装 cmake</p>
+</blockquote>
+<h3 id="安装-cmake"><a href="#安装-cmake" class="headerlink" title="安装 cmake"></a>安装 cmake</h3><ul>
+<li>查看 brew 是否安装了 cmake，如果已经安装跳过这一步骤</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew list</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>通过 brew 安装 cmake</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install cmake</span><br></pre></td></tr></table></figure>
+
+<h3 id="通过-Xcode-编译-LLVM"><a href="#通过-Xcode-编译-LLVM" class="headerlink" title="通过 Xcode 编译 LLVM"></a>通过 Xcode 编译 LLVM</h3><ul>
+<li>cmake 编译成 Xcode 项目</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir build_xcode</span><br><span class="line"><span class="built_in">cd</span> build_code</span><br><span class="line">cmake -G Xcode ../llvm</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>使用 Xcode 编译 Clang</p>
+<ul>
+<li><p>选择自动创建 Schemes<br><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844357823231.jpg" alt></p>
+</li>
+<li><p>编译，选择 ALL_BUILD Scheme 进行编译，预计花费 1 个多小时</p>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="Clang-插件初探"><a href="#Clang-插件初探" class="headerlink" title="Clang 插件初探"></a>Clang 插件初探</h1><p>编译完成后，我们可以基于 Clang 来定制属于我们自己的插件。</p>
+<p>Clang 一共提供了三种不同的方式来编写:</p>
+<ul>
+<li>LibClang: 稳定的高级C语言抽象接口</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">优点：</span><br><span class="line">1.可以使用 C++ 之外的语言与clang交互.</span><br><span class="line">2.有稳定的交互接口 &amp; 向后兼容.</span><br><span class="line">3.提供强大的高级抽象 例如通过cursor 迭代AST，&amp;不用学习Clang‘s AST  详细知识.</span><br><span class="line">缺点：</span><br><span class="line">不能完全控制clang AST</span><br></pre></td></tr></table></figure>
+
+<p>ps：官方提供 c&amp;python 形式API，这里有一个OC形式的 <a href="https://github.com/macmade/ClangKit" target="_blank" rel="noopener">Clangkit</a></p>
+<ul>
+<li>Clang Plugins：Clang 插件允许你在AST上添加运行其他操作作为编译的一部分。插件是由编译器在运行时加载的动态库，它们很容易集成到构建环境中。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">使用Clang插件：</span><br><span class="line">    1.如果任何依赖关系发生变化，则需要您的工具重新运行</span><br><span class="line">    2.希望您的工具能够制作或打破构建</span><br><span class="line">    3.需要完全控制Clang AST</span><br><span class="line"></span><br><span class="line">不使用Clang插件：</span><br><span class="line">    1.想要在构建环境之外运行工具</span><br><span class="line">    2.想要完全控制Clang的设置，包括内存虚拟文件的映射</span><br><span class="line">    3.需要在项目中运行特定的文件子集，而这些文件与触发重建的任何更改无关</span><br></pre></td></tr></table></figure>
+
+<p>ps：当你需要针对您的项目的特殊格式的警告或错误，或者从一个编译步骤创建额外的构建工件时，clang plugins 是你的不二之选。</p>
+<ul>
+<li>LibTooling 是一个 C++ 接口，旨在编写独立工具，以及集成到运行clang工具的服务中。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">使用LibTooling：</span><br><span class="line">    1.希望独立于构建系统，在单个文件或特定文件子集上运行工具</span><br><span class="line">    2.想要完全控制Clang AST</span><br><span class="line">    3.想与Clang插件分享代码</span><br><span class="line"></span><br><span class="line">不使用LibTooling：</span><br><span class="line">    1.想要作为由依赖性更改触发的构建的一部分运行</span><br><span class="line">    2.想要一个稳定的接口，以便在AST API更改时不需要更改代码</span><br><span class="line">    3.希望使用像cursor这样的高级抽象</span><br><span class="line">    4.不想用C ++编写你的工具</span><br></pre></td></tr></table></figure>
+
+<p>ps：当你需要写一个简单的语法检查器或者一个重构工具时，选择libTooling</p>
+<p>我们现在的需求是能够在编译时检查属性标识符应该设置 copy 但是没有设置的情况，然后给出相应的警告提示信息。<br>所以我们的最佳方案就是 clang plugin, 我们看下它是如何执行的：</p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844376744895.jpg" alt></p>
+<blockquote>
+<p>具体是在动态库装载进来后，可以拿到我们自定义的 pluginAction(FrontendAction 的子类)。</p>
+<p>然后在 CompileInstance 初始化之后，依次调用 pluginAction 的几个成员函数（BeginSourceFile、Excute、EndSourceFile）。</p>
+<p>其中 CreateConsumer 创建我们自定义的 consumer 来获取语法树信息，执行ExecuteAction 函数进入 ParseAST 分析流程，调用我们自定义的 ASTConsumer 去handle，通过 RecursiveASTVisitor 或 ASTMatcher 来匹配想检查操作的AST Notes。</p>
+<p>如果不符合规范的话，创建一个diagnosis 来警告或报错，并且可以创建一个 FixHint 来提供修复能力。期间通过 ASTContext 及其关联的 SourceManager 获取源码位置&amp;全局标识符等信息。</p>
+</blockquote>
+<p>上述的 ParseAST 阶段，推荐使用 ASTMatcher，可以简单、精准、高效的匹配到AST Notes。</p>
+<h2 id="创建插件"><a href="#创建插件" class="headerlink" title="创建插件"></a>创建插件</h2><ul>
+<li>在 <code>/llvm/tools/clang/tools</code> 目下新建插件的文件夹</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844359384047.jpg" alt></p>
+<ul>
+<li>修改 <code>/llvm/tools/clang/tools</code> 目下的 <code>CMakeLists.txt</code> 文件，加入一行 <code>add_clang_subdirectory(插件文件夹名称)</code></li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844359928854.jpg" alt></p>
+<ul>
+<li>在 JHPlugin 目录下新建一个名为 JHPulgin.cpp 的源文件，再新建一个 CMakeLists.txt 的文本文件。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844361146347.jpg" alt></p>
+<p>CMakeLists.txt 文件中写入如下的内容</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">add_llvm_library( JHPlugin MODULE BUILDTREE_ONLY</span><br><span class="line"> JHPlugin.cpp</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>使用 cmake 重新生成 Xcode 项目，在 build_xcode 中执行 <code>cmake -G Xcode ../llvm</code></p>
+</li>
+<li><p>最后可以在 LLVM 的 Xcode 项目中可以看到 Loadable modules 目录下有自己的 Plugin 目录了。</p>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844362229791.jpg" alt></p>
+<h2 id="编写插件"><a href="#编写插件" class="headerlink" title="编写插件"></a>编写插件</h2><p>1.自定义一个继承于 PluginASTAction 的 Action</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 继承 PluginASTAction</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">JHASTAction</span> :</span> <span class="keyword">public</span> PluginASTAction &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">unique_ptr</span>&lt;ASTConsumer&gt; CreateASTConsumer(CompilerInstance &amp;Compiler, StringRef InFile);</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">ParseArgs</span><span class="params">(<span class="keyword">const</span> CompilerInstance &amp;CI, <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; &amp;args)</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>2.注册插件</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//注册插件</span></span><br><span class="line"><span class="keyword">static</span> FrontendPluginRegistry::Add&lt;JHPlugin::JHASTAction&gt;</span><br><span class="line">    X(<span class="string">"JHPlugin"</span>, <span class="string">"This is the description of the plugin"</span>);</span><br></pre></td></tr></table></figure>
+
+<p>2.自定义一个继承于 ASTConsumer 的 consumer</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 自定义 ASTConsumer</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">JHConsumer</span> :</span> <span class="keyword">public</span> ASTConsumer &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ASTConsumer</code> 类型是专门用来解析 AST 语法树的节点的抽象类，通过子类化这个抽象类，我们可以重写 <code>ASTConsumer</code> 类提供的一系列解析节点的方法:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HandleTopLevelDecl - Handle the specified top-level declaration.  </span></span><br><span class="line"><span class="comment">/// This iscalled by the parser to process every top-level Decl*.</span></span><br><span class="line"><span class="comment">///</span></span><br><span class="line"><span class="comment">/// \returns true to continue parsing, or false to abort parsing.</span></span><br><span class="line"><span class="comment">// 解析一个顶级的声明节点</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">HandleTopLevelDecl</span><span class="params">(DeclGroupRef D)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/// HandleTranslationUnit - This method is called when the ASTs for entire</span></span><br><span class="line"><span class="comment">/// translation unit have been parsed.\</span></span><br><span class="line"><span class="comment">// 解析完整个文件后被调用</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">HandleTranslationUnit</span><span class="params">(ASTContext &amp;Ctx)</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们在 JHConsumer 里面添加下面两个方法:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 解析顶级节点</span></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">HandleTopLevelDecl</span><span class="params">(DeclGroupRef D)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">cout</span> &lt;&lt; <span class="string">"正在解析..."</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 解析完整个文件后被调用</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">HandleTranslationUnit</span><span class="params">(ASTContext &amp;Ctx)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">cout</span> &lt;&lt; <span class="string">"文件解析完毕!"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">  matcher.matchAST(Ctx);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后我们编译一下当前的插件，接着我们用编译好的 clang 和 JHPlugin 来测试一下效果。我们在桌面新建一个 main.m 文件，内容如下:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">test</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">test2</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b, <span class="keyword">int</span> c)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> a + b + c;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	test(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">	test2(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着在终端中执行如下的命令:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Users/leejunhui/Documents/iOS/OpenSourceApple/LLVM源码/build_xcode/Debug/bin/clang -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk -Xclang -load -Xclang /Users/leejunhui/Documents/iOS/OpenSourceApple/LLVM源码/build_xcode/Debug/lib/JHPlugin.dylib -Xclang -add-plugin -Xclang JHPlugin -c main.m</span><br></pre></td></tr></table></figure>
+
+<p>这段命令拆分一下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">自己编译的 clang 文件路径  -isysroot iOS的SDK路径 -Xclang -load Xclang 插件的dylib路径 -Xclang -add-plugin -Xclang 插件名称 -c 源文件</span><br></pre></td></tr></table></figure>
+
+<p>最后输出如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">正在解析...</span><br><span class="line">正在解析...</span><br><span class="line">正在解析...</span><br><span class="line">文件解析完毕!</span><br></pre></td></tr></table></figure>
+
+<p>说明 main.m 中的三个顶级节点以及整个文件都解析完成。</p>
+<p>3.最终代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"clang/AST/AST.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"clang/AST/DeclObjC.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"clang/AST/ASTConsumer.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"clang/ASTMatchers/ASTMatchers.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"clang/Frontend/CompilerInstance.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"clang/ASTMatchers/ASTMatchFinder.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"clang/Frontend/FrontendPluginRegistry.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> clang;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> llvm;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> clang::ast_matchers;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> JHPlugin &#123;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">JHMatchCallback</span>:</span> <span class="keyword">public</span> MatchFinder::MatchCallback &#123;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        CompilerInstance &amp;CI;</span><br><span class="line">        <span class="comment">//判断是否是自己的文件</span></span><br><span class="line">        <span class="function"><span class="keyword">bool</span> <span class="title">isUserSourceCode</span><span class="params">(<span class="keyword">const</span> <span class="built_in">string</span> filename)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (filename.empty()) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 非Xcode中的源码都认为是用户源码</span></span><br><span class="line">            <span class="keyword">if</span> (filename.find(<span class="string">"/Applications/Xcode.app/"</span>) == <span class="number">0</span>) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//判断是否应该用copy修饰。</span></span><br><span class="line">        <span class="function"><span class="keyword">bool</span> <span class="title">isShouldUseCopy</span><span class="params">(<span class="keyword">const</span> <span class="built_in">string</span> typeStr)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (typeStr.find(<span class="string">"NSString"</span>) != <span class="built_in">string</span>::npos ||</span><br><span class="line">                typeStr.find(<span class="string">"NSArray"</span>) != <span class="built_in">string</span>::npos ||</span><br><span class="line">                typeStr.find(<span class="string">"NSDictionary"</span>) != <span class="built_in">string</span>::npos<span class="comment">/*...*/</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        </span><br><span class="line">        JHMatchCallback(CompilerInstance &amp;CI):CI(CI)&#123;&#125;</span><br><span class="line">        </span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">run</span><span class="params">(<span class="keyword">const</span> MatchFinder::MatchResult &amp;Result)</span></span>&#123;</span><br><span class="line">            <span class="comment">//通过结果获取到节点。</span></span><br><span class="line">            <span class="keyword">const</span> ObjCPropertyDecl *propertyDecl = Result.Nodes.getNodeAs&lt;ObjCPropertyDecl&gt;(<span class="string">"objcPropertyDecl"</span>);</span><br><span class="line">            <span class="comment">//获取文件名称</span></span><br><span class="line">            <span class="built_in">string</span> filename = CI.getSourceManager().getFilename(propertyDecl-&gt;getSourceRange().getBegin()).str();</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> (propertyDecl &amp;&amp; isUserSourceCode(filename)) &#123;<span class="comment">//如果节点有值,并且是用户文件</span></span><br><span class="line">                <span class="comment">//拿到属性的类型</span></span><br><span class="line">                <span class="built_in">string</span> typeStr = propertyDecl-&gt;getType().getAsString();</span><br><span class="line">                <span class="comment">//拿到节点的描述信息</span></span><br><span class="line">                ObjCPropertyDecl::PropertyAttributeKind attrKind = propertyDecl-&gt;getPropertyAttributes();</span><br><span class="line">                </span><br><span class="line">                <span class="comment">//判断是不是应该用Copy</span></span><br><span class="line">                <span class="keyword">if</span> (isShouldUseCopy(typeStr) &amp;&amp; !(attrKind &amp; ObjCPropertyDecl::OBJC_PR_copy)) &#123;</span><br><span class="line">                    <span class="built_in">cout</span>&lt;&lt;typeStr&lt;&lt;<span class="string">"应该用copy修饰而没用Copy，发出警告！"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">                    <span class="comment">//诊断引擎</span></span><br><span class="line">                    DiagnosticsEngine &amp;diag = CI.getDiagnostics();</span><br><span class="line">                    <span class="comment">//Report 报告</span></span><br><span class="line">                    diag.Report(propertyDecl-&gt;getBeginLoc(),diag.getCustomDiagID(DiagnosticsEngine::Warning, <span class="string">"%0这个地方推荐用Copy"</span>))&lt;&lt;typeStr;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    <span class="comment">//自定义的JHConsumer</span></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">JHConsumer</span>:</span> <span class="keyword">public</span> ASTConsumer &#123;</span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        MatchFinder matcher;</span><br><span class="line">        JHMatchCallback callback;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        JHConsumer(CompilerInstance &amp;CI):callback(CI)&#123;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">//添加一个MatchFinder去匹objcPropertyDecl节点</span></span><br><span class="line">            <span class="comment">//回调在JHMatchCallback的run方法里面。</span></span><br><span class="line">            matcher.addMatcher(objcPropertyDecl().bind(<span class="string">"objcPropertyDecl"</span>),&amp;callback);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 在整个文件都解析完后被调用</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">HandleTranslationUnit</span><span class="params">(ASTContext &amp;context)</span> </span>&#123;</span><br><span class="line">            <span class="built_in">cout</span>&lt;&lt;<span class="string">"解析完毕了！"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">            matcher.matchAST(context);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">   </span><br><span class="line">    <span class="comment">//继承PluginASTAction实现我们自定义的 Action</span></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">JHASTAction</span>:</span> <span class="keyword">public</span> PluginASTAction &#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="function"><span class="keyword">bool</span> <span class="title">ParseArgs</span><span class="params">(<span class="keyword">const</span> CompilerInstance &amp;CI,<span class="keyword">const</span> <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; &amp;arg)</span></span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="built_in">unique_ptr</span> &lt;ASTConsumer&gt; CreateASTConsumer(CompilerInstance &amp;CI, StringRef InFile) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">unique_ptr</span> &lt;JHConsumer&gt; (<span class="keyword">new</span> JHConsumer(CI));</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//注册插件</span></span><br><span class="line"><span class="keyword">static</span> FrontendPluginRegistry::Add&lt;JHPlugin::JHASTAction&gt; X(<span class="string">"JHPlugin"</span>, <span class="string">"This is the description of the plugin"</span>);</span><br></pre></td></tr></table></figure>
+
+<p>我们在 ViewController 里面声明如下四个属性：</p>
+<figure class="highlight objectivec"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">ViewController</span> ()</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSArray</span> *arr;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSString</span> *str;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">copy</span>) <span class="built_in">NSArray</span> *arr1;</span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *str1;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>然后运行一下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Users/leejunhui/Documents/iOS/OpenSourceApple/LLVM源码/build_xcode/Debug/bin/clang -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator13.2.sdk -Xclang -load -Xclang /Users/leejunhui/Documents/iOS/OpenSourceApple/LLVM源码/build_xcode/Debug/lib/JHPlugin.dylib -Xclang -add-plugin -Xclang JHPlugin -c ViewController.m</span><br></pre></td></tr></table></figure>
+
+<p>输出如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">解析完毕了！</span><br><span class="line">NSArray *应该用copy修饰而没用Copy，发出警告！</span><br><span class="line">ViewController.m:12:1: warning: NSArray *这个地方推荐用Copy</span><br><span class="line">@property (nonatomic, strong) NSArray *arr;</span><br><span class="line">^</span><br><span class="line">NSString *应该用copy修饰而没用Copy，发出警告！</span><br><span class="line">ViewController.m:13:1: warning: NSString *这个地方推荐用Copy</span><br><span class="line">@property (nonatomic, strong) NSString *str;</span><br><span class="line">^</span><br><span class="line">2 warnings generated.</span><br></pre></td></tr></table></figure>
+
+<p>可以看到最后由两个应该使用 copy 修饰符的属性因为没有使用 copy 而被监测到并且报了警告。</p>
+<h2 id="插件集成到-Xcode"><a href="#插件集成到-Xcode" class="headerlink" title="插件集成到 Xcode"></a>插件集成到 Xcode</h2><p>我们上面的方式只能在终端查看插件的执行结果，但是更理想的应该是集成到 Xcode 内部。<br>我们打开测试项目，在 Build Settings -&gt; Other C Flags 里面添加如下内容:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xclang -load Xclang (.dylib)动态库路径 -Xclang -add-plugin -Xclang 插件名</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844586858697.jpg" alt></p>
+<p>此时，我们执行 Command + B 编译一下项目会有如下的报错信息 </p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844587953304.jpg" alt></p>
+<p>解决方案是添加两个设置，如下所示</p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844588646197.jpg" alt></p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844589529081.jpg" alt></p>
+<ul>
+<li>CC 对应的是自己编译的 clang 的绝对路径</li>
+<li>CXX 对应的是自己编译的 clang++ 的绝对路径</li>
+</ul>
+<p>接着再修改一个设置，如下所示</p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844590285698.jpg" alt></p>
+<p>最后，我们 Command + B 再次编译，注意，这次编译时间会花费得比较久，因为 Xcode 要加载我们自己编译的 clang，等待加载完成后，我们可以看到如下的提示</p>
+<p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/15844591561692.jpg" alt></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p><img src="https://raw.githubusercontent.com/LeeJunhui/blog_images/master/LLVM.png" alt></p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="https://ming1016.github.io/2017/03/01/deeply-analyse-llvm/" target="_blank" rel="noopener">深入剖析 iOS 编译 Clang / LLVM - 戴铭</a></p>
+<p><a href="https://www.jianshu.com/p/403dd226c420" target="_blank" rel="noopener">高效开发一个 clang plugin</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+      <div>
+        <div id="wechat_subscriber" style="display: block; padding: 10px 0; margin: 20px auto; width: 100%; text-align: center">
+    <img id="wechat_subscriber_qcode" src="/uploads/wechat-qcode3.jpg" alt="leejunhui wechat" style="width: 200px; max-width: 100%;">
+    <div>欢迎您扫一扫上面的微信公众号，订阅我的博客！</div>
+</div>
+
+      </div>
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    leejunhui
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://leejunhui.com/2020/03/18/iOS-查漏补缺-LLVM-Clang/" title="iOS 查漏补缺 - LLVM&Clang">http://leejunhui.com/2020/03/18/iOS-查漏补缺-LLVM-Clang/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iOS/" rel="tag"># iOS</a>
+          
+            <a href="/tags/Objective-C/" rel="tag"># Objective-C</a>
+          
+            <a href="/tags/LLVM/" rel="tag"># LLVM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/16/iOS-查漏补缺-RunLoop/" rel="next" title="iOS 查漏补缺 - RunLoop">
+                <i class="fa fa-chevron-left"></i> iOS 查漏补缺 - RunLoop
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/uploads/avatar.png" alt="leejunhui">
+            
+              <p class="site-author-name" itemprop="name">leejunhui</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#iOS-查漏补缺-LLVM-amp-Clang"><span class="nav-number">1.</span> <span class="nav-text">iOS 查漏补缺 - LLVM &amp; Clang</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LLVM-初探"><span class="nav-number">2.</span> <span class="nav-text">LLVM 初探</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#传统编译器"><span class="nav-number">2.1.</span> <span class="nav-text">传统编译器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译器前端-Front-End"><span class="nav-number">2.1.1.</span> <span class="nav-text">编译器前端 Front End</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优化器-Optimizer"><span class="nav-number">2.1.2.</span> <span class="nav-text">优化器 Optimizer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译器后端-Back-End"><span class="nav-number">2.1.3.</span> <span class="nav-text">编译器后端 Back End</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LLVM-架构"><span class="nav-number">2.2.</span> <span class="nav-text">LLVM 架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Clang"><span class="nav-number">2.3.</span> <span class="nav-text">Clang</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#iOS-中的编译过程"><span class="nav-number">3.</span> <span class="nav-text">iOS 中的编译过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#预处理阶段"><span class="nav-number">3.1.</span> <span class="nav-text">预处理阶段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译阶段"><span class="nav-number">3.2.</span> <span class="nav-text">编译阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#词法分析"><span class="nav-number">3.2.1.</span> <span class="nav-text">词法分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#语法分析"><span class="nav-number">3.2.2.</span> <span class="nav-text">语法分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成中间代码-IR"><span class="nav-number">3.2.3.</span> <span class="nav-text">生成中间代码 IR</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成汇编代码"><span class="nav-number">3.3.</span> <span class="nav-text">生成汇编代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成目标文件"><span class="nav-number">3.4.</span> <span class="nav-text">生成目标文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成可执行文件"><span class="nav-number">3.5.</span> <span class="nav-text">生成可执行文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#编译-LLVM-工程"><span class="nav-number">4.</span> <span class="nav-text">编译 LLVM 工程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LLVM-下载"><span class="nav-number">4.1.</span> <span class="nav-text">LLVM 下载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LLVM-编译"><span class="nav-number">4.2.</span> <span class="nav-text">LLVM 编译</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-cmake"><span class="nav-number">4.2.1.</span> <span class="nav-text">安装 cmake</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过-Xcode-编译-LLVM"><span class="nav-number">4.2.2.</span> <span class="nav-text">通过 Xcode 编译 LLVM</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Clang-插件初探"><span class="nav-number">5.</span> <span class="nav-text">Clang 插件初探</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#创建插件"><span class="nav-number">5.1.</span> <span class="nav-text">创建插件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编写插件"><span class="nav-number">5.2.</span> <span class="nav-text">编写插件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插件集成到-Xcode"><span class="nav-number">5.3.</span> <span class="nav-text">插件集成到 Xcode</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">7.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2019 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">leejunhui</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66522444";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
